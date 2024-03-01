@@ -23,5 +23,29 @@ namespace TrackX.Api.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("PO")]
+        public async Task<IActionResult> PO(string po)
+        {
+            var response = await _trackingNoLoginApplication.TrackingByPO(po);
+
+            return Ok(response);
+        }
+
+        [HttpGet("BCF")]
+        public async Task<IActionResult> BCF(string bcf)
+        {
+            var response = await _trackingNoLoginApplication.TrackingByBCF(bcf);
+
+            return Ok(response);
+        }
+
+        [HttpGet("CONTENEDOR")]
+        public async Task<IActionResult> CONTENEDOR(string contenedor)
+        {
+            var response = await _trackingNoLoginApplication.TrackingByContenedor(contenedor);
+
+            return Ok(response);
+        }
     }
 }
