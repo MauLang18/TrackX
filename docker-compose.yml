@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  trackx.api:
+    image: ${DOCKER_REGISTRY-}trackxapi
+    build:
+      context: .
+      dockerfile: TrackX.Api/Dockerfile
