@@ -1,8 +1,5 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Crypto;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using TrackX.Application.Commons.Bases;
 using TrackX.Application.Interfaces;
@@ -14,9 +11,9 @@ namespace TrackX.Application.Services
 {
     public class TrackingNoLoginApplication : ITrackingNoLoginApplication
     {
-        public async Task<BaseResponse<Dynamics>> TrackingByIDTRA(string idtra)
+        public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByIDTRA(string idtra)
         {
-            var response = new BaseResponse<Dynamics>();
+            var response = new BaseResponse<DynamicsTrackingNoLogin>();
 
             try
             {
@@ -52,7 +49,7 @@ namespace TrackX.Application.Services
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
                         // Deserializar la cadena JSON a un objeto Dynamics
-                        Dynamics dynamicsObject = JsonConvert.DeserializeObject<Dynamics>(jsonResponse)!;
+                        DynamicsTrackingNoLogin dynamicsObject = JsonConvert.DeserializeObject<DynamicsTrackingNoLogin>(jsonResponse)!;
 
                         response.IsSuccess = true;
                         response.Data = dynamicsObject;
@@ -76,9 +73,9 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<Dynamics>> TrackingByPO(string po)
+        public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByPO(string po)
         {
-            var response = new BaseResponse<Dynamics>();
+            var response = new BaseResponse<DynamicsTrackingNoLogin>();
 
             try
             {
@@ -114,7 +111,7 @@ namespace TrackX.Application.Services
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
                         // Deserializar la cadena JSON a un objeto Dynamics
-                        Dynamics dynamicsObject = JsonConvert.DeserializeObject<Dynamics>(jsonResponse)!;
+                        DynamicsTrackingNoLogin dynamicsObject = JsonConvert.DeserializeObject<DynamicsTrackingNoLogin>(jsonResponse)!;
 
                         response.IsSuccess = true;
                         response.Data = dynamicsObject;
@@ -139,9 +136,9 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<Dynamics>> TrackingByBCF(string bcf)
+        public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByBCF(string bcf)
         {
-            var response = new BaseResponse<Dynamics>();
+            var response = new BaseResponse<DynamicsTrackingNoLogin>();
 
             try
             {
@@ -177,7 +174,7 @@ namespace TrackX.Application.Services
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
                         // Deserializar la cadena JSON a un objeto Dynamics
-                        Dynamics dynamicsObject = JsonConvert.DeserializeObject<Dynamics>(jsonResponse)!;
+                        DynamicsTrackingNoLogin dynamicsObject = JsonConvert.DeserializeObject<DynamicsTrackingNoLogin>(jsonResponse)!;
 
                         response.IsSuccess = true;
                         response.Data = dynamicsObject;
@@ -202,9 +199,9 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<Dynamics>> TrackingByContenedor(string contenedor)
+        public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByContenedor(string contenedor)
         {
-            var response = new BaseResponse<Dynamics>();
+            var response = new BaseResponse<DynamicsTrackingNoLogin>();
 
             try
             {
@@ -240,7 +237,7 @@ namespace TrackX.Application.Services
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
                         // Deserializar la cadena JSON a un objeto Dynamics
-                        Dynamics dynamicsObject = JsonConvert.DeserializeObject<Dynamics>(jsonResponse)!;
+                        DynamicsTrackingNoLogin dynamicsObject = JsonConvert.DeserializeObject<DynamicsTrackingNoLogin>(jsonResponse)!;
 
                         response.IsSuccess = true;
                         response.Data = dynamicsObject;

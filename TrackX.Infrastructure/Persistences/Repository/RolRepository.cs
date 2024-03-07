@@ -7,20 +7,19 @@ using TrackX.Infrastructure.Persistences.Interfaces;
 
 namespace TrackX.Infrastructure.Persistences.Repository
 {
-    public class UsuarioRepository : GenericRepository<TbUsuario>, IUsuarioRepository
+    public class RolRepository : GenericRepository<TbRol>, IRolRepository
     {
         private readonly DbCfContext _context;
-        public UsuarioRepository(DbCfContext context) : base(context)
+        public RolRepository(DbCfContext context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<BaseEntityResponse<TbUsuario>> ListUsuarios(BaseFiltersRequest filters)
+        public async Task<BaseEntityResponse<TbRol>> ListRoles(BaseFiltersRequest filters)
         {
-            var response = new BaseEntityResponse<TbUsuario>();
+            var response = new BaseEntityResponse<TbRol>();
 
             var usuarios = GetEntityQuery(x => x.UsuarioEliminacionAuditoria == null && x.FechaEliminacionAuditoria == null)
-                .Include(x => x.IdRolNavigation)
                 .AsNoTracking();
 
             if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
@@ -28,7 +27,7 @@ namespace TrackX.Infrastructure.Persistences.Repository
                 switch (filters.NumFilter)
                 {
                     case 1:
-                        usuarios = usuarios.Where(x => x.Correo!.Contains(filters.TextFilter));
+                        usuarios = usuarios.Where(x => x.Nombre!.Contains(filters.TextFilter));
                         break;
                 }
             }
@@ -39,14 +38,6 @@ namespace TrackX.Infrastructure.Persistences.Repository
             response.Items = await Ordering(filters, usuarios, !(bool)filters.Download!).ToListAsync();
 
             return response;
-        }
-
-        public async Task<TbUsuario> UserByEmail(string email)
-        {
-            var user = await _context.TbUsuarios.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Correo!.Equals(email));
-
-            return user!;
         }
     }
 }

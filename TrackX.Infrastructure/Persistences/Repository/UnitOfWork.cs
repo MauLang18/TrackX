@@ -11,12 +11,15 @@ namespace TrackX.Infrastructure.Persistences.Repository
 
         public IUsuarioRepository Usuario { get; private set; }
 
+        public IRolRepository Rol {  get; private set; }
+
         public IAzureStorage Storage { get; private set; }
 
         public UnitOfWork(DbCfContext context, IConfiguration configuration)
         {
             _context = context;
             Usuario = new UsuarioRepository(_context);
+            Rol = new RolRepository(_context);
             Storage = new AzureStorage(configuration);
         }
 

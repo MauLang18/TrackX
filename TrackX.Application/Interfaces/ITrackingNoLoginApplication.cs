@@ -5,9 +5,9 @@ namespace TrackX.Application.Interfaces
 {
     public interface ITrackingNoLoginApplication
     {
-        Task<BaseResponse<Dynamics>> TrackingByIDTRA(string idtra);
-        Task<BaseResponse<Dynamics>> TrackingByPO(string po);
-        Task<BaseResponse<Dynamics>> TrackingByBCF(string bcf);
-        Task<BaseResponse<Dynamics>> TrackingByContenedor(string contenedor);
+        Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByIDTRA(string idtra);
+        Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByPO(string po);
+        Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByBCF(string bcf);
+        Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByContenedor(string contenedor);
     }
 }

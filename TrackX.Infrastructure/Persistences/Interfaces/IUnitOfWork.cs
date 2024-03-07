@@ -7,6 +7,7 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         //Declaracion o matricula de nuestra interfaces a nivel de repository
 
         IUsuarioRepository Usuario { get; }
+        IRolRepository Rol {  get; }
         IAzureStorage Storage { get; }
 
         void SaveChanges();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TrackX.Domain.Entities;
+﻿namespace TrackX.Domain.Entities;
 
 public partial class TbUsuario : BaseEntity
 {
@@ -16,6 +13,8 @@ public partial class TbUsuario : BaseEntity
     public string Tipo { get; set; } = null!;
 
     public string? Cliente { get; set; }
-    
-    public int Rol { get; set; }
+
+    public int IdRol { get; set; }
+
+    public virtual TbRol IdRolNavigation { get; set; } = null!;
 }
