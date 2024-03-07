@@ -16,4 +16,6 @@ public partial class TbUsuario : BaseEntity
     public string Tipo { get; set; } = null!;
 
     public string? Cliente { get; set; }
+    
+    public int Rol { get; set; }
 }

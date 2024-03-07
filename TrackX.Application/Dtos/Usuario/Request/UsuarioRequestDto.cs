@@ -9,5 +9,7 @@ namespace TrackX.Application.Dtos.Usuario.Request
         public string? Pass { get; set; }
         public string? Correo { get; set; }
         public string? Tipo { get; set; }
+        public string? Cliente { get; set; }
+        public int Rol { get; set; }
     }
 }
