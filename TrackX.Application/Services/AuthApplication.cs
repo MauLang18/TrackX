@@ -123,10 +123,12 @@ namespace TrackX.Application.Services
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.NameId, usuario.Correo!),
+                new Claim(JwtRegisteredClaimNames.NameId, usuario.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.FamilyName, usuario.Nombre + " " + usuario.Apellido),
                 new Claim(JwtRegisteredClaimNames.GivenName, usuario.IdRol.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, usuario.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, usuario.Correo!),
+                new Claim(JwtRegisteredClaimNames.Name, usuario.Cliente!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
             };

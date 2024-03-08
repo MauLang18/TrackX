@@ -4,7 +4,6 @@ using System.Net.Http.Headers;
 using TrackX.Application.Commons.Bases;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
-using TrackX.Infrastructure.Commons.Bases.Response;
 using TrackX.Utilities.Static;
 using WatchDog;
 
