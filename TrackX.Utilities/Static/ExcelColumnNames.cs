@@ -25,10 +25,10 @@
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("NOMBRE", "Nombre"),
-                ("DESCRIPCION", "Descripcion"),
-                ("FECHA DE CREACIÓN", "Fechacreacionauditoria"),
-                ("ESTADO", "EstadoCategoria")
+                ("new_statuscliente", "new_statuscliente"),
+                ("new_bcf", "new_bcf"),
+                ("new_contenedor", "new_contenedor"),
+                ("new_po", "new_po")
             };
 
             return columnsProperties;

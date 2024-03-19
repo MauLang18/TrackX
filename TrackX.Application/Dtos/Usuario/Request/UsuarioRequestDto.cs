@@ -11,6 +11,7 @@ namespace TrackX.Application.Dtos.Usuario.Request
         public string? Tipo { get; set; }
         public string? Cliente { get; set; }
         public int IdRol { get; set; }
+        public IFormFile? Imagen { get; set; }
         public int Estado { get; set; }
     }
 }

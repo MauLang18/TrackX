@@ -23,4 +23,8 @@
     <ProjectReference Include="..\TrackX.Utilities\TrackX.Utilities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>

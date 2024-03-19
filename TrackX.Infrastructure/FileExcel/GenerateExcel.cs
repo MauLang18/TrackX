@@ -1,12 +1,12 @@
 ﻿using ClosedXML.Excel;
-using TrackX.Infrastructure.Commons.Bases.Response;
+using TrackX.Domain.Entities;
 using TrackX.Utilities.Static;
 
 namespace TrackX.Infrastructure.FileExcel
 {
     public class GenerateExcel : IGenerateExcel
     {
-        public MemoryStream GenerateToExcel<T>(BaseEntityResponse<T> data, List<TableColumns> columns)
+        public MemoryStream GenerateToExcel(List<Value2> data, List<TableColumns> columns)
         {
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Listado");
@@ -18,11 +18,11 @@ namespace TrackX.Infrastructure.FileExcel
 
             var rowIndex = 2;
 
-            foreach (var item in data.Items!)
+            foreach (var item in data!)
             {
                 for (int i = 0; i < columns.Count; i++)
                 {
-                    var propertyValue = typeof(T).GetProperty(columns[i].PropertyName!)?.GetValue(item)?.ToString();
+                    var propertyValue = typeof(Value2).GetProperty(columns[i].PropertyName!)?.GetValue(item)?.ToString();
                     worksheet.Cell(rowIndex, i + 1).Value = propertyValue;
                 }
 

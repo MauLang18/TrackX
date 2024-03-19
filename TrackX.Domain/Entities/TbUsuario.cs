@@ -16,5 +16,7 @@ public partial class TbUsuario : BaseEntity
 
     public int IdRol { get; set; }
 
+    public string? Imagen { get; set; }
+
     public virtual TbRol IdRolNavigation { get; set; } = null!;
 }

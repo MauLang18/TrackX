@@ -18,12 +18,15 @@ namespace TrackX.Application.Extensions
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
+            services.AddTransient<IFileStorageLocalApplication, FileStorageLocalApplication>();
+
             services.AddScoped<IUsuarioApplication, UsuarioApplication>();
             services.AddScoped<IAuthApplication, AuthApplication>();
             services.AddScoped<IRolApplication, RolApplication>();
             services.AddScoped<ITrackingNoLoginApplication, TrackingNoLoginApplication>();
             services.AddScoped<ITrackingLoginApplication, TrackingLoginApplication>();
             services.AddScoped<IGenerateExcelApplication, GenerateExcelApplication>();
+            services.AddScoped<IClienteApplication, ClienteApplication>();
 
             services.AddWatchDog();
 

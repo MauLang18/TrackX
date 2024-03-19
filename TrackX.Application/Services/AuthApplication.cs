@@ -22,12 +22,14 @@ namespace TrackX.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly AppSettings _appSettings;
+        private readonly IClienteApplication _clienteApplication;
 
-        public AuthApplication(IUnitOfWork unitOfWork, IConfiguration configuration, IOptions<AppSettings> appSettings)
+        public AuthApplication(IUnitOfWork unitOfWork, IConfiguration configuration, IOptions<AppSettings> appSettings, IClienteApplication clienteApplication)
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
             _appSettings = appSettings.Value;
+            _clienteApplication = clienteApplication;
         }
 
         public async Task<BaseResponse<string>> Login(TokenRequestDto requestDto, string authType)
@@ -55,7 +57,16 @@ namespace TrackX.Application.Services
                 if (BC.Verify(requestDto.Pass, user.Pass))
                 {
                     response.IsSuccess = true;
-                    response.Data = GenerateToken(user);
+                    string shipperValue = user.Cliente!;
+                    var nombre = "";
+
+                    var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+
+                    foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                    {
+                        nombre = items.name!;
+                    }
+                    response.Data = GenerateToken(user, nombre);
                     response.Message = ReplyMessage.MESSAGE_TOKEN;
                     return response;
                 }
@@ -102,7 +113,7 @@ namespace TrackX.Application.Services
                 }
 
                 response.IsSuccess = true;
-                response.Data = GenerateToken(user);
+                response.Data = GenerateToken(user,"");
                 response.Message = ReplyMessage.MESSAGE_TOKEN;
             }
             catch (Exception ex)
@@ -115,7 +126,7 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        private string GenerateToken(TbUsuario usuario)
+        private string GenerateToken(TbUsuario usuario, string nombre)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!));
 
@@ -129,6 +140,8 @@ namespace TrackX.Application.Services
                 new Claim(JwtRegisteredClaimNames.UniqueName, usuario.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, usuario.Correo!),
                 new Claim(JwtRegisteredClaimNames.Name, usuario.Cliente!),
+                new Claim(JwtRegisteredClaimNames.CHash, usuario.Imagen!),
+                new Claim(JwtRegisteredClaimNames.AtHash, nombre!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
             };

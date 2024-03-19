@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using System.Dynamic;
 using TrackX.Application.Commons.Bases;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Dtos.Usuario.Response;
@@ -16,11 +17,15 @@ namespace TrackX.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IFileStorageLocalApplication _fileStorage;
+        private readonly IClienteApplication _clienteApplication;
 
-        public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper)
+        public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _fileStorage = fileStorage;
+            _clienteApplication = clienteApplication;
         }
 
         public async Task<BaseResponse<BaseEntityResponse<UsuarioResponseDto>>> ListUsuarios(BaseFiltersRequest filters)
@@ -62,6 +67,14 @@ namespace TrackX.Application.Services
                 if (usuario is not null)
                 {
                     response.IsSuccess = true;
+                    string shipperValue = usuario.Cliente!;
+
+                    var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+
+                    foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                    {
+                        usuario.Cliente = items.name;
+                    }
                     response.Data = _mapper.Map<UsuarioResponseDto>(usuario);
                     response.Message = ReplyMessage.MESSAGE_QUERY;
                 }
@@ -88,6 +101,9 @@ namespace TrackX.Application.Services
             {
                 var account = _mapper.Map<TbUsuario>(requestDto);
                 account.Pass = BC.HashPassword(account.Pass);
+
+                if (requestDto.Imagen is not null)
+                    account.Imagen = await _fileStorage.SaveFile(AzureContainers.USUARIOS, requestDto.Imagen);
 
                 response.Data = await _unitOfWork.Usuario.RegisterAsync(account);
 
@@ -130,6 +146,13 @@ namespace TrackX.Application.Services
                 usuario.Id = id;
                 usuario.Pass = BC.HashPassword(usuario.Pass);
 
+                if (requestDto.Imagen is not null)
+                    usuario.Imagen = await _fileStorage
+                        .EditFile(AzureContainers.USUARIOS, requestDto.Imagen, usuarioEdit.Data!.Imagen!);
+
+                if (requestDto.Imagen is null)
+                    usuario.Imagen = usuarioEdit.Data!.Imagen;
+
                 response.Data = await _unitOfWork.Usuario.EditAsync(usuario);
 
                 if (response.Data)
@@ -167,6 +190,8 @@ namespace TrackX.Application.Services
                 }
 
                 response.Data = await _unitOfWork.Usuario.RemoveAsync(id);
+
+                await _fileStorage.RemoveFile(usuario.Data!.Imagen!, AzureContainers.USUARIOS);
 
                 if (response.Data)
                 {

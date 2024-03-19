@@ -37,7 +37,7 @@ namespace TrackX.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<IActionResult> RegisterUsuario([FromBody] UsuarioRequestDto requestDto)
+        public async Task<IActionResult> RegisterUsuario([FromForm] UsuarioRequestDto requestDto)
         {
             var response = await _usuarioApplication.RegisterUsuario(requestDto);
 
@@ -45,7 +45,7 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditUsuario(int id, [FromBody] UsuarioRequestDto requestDto)
+        public async Task<IActionResult> EditUsuario(int id, [FromForm] UsuarioRequestDto requestDto)
         {
             var response = await _usuarioApplication.EditUsuario(id, requestDto);
 

@@ -1,9 +1,6 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TrackX.Application.Interfaces;
-using TrackX.Application.Services;
-using TrackX.Infrastructure.Commons.Bases.Request;
 using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
@@ -22,16 +19,9 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpGet("Activo")]
-        public async Task<IActionResult> TrackingActivoByCliente (string cliente)
+        public async Task<IActionResult> TrackingActivoByCliente(string cliente)
         {
             var response = await _trackingLoginApplication.TrackingActivoByCliente(cliente);
-
-            /*if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsCategorias();
-                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }*/
 
             return Ok(response);
         }
@@ -49,6 +39,17 @@ namespace TrackX.Api.Controllers
             }*/
 
             return Ok(response);
+        }
+
+        [HttpGet("Activo/Download")]
+        public async Task<IActionResult> DownloadActivo(string cliente)
+        {
+            var response = await _trackingLoginApplication.TrackingActivoByCliente(cliente);
+
+            var columnNames = ExcelColumnNames.GetColumnsCategorias();
+            var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!.value!, columnNames);
+
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
     }
 }

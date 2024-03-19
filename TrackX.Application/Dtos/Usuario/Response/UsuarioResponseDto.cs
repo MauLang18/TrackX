@@ -10,6 +10,7 @@
         public string? Cliente { get; set; }
         public string? Rol { get; set; }
         public int IdRol { get; set; }
+        public string? Imagen { get; set; }
         public DateTime FechaCreacionAuditoria { get; set; }
         public int Estado { get; set; }
         public string? EstadoUsuario { get; set; }

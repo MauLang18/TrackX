@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using TrackX.Application.Commons.Bases;
@@ -11,6 +12,13 @@ namespace TrackX.Application.Services
 {
     public class TrackingLoginApplication : ITrackingLoginApplication
     {
+        private readonly IClienteApplication _clienteApplication;
+
+        public TrackingLoginApplication(IClienteApplication clienteApplication)
+        {
+            _clienteApplication = clienteApplication;
+        }
+
         public async Task<BaseResponse<DynamicsTrackingLogin>> TrackingFinalizadoByCliente(string cliente)
         {
             var response = new BaseResponse<DynamicsTrackingLogin>();
@@ -28,7 +36,6 @@ namespace TrackX.Application.Services
                 var authContext = new AuthenticationContext(authority);
                 var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
                 accessToken = result.AccessToken;
-                Console.WriteLine(accessToken);
 
                 using (HttpClient httpClient = new HttpClient())
                 {
@@ -47,8 +54,19 @@ namespace TrackX.Application.Services
                     {
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
-                        // Deserializar la cadena JSON a un objeto Dynamics
                         DynamicsTrackingLogin dynamicsObject = JsonConvert.DeserializeObject<DynamicsTrackingLogin>(jsonResponse)!;
+
+                        foreach (var item in dynamicsObject.value!)
+                        {
+                            string shipperValue = item._new_shipper_value!;
+
+                            var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+
+                            foreach(var items in nuevoValorCliente.Result.Data!.value!)
+                            {
+                                item._new_shipper_value = items.name;
+                            }
+                        }
 
                         response.IsSuccess = true;
                         response.Data = dynamicsObject;
@@ -90,7 +108,6 @@ namespace TrackX.Application.Services
                 var authContext = new AuthenticationContext(authority);
                 var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
                 accessToken = result.AccessToken;
-                Console.WriteLine(accessToken);
 
                 using (HttpClient httpClient = new HttpClient())
                 {
@@ -109,8 +126,22 @@ namespace TrackX.Application.Services
                     {
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
-                        // Deserializar la cadena JSON a un objeto Dynamics
                         DynamicsTrackingLogin dynamicsObject = JsonConvert.DeserializeObject<DynamicsTrackingLogin>(jsonResponse)!;
+
+                        foreach (var item in dynamicsObject.value!)
+                        {
+                            string shipperValue = item._new_shipper_value!;
+
+                            var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+
+                            if(nuevoValorCliente.Result.Data is not null)
+                            {
+                                foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                                {
+                                    item._new_shipper_value = items.name;
+                                }
+                            }
+                        }
 
                         response.IsSuccess = true;
                         response.Data = dynamicsObject;

@@ -28,7 +28,6 @@ namespace TrackX.Application.Services
                 var authContext = new AuthenticationContext(authority);
                 var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
                 accessToken = result.AccessToken;
-                Console.WriteLine(accessToken);
 
                 using (HttpClient httpClient = new HttpClient())
                 {
@@ -90,7 +89,6 @@ namespace TrackX.Application.Services
                 var authContext = new AuthenticationContext(authority);
                 var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
                 accessToken = result.AccessToken;
-                Console.WriteLine(accessToken);
 
                 using (HttpClient httpClient = new HttpClient())
                 {
@@ -153,7 +151,6 @@ namespace TrackX.Application.Services
                 var authContext = new AuthenticationContext(authority);
                 var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
                 accessToken = result.AccessToken;
-                Console.WriteLine(accessToken);
 
                 using (HttpClient httpClient = new HttpClient())
                 {
@@ -216,7 +213,6 @@ namespace TrackX.Application.Services
                 var authContext = new AuthenticationContext(authority);
                 var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
                 accessToken = result.AccessToken;
-                Console.WriteLine(accessToken);
 
                 using (HttpClient httpClient = new HttpClient())
                 {

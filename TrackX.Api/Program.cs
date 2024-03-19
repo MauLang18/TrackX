@@ -19,6 +19,8 @@ builder.Services.AddSwagger();
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("GoogleSettings"));
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
