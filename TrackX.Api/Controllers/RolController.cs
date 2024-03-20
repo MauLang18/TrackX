@@ -56,7 +56,7 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("Remove/{id:int}")]
+        [HttpPut("Remove/{id:int}")]
         public async Task<IActionResult> RemoveRol(int id)
         {
             var response = await _rolApplication.RemoveRol(id);

@@ -25,10 +25,18 @@
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("new_statuscliente", "new_statuscliente"),
-                ("new_bcf", "new_bcf"),
-                ("new_contenedor", "new_contenedor"),
-                ("new_po", "new_po")
+                ("IDTRA", "title"),
+                ("# CONTENEDOR", "new_contenedor"),
+                ("# FACTURA", "new_factura"),
+                ("BCF", "new_bcf"),
+                ("PO", "new_PO"),
+                ("ORIGEN", "new_origen"),
+                ("POL", "new_pol"),
+                ("ETD", "new_etd1"),
+                ("DESTINO", "new_destino"),
+                ("POE", "new_poe"),
+                ("ETA", "new_eta"),
+                ("BCF", "new_bcf"),
             };
 
             return columnsProperties;

@@ -23,6 +23,9 @@ namespace TrackX.Application.Extensions
             services.AddScoped<IUsuarioApplication, UsuarioApplication>();
             services.AddScoped<IAuthApplication, AuthApplication>();
             services.AddScoped<IRolApplication, RolApplication>();
+            services.AddScoped<IItinerarioApplication, ItinerarioApplication>();
+            services.AddScoped<IEmpleoApplication, EmpleoApplication>();
+            services.AddScoped<INoticiaApplication, NoticiaApplication>();
             services.AddScoped<ITrackingNoLoginApplication, TrackingNoLoginApplication>();
             services.AddScoped<ITrackingLoginApplication, TrackingLoginApplication>();
             services.AddScoped<IGenerateExcelApplication, GenerateExcelApplication>();
