@@ -4,7 +4,7 @@ using TrackX.Infrastructure.Commons.Bases.Response;
 
 namespace TrackX.Infrastructure.Persistences.Interfaces
 {
-    public interface IEmpleoRepository
+    public interface IEmpleoRepository : IGenericRepository<TbEmpleo>
     {
         Task<BaseEntityResponse<TbEmpleo>> ListEmpleos(BaseFiltersRequest filters);
     }

@@ -15,12 +15,21 @@ namespace TrackX.Infrastructure.Persistences.Repository
 
         public IAzureStorage Storage { get; private set; }
 
+        public IEmpleoRepository Empleo { get; private set; }
+
+        public IItinerarioRepository Itinerario { get; private set; }
+
+        public INoticiaRepository Noticia { get; private set; }
+
         public UnitOfWork(DbCfContext context, IConfiguration configuration)
         {
             _context = context;
             Usuario = new UsuarioRepository(_context);
             Rol = new RolRepository(_context);
             Storage = new AzureStorage(configuration);
+            Empleo = new EmpleoRepository(_context);
+            Itinerario = new ItinerarioRepository(_context);
+            Noticia = new NoticiaRepository(_context);
         }
 
         public void Dispose()

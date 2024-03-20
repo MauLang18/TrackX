@@ -9,6 +9,9 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         IUsuarioRepository Usuario { get; }
         IRolRepository Rol {  get; }
         IAzureStorage Storage { get; }
+        IEmpleoRepository Empleo { get; }
+        IItinerarioRepository Itinerario { get; }
+        INoticiaRepository Noticia { get; }
 
         void SaveChanges();
         Task SaveChangesAsync();
