@@ -8,6 +8,7 @@ using TrackX.Infrastructure.Commons.Bases.Request;
 using TrackX.Infrastructure.Commons.Bases.Response;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
+using WatchDog;
 
 namespace TrackX.Application.Services
 {
@@ -41,10 +42,11 @@ namespace TrackX.Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
             }
 
             return response;
@@ -69,10 +71,11 @@ namespace TrackX.Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
             }
 
             return response;
@@ -96,10 +99,11 @@ namespace TrackX.Application.Services
                     response.Message = ReplyMessage.MESSAGE_FAILED;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
             }
 
             return response;
@@ -134,10 +138,11 @@ namespace TrackX.Application.Services
                     response.Message = ReplyMessage.MESSAGE_FAILED;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
             }
 
             return response;
@@ -170,10 +175,11 @@ namespace TrackX.Application.Services
                     response.Message = ReplyMessage.MESSAGE_FAILED;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
             }
 
             return response;

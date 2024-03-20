@@ -1,7 +1,5 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Crypto;
 using System.Net.Http.Headers;
 using TrackX.Application.Commons.Bases;
 using TrackX.Application.Interfaces;
@@ -13,6 +11,7 @@ namespace TrackX.Application.Services
 {
     public class ClienteApplication : IClienteApplication
     {
+        [Obsolete]
         public async Task<BaseResponse<DynamicsClientes>> NombreCliente(string code)
         {
             var response = new BaseResponse<DynamicsClientes>();
@@ -48,7 +47,6 @@ namespace TrackX.Application.Services
                     {
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
-                        // Deserializar la cadena JSON a un objeto Dynamics
                         DynamicsClientes dynamicsObject = JsonConvert.DeserializeObject<DynamicsClientes>(jsonResponse)!;
 
                         response.IsSuccess = true;

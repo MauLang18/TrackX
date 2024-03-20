@@ -11,6 +11,7 @@ namespace TrackX.Application.Services
 {
     public class TrackingNoLoginApplication : ITrackingNoLoginApplication
     {
+        [Obsolete]
         public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByIDTRA(string idtra)
         {
             var response = new BaseResponse<DynamicsTrackingNoLogin>();
@@ -72,6 +73,7 @@ namespace TrackX.Application.Services
             return response;
         }
 
+        [Obsolete]
         public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByPO(string po)
         {
             var response = new BaseResponse<DynamicsTrackingNoLogin>();
@@ -134,6 +136,7 @@ namespace TrackX.Application.Services
             return response;
         }
 
+        [Obsolete]
         public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByBCF(string bcf)
         {
             var response = new BaseResponse<DynamicsTrackingNoLogin>();
@@ -196,6 +199,7 @@ namespace TrackX.Application.Services
             return response;
         }
 
+        [Obsolete]
         public async Task<BaseResponse<DynamicsTrackingNoLogin>> TrackingByContenedor(string contenedor)
         {
             var response = new BaseResponse<DynamicsTrackingNoLogin>();
@@ -232,7 +236,6 @@ namespace TrackX.Application.Services
                     {
                         string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
 
-                        // Deserializar la cadena JSON a un objeto Dynamics
                         DynamicsTrackingNoLogin dynamicsObject = JsonConvert.DeserializeObject<DynamicsTrackingNoLogin>(jsonResponse)!;
 
                         response.IsSuccess = true;

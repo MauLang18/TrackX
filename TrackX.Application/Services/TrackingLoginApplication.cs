@@ -19,6 +19,7 @@ namespace TrackX.Application.Services
             _clienteApplication = clienteApplication;
         }
 
+        [Obsolete]
         public async Task<BaseResponse<DynamicsTrackingLogin>> TrackingFinalizadoByCliente(string cliente)
         {
             var response = new BaseResponse<DynamicsTrackingLogin>();
@@ -91,6 +92,7 @@ namespace TrackX.Application.Services
             return response;
         }
 
+        [Obsolete]
         public async Task<BaseResponse<DynamicsTrackingLogin>> TrackingActivoByCliente(string cliente)
         {
             var response = new BaseResponse<DynamicsTrackingLogin>();
