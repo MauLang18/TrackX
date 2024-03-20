@@ -30,6 +30,7 @@ namespace TrackX.Infrastructure.Persistences.Contexts.Configurations
                 .HasMaxLength(7)
                 .IsUnicode(false);
             builder.Property(e => e.Imagen).IsUnicode(false);
+            builder.Property(e => e.NombreCliente).IsUnicode(false);
 
             builder.HasOne(d => d.IdRolNavigation).WithMany(p => p.TbUsuarios)
                 .HasForeignKey(d => d.IdRol)

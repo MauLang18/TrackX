@@ -1,4 +1,5 @@
-﻿using Google.Apis.Auth;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -62,11 +63,18 @@ namespace TrackX.Application.Services
 
                     var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
 
-                    foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                    if (nuevoValorCliente.Result.Data?.value != null)
                     {
-                        nombre = items.name!;
+                        foreach (var items in nuevoValorCliente.Result.Data.value)
+                        {
+                            user.NombreCliente = items.name!;
+                        }
                     }
-                    response.Data = GenerateToken(user, nombre);
+                    else
+                    {
+                        nombre = "";
+                    }
+                    response.Data = GenerateToken(user);
                     response.Message = ReplyMessage.MESSAGE_TOKEN;
                     return response;
                 }
@@ -113,7 +121,7 @@ namespace TrackX.Application.Services
                 }
 
                 response.IsSuccess = true;
-                response.Data = GenerateToken(user,"");
+                response.Data = GenerateToken(user);
                 response.Message = ReplyMessage.MESSAGE_TOKEN;
             }
             catch (Exception ex)
@@ -126,7 +134,7 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        private string GenerateToken(TbUsuario usuario, string nombre)
+        private string GenerateToken(TbUsuario usuario)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!));
 
@@ -135,13 +143,13 @@ namespace TrackX.Application.Services
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.NameId, usuario.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.FamilyName, usuario.Nombre + " " + usuario.Apellido),
+                new Claim(JwtRegisteredClaimNames.FamilyName, $"{usuario.Nombre} {usuario.Apellido}"),
                 new Claim(JwtRegisteredClaimNames.GivenName, usuario.IdRol.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, usuario.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, usuario.Correo!),
-                new Claim(JwtRegisteredClaimNames.Name, usuario.Cliente!),
-                new Claim(JwtRegisteredClaimNames.CHash, usuario.Imagen!),
-                new Claim(JwtRegisteredClaimNames.AtHash, nombre!),
+                new Claim(JwtRegisteredClaimNames.Email, usuario.Correo ?? ""),
+                new Claim(JwtRegisteredClaimNames.Name, usuario.Cliente ?? ""),
+                new Claim(JwtRegisteredClaimNames.Gender, usuario.Imagen ?? ""),
+                new Claim(JwtRegisteredClaimNames.Acr, usuario.NombreCliente ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
             };

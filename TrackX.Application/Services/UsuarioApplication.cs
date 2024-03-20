@@ -67,14 +67,6 @@ namespace TrackX.Application.Services
                 if (usuario is not null)
                 {
                     response.IsSuccess = true;
-                    string shipperValue = usuario.Cliente!;
-
-                    var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
-
-                    foreach (var items in nuevoValorCliente.Result.Data!.value!)
-                    {
-                        usuario.Cliente = items.name;
-                    }
                     response.Data = _mapper.Map<UsuarioResponseDto>(usuario);
                     response.Message = ReplyMessage.MESSAGE_QUERY;
                 }

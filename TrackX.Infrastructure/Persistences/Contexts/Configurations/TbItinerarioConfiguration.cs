@@ -8,7 +8,7 @@ namespace TrackX.Infrastructure.Persistences.Contexts.Configurations
     {
         public void Configure(EntityTypeBuilder<TbItinerario> builder)
         {
-            builder.HasKey(e => e.Id).HasName("PK__TB_ITINERARIO__3214EC07ADB85605");
+            builder.HasKey(e => e.Id).HasName("PK__TB_ITINERARIOS__3214EC07ADB85605");
 
             builder.ToTable("TB_ITINERARIO");
 
