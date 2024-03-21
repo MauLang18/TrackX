@@ -168,7 +168,7 @@ namespace TrackX.Application.Services
                     usuario.Pass = BC.HashPassword(requestDto.Pass);
 
                 if (requestDto.Pass is null)
-                    usuario.Pass = usuario.Pass!;
+                    usuario.Pass = usuarioEdit.Data!.Pass!;
 
                 if (requestDto.Imagen is not null)
                     usuario.Imagen = await _fileStorage

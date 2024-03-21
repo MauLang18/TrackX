@@ -7,7 +7,6 @@ using TrackX.Application.Interfaces;
 
 namespace TrackX.Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuarioController : ControllerBase

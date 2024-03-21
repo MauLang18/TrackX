@@ -15,15 +15,15 @@ var Cors = "Cors";
 builder.Services.AddInjectionInfrastructure(Configuration);
 builder.Services.AddInjectionApplication(Configuration);
 builder.Services.AddAuthentication(Configuration);
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("GoogleSettings"));
 
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCors(options =>
 {
@@ -49,7 +49,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseWatchDogExceptionLogger();
 
-app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 
