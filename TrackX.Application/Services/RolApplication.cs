@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
-using TrackX.Application.Commons.Bases;
+using Microsoft.EntityFrameworkCore;
+using TrackX.Application.Commons.Bases.Request;
+using TrackX.Application.Commons.Bases.Response;
+using TrackX.Application.Commons.Ordering;
 using TrackX.Application.Dtos.Rol.Request;
 using TrackX.Application.Dtos.Rol.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
-using TrackX.Infrastructure.Commons.Bases.Request;
-using TrackX.Infrastructure.Commons.Bases.Response;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -16,31 +17,55 @@ namespace TrackX.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IOrderingQuery _orderingQuery;
 
-        public RolApplication(IUnitOfWork unitOfWork, IMapper mapper)
+        public RolApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _orderingQuery = orderingQuery;
         }
 
-        public async Task<BaseResponse<BaseEntityResponse<RolResponseDto>>> ListRoles(BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<RolResponseDto>>> ListRoles(BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<BaseEntityResponse<RolResponseDto>>();
+            var response = new BaseResponse<IEnumerable<RolResponseDto>>();
             try
             {
-                var roles = await _unitOfWork.Rol.ListRoles(filters);
+                var roles = _unitOfWork.Rol
+                    .GetAllQueryable()
+                    .AsQueryable();
 
-                if (roles is not null)
+                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
-                    response.IsSuccess = true;
-                    response.Data = _mapper.Map<BaseEntityResponse<RolResponseDto>>(roles);
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                    switch (filters.NumFilter)
+                    {
+                        case 1:
+                            roles = roles.Where(x => x.Nombre!.Contains(filters.TextFilter));
+                            break;
+                    }
                 }
-                else
+
+                if (filters.StateFilter is not null)
                 {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    roles = roles.Where(x => x.Estado.Equals(filters.StateFilter));
                 }
+
+                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+                {
+                    roles = roles.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                        .AddDays(1));
+                }
+
+                filters.Sort ??= "Id";
+
+                var items = await _orderingQuery
+                    .Ordering(filters, roles, !(bool)filters.Download!).ToListAsync();
+
+                response.IsSuccess = true;
+                response.TotalRecords = await roles.CountAsync();
+                response.Data = _mapper.Map<IEnumerable<RolResponseDto>>(items);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
             {

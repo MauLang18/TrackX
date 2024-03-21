@@ -1,4 +1,5 @@
-﻿using TrackX.Infrastructure.FileStorage;
+﻿using TrackX.Domain.Entities;
+using TrackX.Infrastructure.FileStorage;
 
 namespace TrackX.Infrastructure.Persistences.Interfaces
 {
@@ -7,11 +8,10 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         //Declaracion o matricula de nuestra interfaces a nivel de repository
 
         IUsuarioRepository Usuario { get; }
-        IRolRepository Rol {  get; }
-        IAzureStorage Storage { get; }
-        IEmpleoRepository Empleo { get; }
-        IItinerarioRepository Itinerario { get; }
-        INoticiaRepository Noticia { get; }
+        IGenericRepository<TbRol> Rol {  get; }
+        IGenericRepository<TbEmpleo> Empleo { get; }
+        IGenericRepository<TbItinerario> Itinerario { get; }
+        IGenericRepository<TbNoticia> Noticia { get; }
 
         void SaveChanges();
         Task SaveChangesAsync();

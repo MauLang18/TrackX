@@ -17,6 +17,12 @@ public partial class DbCfContext : DbContext
 
     public virtual DbSet<TbUsuario> TbUsuarios { get; set; }
 
+    public virtual DbSet<TbItinerario> TbItinerarios { get; set; }
+
+    public virtual DbSet<TbNoticia> TbNoticias { get; set; }
+
+    public virtual DbSet<TbEmpleo> TbEmpleos { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasAnnotation("Relational.Collaction", "Modern_Spanish_CI_AS");

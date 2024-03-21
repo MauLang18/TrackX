@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using TrackX.Domain.Entities;
 using TrackX.Infrastructure.FileStorage;
 using TrackX.Infrastructure.Persistences.Contexts;
 using TrackX.Infrastructure.Persistences.Interfaces;
@@ -8,29 +9,26 @@ namespace TrackX.Infrastructure.Persistences.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly DbCfContext _context;
-
-        public IUsuarioRepository Usuario { get; private set; }
-
-        public IRolRepository Rol {  get; private set; }
-
-        public IAzureStorage Storage { get; private set; }
-
-        public IEmpleoRepository Empleo { get; private set; }
-
-        public IItinerarioRepository Itinerario { get; private set; }
-
-        public INoticiaRepository Noticia { get; private set; }
+        private IGenericRepository<TbRol> _rol = null!;
+        private IUsuarioRepository _usuario = null!;
+        private IGenericRepository<TbEmpleo> _empleo = null!;
+        private IGenericRepository<TbItinerario> _itinerario = null!;
+        private IGenericRepository<TbNoticia> _noticia = null!;
 
         public UnitOfWork(DbCfContext context, IConfiguration configuration)
         {
             _context = context;
-            Usuario = new UsuarioRepository(_context);
-            Rol = new RolRepository(_context);
-            Storage = new AzureStorage(configuration);
-            Empleo = new EmpleoRepository(_context);
-            Itinerario = new ItinerarioRepository(_context);
-            Noticia = new NoticiaRepository(_context);
         }
+
+        public IUsuarioRepository Usuario => _usuario ?? new UsuarioRepository(_context);
+
+        public IGenericRepository<TbRol> Rol => _rol ?? new GenericRepository<TbRol>(_context);
+
+        public IGenericRepository<TbEmpleo> Empleo => _empleo ?? new GenericRepository<TbEmpleo>(_context);
+
+        public IGenericRepository<TbItinerario> Itinerario => _itinerario ?? new GenericRepository<TbItinerario>(_context);
+
+        public IGenericRepository<TbNoticia> Noticia => _noticia ?? new GenericRepository<TbNoticia>(_context);
 
         public void Dispose()
         {

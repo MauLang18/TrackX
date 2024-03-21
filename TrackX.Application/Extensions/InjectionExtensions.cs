@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using TrackX.Application.Commons.Ordering;
 using TrackX.Application.Extensions.WatchDog;
 using TrackX.Application.Interfaces;
 using TrackX.Application.Services;
@@ -18,7 +19,10 @@ namespace TrackX.Application.Extensions
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
+            services.AddTransient<IOrderingQuery, OrderingQuery>();
             services.AddTransient<IFileStorageLocalApplication, FileStorageLocalApplication>();
+
+            services.AddScoped<IGenerateExcelApplication, GenerateExcelApplication>();
 
             services.AddScoped<IUsuarioApplication, UsuarioApplication>();
             services.AddScoped<IAuthApplication, AuthApplication>();
@@ -28,7 +32,6 @@ namespace TrackX.Application.Extensions
             services.AddScoped<INoticiaApplication, NoticiaApplication>();
             services.AddScoped<ITrackingNoLoginApplication, TrackingNoLoginApplication>();
             services.AddScoped<ITrackingLoginApplication, TrackingLoginApplication>();
-            services.AddScoped<IGenerateExcelApplication, GenerateExcelApplication>();
             services.AddScoped<IClienteApplication, ClienteApplication>();
 
             services.AddWatchDog();

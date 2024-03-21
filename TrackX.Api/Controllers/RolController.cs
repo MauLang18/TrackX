@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Rol.Request;
 using TrackX.Application.Interfaces;
-using TrackX.Infrastructure.Commons.Bases.Request;
 
 namespace TrackX.Api.Controllers
 {

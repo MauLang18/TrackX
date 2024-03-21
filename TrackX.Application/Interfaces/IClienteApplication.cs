@@ -1,4 +1,4 @@
-﻿using TrackX.Application.Commons.Bases;
+﻿using TrackX.Application.Commons.Bases.Response;
 using TrackX.Domain.Entities;
 
 namespace TrackX.Application.Interfaces

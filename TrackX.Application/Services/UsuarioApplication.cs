@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using System.Dynamic;
-using TrackX.Application.Commons.Bases;
+using Microsoft.EntityFrameworkCore;
+using TrackX.Application.Commons.Bases.Request;
+using TrackX.Application.Commons.Bases.Response;
+using TrackX.Application.Commons.Ordering;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Dtos.Usuario.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
-using TrackX.Infrastructure.Commons.Bases.Request;
-using TrackX.Infrastructure.Commons.Bases.Response;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -19,32 +19,57 @@ namespace TrackX.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IFileStorageLocalApplication _fileStorage;
+        private readonly IOrderingQuery _orderingQuery;
 
-        public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorage)
+        public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorage, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _fileStorage = fileStorage;
+            _orderingQuery = orderingQuery;
         }
 
-        public async Task<BaseResponse<BaseEntityResponse<UsuarioResponseDto>>> ListUsuarios(BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<UsuarioResponseDto>>> ListUsuarios(BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<BaseEntityResponse<UsuarioResponseDto>>();
+            var response = new BaseResponse<IEnumerable<UsuarioResponseDto>>();
             try
             {
-                var usuarios = await _unitOfWork.Usuario.ListUsuarios(filters);
+                var usuarios = _unitOfWork.Usuario
+                    .GetAllQueryable()
+                    .Include(x => x.IdRolNavigation)
+                    .AsQueryable();
 
-                if (usuarios is not null)
+                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
-                    response.IsSuccess = true;
-                    response.Data = _mapper.Map<BaseEntityResponse<UsuarioResponseDto>>(usuarios);
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                    switch (filters.NumFilter)
+                    {
+                        case 1:
+                            usuarios = usuarios.Where(x => x.Correo!.Contains(filters.TextFilter));
+                            break;
+                    }
                 }
-                else
+
+                if (filters.StateFilter is not null)
                 {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    usuarios = usuarios.Where(x => x.Estado.Equals(filters.StateFilter));
                 }
+
+                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+                {
+                    usuarios = usuarios.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                        .AddDays(1));
+                }
+
+                filters.Sort ??= "Id";
+
+                var items = await _orderingQuery
+                    .Ordering(filters, usuarios, !(bool)filters.Download!).ToListAsync();
+
+                response.IsSuccess = true;
+                response.TotalRecords = await usuarios.CountAsync();
+                response.Data = _mapper.Map<IEnumerable<UsuarioResponseDto>>(items);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
             {
@@ -138,7 +163,12 @@ namespace TrackX.Application.Services
 
                 var usuario = _mapper.Map<TbUsuario>(requestDto);
                 usuario.Id = id;
-                usuario.Pass = BC.HashPassword(usuario.Pass);
+
+                if (requestDto.Pass is not null)
+                    usuario.Pass = BC.HashPassword(requestDto.Pass);
+
+                if (requestDto.Pass is null)
+                    usuario.Pass = usuario.Pass!;
 
                 if (requestDto.Imagen is not null)
                     usuario.Imagen = await _fileStorage

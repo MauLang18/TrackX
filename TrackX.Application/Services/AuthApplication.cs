@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using TrackX.Application.Commons.Bases;
+using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;

@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
-using TrackX.Application.Commons.Bases;
+using Microsoft.EntityFrameworkCore;
+using TrackX.Application.Commons.Bases.Request;
+using TrackX.Application.Commons.Bases.Response;
+using TrackX.Application.Commons.Ordering;
+using TrackX.Application.Dtos.Empleo.Response;
 using TrackX.Application.Dtos.Itinerario.Request;
 using TrackX.Application.Dtos.Itinerario.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
-using TrackX.Infrastructure.Commons.Bases.Request;
-using TrackX.Infrastructure.Commons.Bases.Response;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -16,31 +18,55 @@ namespace TrackX.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IOrderingQuery _orderingQuery;
 
-        public ItinerarioApplication(IUnitOfWork unitOfWork, IMapper mapper)
+        public ItinerarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _orderingQuery = orderingQuery;
         }
 
-        public async Task<BaseResponse<BaseEntityResponse<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<BaseEntityResponse<ItinerarioResponseDto>>();
+            var response = new BaseResponse<IEnumerable<ItinerarioResponseDto>>();
             try
             {
-                var itinerarios = await _unitOfWork.Itinerario.ListItinerarios(filters);
+                var itinerarios = _unitOfWork.Empleo
+                    .GetAllQueryable()
+                    .AsQueryable();
 
-                if (itinerarios is not null)
+                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
-                    response.IsSuccess = true;
-                    response.Data = _mapper.Map<BaseEntityResponse<ItinerarioResponseDto>>(itinerarios);
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                    switch (filters.NumFilter)
+                    {
+                        case 1:
+                            itinerarios = itinerarios.Where(x => x.Titulo!.Contains(filters.TextFilter));
+                            break;
+                    }
                 }
-                else
+
+                if (filters.StateFilter is not null)
                 {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    itinerarios = itinerarios.Where(x => x.Estado.Equals(filters.StateFilter));
                 }
+
+                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+                {
+                    itinerarios = itinerarios.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                        .AddDays(1));
+                }
+
+                filters.Sort ??= "Id";
+
+                var items = await _orderingQuery
+                    .Ordering(filters, itinerarios, !(bool)filters.Download!).ToListAsync();
+
+                response.IsSuccess = true;
+                response.TotalRecords = await itinerarios.CountAsync();
+                response.Data = _mapper.Map<IEnumerable<ItinerarioResponseDto>>(items);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
             {

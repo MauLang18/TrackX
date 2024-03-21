@@ -2,7 +2,6 @@
 using TrackX.Application.Dtos.Rol.Request;
 using TrackX.Application.Dtos.Rol.Response;
 using TrackX.Domain.Entities;
-using TrackX.Infrastructure.Commons.Bases.Response;
 using TrackX.Utilities.Static;
 
 namespace TrackX.Application.Mappers
@@ -15,8 +14,6 @@ namespace TrackX.Application.Mappers
                 .ForMember(x => x.EstadoRol, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
                 .ReverseMap();
             CreateMap<TbRol, RolSelectResponseDto>()
-                .ReverseMap();
-            CreateMap<BaseEntityResponse<TbRol>, BaseEntityResponse<RolResponseDto>>()
                 .ReverseMap();
             CreateMap<RolRequestDto, TbRol>()
                 .ReverseMap();

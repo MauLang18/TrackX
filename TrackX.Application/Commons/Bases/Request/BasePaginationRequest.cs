@@ -1,4 +1,4 @@
-﻿namespace TrackX.Infrastructure.Commons.Bases.Request
+﻿namespace TrackX.Application.Commons.Bases.Request
 {
     public class BasePaginationRequest
     {

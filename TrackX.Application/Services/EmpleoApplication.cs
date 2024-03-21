@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
-using TrackX.Application.Commons.Bases;
+using Microsoft.EntityFrameworkCore;
+using TrackX.Application.Commons.Bases.Request;
+using TrackX.Application.Commons.Bases.Response;
+using TrackX.Application.Commons.Ordering;
 using TrackX.Application.Dtos.Empleo.Request;
 using TrackX.Application.Dtos.Empleo.Response;
+using TrackX.Application.Dtos.Usuario.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
-using TrackX.Infrastructure.Commons.Bases.Request;
-using TrackX.Infrastructure.Commons.Bases.Response;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -17,32 +19,56 @@ namespace TrackX.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IFileStorageLocalApplication _fileStorageLocalApplication;
+        private readonly IOrderingQuery _orderingQuery;
 
-        public EmpleoApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorageLocalApplication)
+        public EmpleoApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorageLocalApplication, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _fileStorageLocalApplication = fileStorageLocalApplication;
+            _orderingQuery = orderingQuery;
         }
 
-        public async Task<BaseResponse<BaseEntityResponse<EmpleoResponseDto>>> ListEmpleos(BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<EmpleoResponseDto>>> ListEmpleos(BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<BaseEntityResponse<EmpleoResponseDto>>();
+            var response = new BaseResponse<IEnumerable<EmpleoResponseDto>>();
             try
             {
-                var empleos = await _unitOfWork.Empleo.ListEmpleos(filters);
+                var empleos = _unitOfWork.Empleo
+                    .GetAllQueryable()
+                    .AsQueryable();
 
-                if (empleos is not null)
+                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
-                    response.IsSuccess = true;
-                    response.Data = _mapper.Map<BaseEntityResponse<EmpleoResponseDto>>(empleos);
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                    switch (filters.NumFilter)
+                    {
+                        case 1:
+                            empleos = empleos.Where(x => x.Titulo!.Contains(filters.TextFilter));
+                            break;
+                    }
                 }
-                else
+
+                if (filters.StateFilter is not null)
                 {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    empleos = empleos.Where(x => x.Estado.Equals(filters.StateFilter));
                 }
+
+                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+                {
+                    empleos = empleos.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                        .AddDays(1));
+                }
+
+                filters.Sort ??= "Id";
+
+                var items = await _orderingQuery
+                    .Ordering(filters, empleos, !(bool)filters.Download!).ToListAsync();
+
+                response.IsSuccess = true;
+                response.TotalRecords = await empleos.CountAsync();
+                response.Data = _mapper.Map<IEnumerable<EmpleoResponseDto>>(items);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
             {
