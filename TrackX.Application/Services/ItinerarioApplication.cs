@@ -32,7 +32,7 @@ namespace TrackX.Application.Services
             var response = new BaseResponse<IEnumerable<ItinerarioResponseDto>>();
             try
             {
-                var itinerarios = _unitOfWork.Empleo
+                var itinerarios = _unitOfWork.Itinerario
                     .GetAllQueryable()
                     .AsQueryable();
 
@@ -41,7 +41,10 @@ namespace TrackX.Application.Services
                     switch (filters.NumFilter)
                     {
                         case 1:
-                            itinerarios = itinerarios.Where(x => x.Titulo!.Contains(filters.TextFilter));
+                            itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.TextFilter));
+                            break;
+                        case 2:
+                            itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.TextFilter));
                             break;
                     }
                 }
