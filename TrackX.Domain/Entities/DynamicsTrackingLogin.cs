@@ -40,8 +40,8 @@ namespace TrackX.Domain.Entities
         public object? new_lugarcolocacion { get; set; }
         public object? new_redestino { get; set; }
         public int? new_diasdetransito { get; set; }
-        public object? new_nombrebuque { get; set; }
-        public object? new_numeroviaje { get; set; }
+        public object? new_barcodesalida { get; set; }
+        public object? new_viajedesalida { get; set; }
         public string? _customerid_value { get; set; }
         public string? incidentid { get; set; }
     }

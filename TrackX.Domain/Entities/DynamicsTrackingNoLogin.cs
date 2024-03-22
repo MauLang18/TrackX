@@ -22,7 +22,7 @@ namespace TrackX.Domain.Entities
         public DateTime? new_instcliente { get; set; }
         public object? new_ingreso { get; set; }
         public object? new_ingresoabodegas { get; set; }
-        public object? new_nombrebuque { get; set; }
+        public object? new_barcodesalida { get; set; }
         public int? new_origen { get; set; }
         public int? new_poe { get; set; }
         public int? new_pol { get; set; }

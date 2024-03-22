@@ -13,6 +13,11 @@ namespace TrackX.Api.Controllers
     {
         private readonly IItinerarioApplication _itinerarioApplication;
 
+        public ItinerarioController(IItinerarioApplication itinerarioApplication)
+        {
+            _itinerarioApplication = itinerarioApplication;
+        }
+
         [HttpGet]
         public async Task<IActionResult> ListItinerarios([FromQuery] BaseFiltersRequest filters)
         {

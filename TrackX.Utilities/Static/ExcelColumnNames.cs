@@ -36,7 +36,24 @@
                 ("DESTINO", "new_destino"),
                 ("POE", "new_poe"),
                 ("ETA", "new_eta"),
-                ("BCF", "new_bcf"),
+                ("ESTADO", "new_preestado2"),
+                ("ESTADO CLIENTE", "new_statuscliente"),
+                ("FECHA MODIFICACION", "modifiedon"),
+                ("DIAS DE TRANSITO", "new_diasdetransito"),
+                ("CONFIRMACION DE ZARPE", "new_confirmacinzarpe"),
+                ("NOMBRE DEL BUQUE", "new_barcodesalida"),
+                ("NUMERO DE VIAJE", "new_viajedesalida"),
+                ("INCOTERM", "new_incoterm"),
+                ("TRANSPORTE", "new_transporte"),
+                ("MARCHAMO", "new_seal"),
+                ("CANTIDAD DE EQUIPO", "new_cantequipo"),
+                ("TAMAÑO DE EQUPO", "new_tamaoequipo"),
+                ("CANTIDAD DE BULTOS", "new_contidadbultos"),
+                ("SHIPPER", "_new_shipper_value"),
+                ("COMMODITY", "new_commodity"),
+                ("TARIFA","new_ofertatarifaid"),
+                ("PROYECCION DE INGRESO", "new_montocostoestimado"),
+                ("FACTURAS CF", "new_new_facturacompaia")
             };
 
             return columnsProperties;
