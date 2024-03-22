@@ -60,12 +60,20 @@ namespace TrackX.Application.Services
                     response.IsSuccess = true;
                     string shipperValue = user.Cliente!;
 
-                    var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
-
-                    foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                    if (shipperValue is not null)
                     {
-                        user.NombreCliente = items.name!;
+                        var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+
+                        foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                        {
+                            user.NombreCliente = items.name!;
+                        }
                     }
+                    else
+                    {
+                        user.NombreCliente = "";
+                    }
+
                     response.Data = GenerateToken(user);
                     response.Message = ReplyMessage.MESSAGE_TOKEN;
                     return response;

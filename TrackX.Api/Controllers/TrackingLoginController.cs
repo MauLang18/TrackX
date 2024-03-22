@@ -31,13 +31,6 @@ namespace TrackX.Api.Controllers
         {
             var response = await _trackingLoginApplication.TrackingFinalizadoByCliente(cliente);
 
-            /*if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsCategorias();
-                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }*/
-
             return Ok(response);
         }
 

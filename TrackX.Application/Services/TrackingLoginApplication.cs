@@ -61,11 +61,18 @@ namespace TrackX.Application.Services
                         {
                             string shipperValue = item._new_shipper_value!;
 
-                            var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
-
-                            foreach(var items in nuevoValorCliente.Result.Data!.value!)
+                            if (shipperValue is not null)
                             {
-                                item._new_shipper_value = items.name;
+                                var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+
+                                foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                                {
+                                    item._new_shipper_value = items.name;
+                                }
+                            }
+                            else
+                            {
+                                item._new_shipper_value = "";
                             }
                         }
 
@@ -134,14 +141,18 @@ namespace TrackX.Application.Services
                         {
                             string shipperValue = item._new_shipper_value!;
 
-                            var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
-
-                            if(nuevoValorCliente.Result.Data is not null)
+                            if (shipperValue is not null)
                             {
+                                var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+
                                 foreach (var items in nuevoValorCliente.Result.Data!.value!)
                                 {
                                     item._new_shipper_value = items.name;
                                 }
+                            }
+                            else
+                            {
+                                item._new_shipper_value = "";
                             }
                         }
 
