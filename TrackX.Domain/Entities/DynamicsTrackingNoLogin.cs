@@ -13,6 +13,7 @@ namespace TrackX.Domain.Entities
     {
         [JsonProperty("@odata.etag")]
         public string? odataetag { get; set; }
+        public object? new_etadestino { get; set; }
         public string? new_contenedor { get; set; }
         public string? new_bcf { get; set; }
         public DateTime? new_confirmacinzarpe { get; set; }

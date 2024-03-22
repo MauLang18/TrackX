@@ -12,7 +12,8 @@ namespace TrackX.Domain.Entities
     public class Value4
     {
         [JsonProperty("@odata.etag")]
-        public string? odataetag { get; set; }
+        public string? odataetag { get; set; } 
+        public object? new_etadestino { get; set; }
         public object? new_contenedor { get; set; }
         public string? new_factura { get; set; }
         public object? new_bcf { get; set; }
