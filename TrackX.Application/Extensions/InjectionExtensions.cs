@@ -33,6 +33,7 @@ namespace TrackX.Application.Extensions
             services.AddScoped<ITrackingNoLoginApplication, TrackingNoLoginApplication>();
             services.AddScoped<ITrackingLoginApplication, TrackingLoginApplication>();
             services.AddScoped<IClienteApplication, ClienteApplication>();
+            services.AddScoped<ILoginTrackingApplication, LoginTrackingApplication>();
 
             services.AddWatchDog();
 
