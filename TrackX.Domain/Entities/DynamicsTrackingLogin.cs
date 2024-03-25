@@ -43,6 +43,8 @@ namespace TrackX.Domain.Entities
         public object? new_barcodesalida { get; set; }
         public object? new_viajedesalida { get; set; }
         public string? _customerid_value { get; set; }
+        public object? new_ofertatarifaid { get; set; }
+        public object? new_montocostoestimado { get; set; }
         public string? incidentid { get; set; }
     }
 }

@@ -17,33 +17,33 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpGet("IDTRA")]
-        public async Task<IActionResult> IDTRA(string idtra)
+        public async Task<IActionResult> IDTRA(string idtra, string cliente)
         {
-            var response = await _loginTrackingApplication.TrackingByIDTRA(idtra);
+            var response = await _loginTrackingApplication.TrackingByIDTRA(idtra,cliente);
 
             return Ok(response);
         }
 
         [HttpGet("PO")]
-        public async Task<IActionResult> PO(string po)
+        public async Task<IActionResult> PO(string po, string cliente)
         {
-            var response = await _loginTrackingApplication.TrackingByPO(po);
+            var response = await _loginTrackingApplication.TrackingByPO(po,cliente);
 
             return Ok(response);
         }
 
         [HttpGet("BCF")]
-        public async Task<IActionResult> BCF(string bcf)
+        public async Task<IActionResult> BCF(string bcf, string cliente)
         {
-            var response = await _loginTrackingApplication.TrackingByBCF(bcf);
+            var response = await _loginTrackingApplication.TrackingByBCF(bcf,cliente);
 
             return Ok(response);
         }
 
         [HttpGet("CONTENEDOR")]
-        public async Task<IActionResult> CONTENEDOR(string contenedor)
+        public async Task<IActionResult> CONTENEDOR(string contenedor, string cliente)
         {
-            var response = await _loginTrackingApplication.TrackingByContenedor(contenedor);
+            var response = await _loginTrackingApplication.TrackingByContenedor(contenedor,cliente);
 
             return Ok(response);
         }
