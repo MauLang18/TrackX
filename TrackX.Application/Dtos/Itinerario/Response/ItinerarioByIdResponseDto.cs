@@ -11,6 +11,10 @@
         public string? Carrier { get; set; }
         public string? Vessel { get; set; }
         public string? Voyage { get; set; }
+        public string? Origen { get; set; }
+        public string? Destino { get; set; }
+        public string? Transporte { get; set; }
+        public string? Modalidad { get; set; }
         public int Estado { get; set; }
     }
 }

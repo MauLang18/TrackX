@@ -33,7 +33,7 @@ namespace TrackX.Application.Services
                 using (HttpClient httpClient = new HttpClient())
                 {
                     httpClient.BaseAddress = new Uri(crmUrl);
-                    httpClient.Timeout = new TimeSpan(0, 2, 0);
+                    httpClient.Timeout = TimeSpan.FromSeconds(300);
                     httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
                     httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

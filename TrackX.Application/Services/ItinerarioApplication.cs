@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Commons.Ordering;
-using TrackX.Application.Dtos.Empleo.Response;
 using TrackX.Application.Dtos.Itinerario.Request;
 using TrackX.Application.Dtos.Itinerario.Response;
 using TrackX.Application.Interfaces;
@@ -19,12 +18,14 @@ namespace TrackX.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IOrderingQuery _orderingQuery;
+        private readonly IFileStorageLocalApplication _fileStorage;
 
-        public ItinerarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
+        public ItinerarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _orderingQuery = orderingQuery;
+            _fileStorage = fileStorage;
         }
 
         public async Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersRequest filters)
@@ -116,6 +117,13 @@ namespace TrackX.Application.Services
             try
             {
                 var itinerario = _mapper.Map<TbItinerario>(requestDto);
+
+                if (requestDto.Origen is not null)
+                    itinerario.Origen = await _fileStorage.SaveFile(AzureContainers.ITINERARIOS, requestDto.Origen);
+
+                if (requestDto.Destino is not null)
+                    itinerario.Destino = await _fileStorage.SaveFile(AzureContainers.ITINERARIOS, requestDto.Destino);
+
                 response.Data = await _unitOfWork.Itinerario.RegisterAsync(itinerario);
                 if (response.Data)
                 {
@@ -154,6 +162,21 @@ namespace TrackX.Application.Services
 
                 var itinerario = _mapper.Map<TbItinerario>(requestDto);
                 itinerario.Id = id;
+
+                if (requestDto.Origen is not null)
+                    itinerario.Origen = await _fileStorage
+                        .EditFile(AzureContainers.ITINERARIOS, requestDto.Origen, itinerarioEdit.Data!.Origen!);
+
+                if (requestDto.Origen is null)
+                    itinerario.Origen = itinerarioEdit.Data!.Origen;
+
+                if (requestDto.Destino is not null)
+                    itinerario.Destino = await _fileStorage
+                        .EditFile(AzureContainers.ITINERARIOS, requestDto.Destino, itinerarioEdit.Data!.Destino!);
+
+                if (requestDto.Destino is null)
+                    itinerario.Destino = itinerarioEdit.Data!.Destino;
+
                 response.Data = await _unitOfWork.Itinerario.EditAsync(itinerario);
 
                 if (response.Data)
@@ -192,6 +215,9 @@ namespace TrackX.Application.Services
                 }
 
                 response.Data = await _unitOfWork.Itinerario.RemoveAsync(id);
+
+                await _fileStorage.RemoveFile(itinerario.Data!.Origen!, AzureContainers.ITINERARIOS);
+                await _fileStorage.RemoveFile(itinerario.Data!.Destino!, AzureContainers.ITINERARIOS);
 
                 if (response.Data)
                 {

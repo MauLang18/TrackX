@@ -24,6 +24,13 @@ namespace TrackX.Infrastructure.Extensions
             services.AddTransient<IFileStorageLocal, FileStorageLocal>();
             services.AddTransient<IGenerateExcel, GenerateExcel>();
 
+            services.AddStackExchangeRedisCache(options =>
+            {
+                var redis = configuration.GetConnectionString("Redis");
+
+                options.Configuration = redis;
+            });
+
             return services;
         }
     }

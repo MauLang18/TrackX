@@ -31,6 +31,20 @@ namespace TrackX.Infrastructure.Persistences.Contexts.Configurations
                 .IsUnicode(false);
             builder.Property(e => e.Imagen).IsUnicode(false);
             builder.Property(e => e.NombreCliente).IsUnicode(false);
+            builder.Property(e => e.NombreEmpresa)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            builder.Property(e => e.Telefono)
+                .HasMaxLength(25)
+                .IsUnicode(false);
+            builder.Property(e => e.Direccion)
+                .IsUnicode(false);
+            builder.Property(e => e.Pais)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            builder.Property(e => e.Paginas)
+                .HasMaxLength(100)
+                .IsUnicode(false);
 
             builder.HasOne(d => d.IdRolNavigation).WithMany(p => p.TbUsuarios)
                 .HasForeignKey(d => d.IdRol)

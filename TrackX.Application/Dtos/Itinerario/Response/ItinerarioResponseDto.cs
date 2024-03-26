@@ -1,4 +1,6 @@
-﻿namespace TrackX.Application.Dtos.Itinerario.Response
+﻿using Microsoft.AspNetCore.Http;
+
+namespace TrackX.Application.Dtos.Itinerario.Response
 {
     public class ItinerarioResponseDto
     {
@@ -11,6 +13,10 @@
         public string? Carrier { get; set; }
         public string? Vessel { get; set; }
         public string? Voyage { get; set; }
+        public string? Origen { get; set; }
+        public string? Destino { get; set; }
+        public string? Transporte { get; set; }
+        public string? Modalidad { get; set; }
         public DateTime FechaCreacionAuditoria { get; set; }
         public int Estado { get; set; }
         public string? EstadoItinerario { get; set; }

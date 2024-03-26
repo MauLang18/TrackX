@@ -151,6 +151,7 @@ namespace TrackX.Application.Services
                 new Claim(JwtRegisteredClaimNames.Gender, usuario.Imagen ?? ""),
                 new Claim(JwtRegisteredClaimNames.Acr, usuario.NombreCliente ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Typ, usuario.Paginas ?? ""),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
             };
 

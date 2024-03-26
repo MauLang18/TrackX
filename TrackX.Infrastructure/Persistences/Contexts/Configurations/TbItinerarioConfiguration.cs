@@ -27,6 +27,16 @@ namespace TrackX.Infrastructure.Persistences.Contexts.Configurations
             builder.Property(e => e.Voyage)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            builder.Property(e => e.Origen)
+                .IsUnicode(false);
+            builder.Property(e => e.Destino)
+                .IsUnicode(false);
+            builder.Property(e => e.Transporte)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            builder.Property(e => e.Modalidad)
+                .HasMaxLength(100)
+                .IsUnicode(false);
         }
     }
 }

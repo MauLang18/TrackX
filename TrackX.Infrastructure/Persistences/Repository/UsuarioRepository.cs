@@ -2,6 +2,7 @@
 using TrackX.Domain.Entities;
 using TrackX.Infrastructure.Persistences.Contexts;
 using TrackX.Infrastructure.Persistences.Interfaces;
+using TrackX.Utilities.Static;
 
 namespace TrackX.Infrastructure.Persistences.Repository
 {
@@ -16,6 +17,7 @@ namespace TrackX.Infrastructure.Persistences.Repository
         public async Task<TbUsuario> UserByEmail(string email)
         {
             var user = await _context.TbUsuarios.AsNoTracking()
+                .Where(x => x.Estado.Equals((int)StateTypes.Activo) && x.UsuarioEliminacionAuditoria == null && x.FechaEliminacionAuditoria == null)
                 .FirstOrDefaultAsync(x => x.Correo!.Equals(email));
 
             return user!;

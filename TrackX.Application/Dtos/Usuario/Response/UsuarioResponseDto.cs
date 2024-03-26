@@ -12,6 +12,11 @@
         public string? Rol { get; set; }
         public int IdRol { get; set; }
         public string? Imagen { get; set; }
+        public string? NombreEmpresa { get; set; }
+        public string? Telefono { get; set; }
+        public string? Direccion { get; set; }
+        public string? Pais { get; set; }
+        public string? Paginas { get; set; }
         public DateTime FechaCreacionAuditoria { get; set; }
         public int Estado { get; set; }
         public string? EstadoUsuario { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using System.Threading.Tasks;
 using TrackX.Application.Interfaces;
 using TrackX.Utilities.Static;
@@ -11,14 +12,17 @@ namespace TrackX.Api.Controllers
     {
         private readonly ITrackingLoginApplication _trackingLoginApplication;
         private readonly IGenerateExcelApplication _generateExcelApplication;
+        private readonly IOutputCacheStore _outputCacheStore;
 
-        public TrackingLoginController(ITrackingLoginApplication trackingLoginApplication, IGenerateExcelApplication generateExcelApplication)
+        public TrackingLoginController(ITrackingLoginApplication trackingLoginApplication, IGenerateExcelApplication generateExcelApplication, IOutputCacheStore outputCacheStore)
         {
             _trackingLoginApplication = trackingLoginApplication;
             _generateExcelApplication = generateExcelApplication;
+            _outputCacheStore = outputCacheStore;
         }
 
         [HttpGet("Activo")]
+        [OutputCache(Duration = 3600, PolicyName = "activo")]
         public async Task<IActionResult> TrackingActivoByCliente(string cliente)
         {
             var response = await _trackingLoginApplication.TrackingActivoByCliente(cliente);
@@ -27,6 +31,7 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpGet("Finalizado")]
+        [OutputCache(Duration = 3600, PolicyName = "finalizado")]
         public async Task<IActionResult> TrackingFinalizadoByCliente(string cliente)
         {
             var response = await _trackingLoginApplication.TrackingFinalizadoByCliente(cliente);
@@ -43,6 +48,14 @@ namespace TrackX.Api.Controllers
             var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!.value!, columnNames);
 
             return File(fileBytes, ContentType.ContentTypeExcel);
+        }
+
+        [HttpGet("Cache")]
+        public async Task<IActionResult> LimpiarCache()
+        {
+            await _outputCacheStore.EvictByTagAsync("activo", default);
+            await _outputCacheStore.EvictByTagAsync("finalizado", default);
+            return Ok();
         }
     }
 }

@@ -20,5 +20,15 @@ public partial class TbUsuario : BaseEntity
 
     public string? NombreCliente { get; set; }
 
+    public string? NombreEmpresa { get; set; }
+
+    public string? Telefono { get; set; }
+
+    public string? Direccion { get; set; }
+
+    public string? Pais { get; set; }
+
+    public string? Paginas { get; set; }
+
     public virtual TbRol IdRolNavigation { get; set; } = null!;
 }
