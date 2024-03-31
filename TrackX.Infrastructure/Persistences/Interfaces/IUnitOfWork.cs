@@ -12,6 +12,7 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         IGenericRepository<TbEmpleo> Empleo { get; }
         IGenericRepository<TbItinerario> Itinerario { get; }
         IGenericRepository<TbNoticia> Noticia { get; }
+        IGenericRepository<TbWhs> Whs { get; }
 
         void SaveChanges();
         Task SaveChangesAsync();

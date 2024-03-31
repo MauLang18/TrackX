@@ -14,6 +14,7 @@ namespace TrackX.Infrastructure.Persistences.Repository
         private IGenericRepository<TbEmpleo> _empleo = null!;
         private IGenericRepository<TbItinerario> _itinerario = null!;
         private IGenericRepository<TbNoticia> _noticia = null!;
+        private IGenericRepository<TbWhs> _whs = null!;
 
         public UnitOfWork(DbCfContext context, IConfiguration configuration)
         {
@@ -29,6 +30,8 @@ namespace TrackX.Infrastructure.Persistences.Repository
         public IGenericRepository<TbItinerario> Itinerario => _itinerario ?? new GenericRepository<TbItinerario>(_context);
 
         public IGenericRepository<TbNoticia> Noticia => _noticia ?? new GenericRepository<TbNoticia>(_context);
+
+        public IGenericRepository<TbWhs> Whs => _whs ?? new GenericRepository<TbWhs>(_context);
 
         public void Dispose()
         {

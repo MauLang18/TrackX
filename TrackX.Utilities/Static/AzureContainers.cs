@@ -6,5 +6,6 @@
         public const string EMPLEOS = "empleos";
         public const string NOTICIAS = "noticias";
         public const string ITINERARIOS = "itinerarios";
+        public const string WHS = "whs";
     }
 }

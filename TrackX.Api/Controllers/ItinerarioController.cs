@@ -33,7 +33,6 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
-        [AllowAnonymous]
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterItinerario([FromBody] ItinerarioRequestDto requestDto)
         {
