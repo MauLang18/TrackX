@@ -22,19 +22,19 @@ public partial class TbWhs : BaseEntity
 
     public string TipoBultos { get; set; } = null!;
 
-    public string VinculacionOtroRegistro { get; set; } = null!;
+    public string? VinculacionOtroRegistro { get; set; }
 
     public string WHSReceipt { get; set; } = null!;
 
-    public string Documentoregistro { get; set; } = null!;
+    public string? Documentoregistro { get; set; }
 
     public string Imagen1 { get; set; } = null!;
 
-    public string Imagen2 { get; set; } = null!;
+    public string? Imagen2 { get; set; }
 
-    public string Imagen3 { get; set; } = null!;
+    public string? Imagen3 { get; set; }
 
-    public string Imagen4 { get; set; } = null!;
+    public string? Imagen4 { get; set; }
 
-    public string Imagen5 { get; set; } = null!;
+    public string? Imagen5 { get; set; }
 }

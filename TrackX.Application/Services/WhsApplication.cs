@@ -35,8 +35,9 @@ namespace TrackX.Application.Services
             {
                 var WHS = _unitOfWork.Whs
                     .GetAllQueryable()
-                    .AsQueryable()
-                    .Where(x => x.POL.Equals(whs));
+                    .AsQueryable();
+
+                WHS = WHS.Where(x => x.POL!.Contains(whs));
 
                 if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {

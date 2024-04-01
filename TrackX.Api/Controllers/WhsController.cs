@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Whs.Request;
@@ -41,16 +40,15 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
-        [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<IActionResult> RegisterWhs([FromBody] WhsRequestDto requestDto)
+        public async Task<IActionResult> RegisterWhs([FromForm] WhsRequestDto requestDto)
         {
             var response = await _WhsApplication.RegisterWhs(requestDto);
             return Ok(response);
         }
 
         [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditWhs(int id, [FromBody] WhsRequestDto requestDto)
+        public async Task<IActionResult> EditWhs(int id, [FromForm] WhsRequestDto requestDto)
         {
             var response = await _WhsApplication.EditWhs(id, requestDto);
 

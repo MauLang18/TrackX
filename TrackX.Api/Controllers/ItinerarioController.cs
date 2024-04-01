@@ -34,14 +34,14 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<IActionResult> RegisterItinerario([FromBody] ItinerarioRequestDto requestDto)
+        public async Task<IActionResult> RegisterItinerario([FromForm] ItinerarioRequestDto requestDto)
         {
             var response = await _itinerarioApplication.RegisterItinerario(requestDto);
             return Ok(response);
         }
 
         [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditItinerario(int id, [FromBody] ItinerarioRequestDto requestDto)
+        public async Task<IActionResult> EditItinerario(int id, [FromForm] ItinerarioRequestDto requestDto)
         {
             var response = await _itinerarioApplication.EditItinerario(id, requestDto);
 
