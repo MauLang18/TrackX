@@ -20,7 +20,7 @@
             return columns;
         }
 
-        #region ColumnsCategorias
+        #region ColumnsTramitesActivos
         public static List<(string ColumnName, string PropertyName)> GetColumnsCategorias()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
@@ -60,19 +60,28 @@
         }
         #endregion
 
-        #region ColumnsProveedores
+        #region ColumnsWHS
         public static List<(string ColumnName, string PropertyName)> GetColumnsProveedores()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("NOMBRE", "Nombre"),
-                ("EMAIL", "Correo"),
-                ("TIPO DE DOCUMENTO", "TipoDocumento"),
-                ("N° DE DOCUMENTO","NumeroDocumento"),
-                ("DIRECCION", "Direccion"),
-                ("TELÉFONO","Telefono"),
-                ("FECHA DE CREACIÓN", "FechaCreacionAuditoria"),
-                ("ESTADO", "EstadoProveedor")
+                ("ID INTERNO", "Idtra"),
+                ("TIPO REGISTRO", "TipoRegistro"),
+                ("PO","PO"),
+                ("STATUS", "StatusWHS"),
+                ("POL","POL"),
+                ("POD","POD"),
+                ("DETALLE","Detalle"),
+                ("TIPO BULTOS","TipoBultos"),
+                ("VINCULADO","VinculacionOtroRegistro"),
+                ("WHS RECEIPT","WHSReceipt"),
+                ("DOCUMENTACION REGISTRO","Documentoregistro"),
+                ("IMAGEN1","Imagen1"),
+                ("IMAGEN2","Imagen2"),
+                ("IMAGEN3","Imagen3"),
+                ("IMAGEN4","Imagen4"),
+                ("IMAGEN5","Imagen5"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
             };
 
             return columnsProperties;

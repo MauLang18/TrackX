@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Whs.Request;
 using TrackX.Application.Interfaces;
+using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
 {
@@ -11,10 +12,12 @@ namespace TrackX.Api.Controllers
     public class WhsController : ControllerBase
     {
         private readonly IWhsApplication _WhsApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public WhsController(IWhsApplication WhsApplication)
+        public WhsController(IWhsApplication WhsApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _WhsApplication = WhsApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
         [HttpGet]
@@ -29,6 +32,13 @@ namespace TrackX.Api.Controllers
         public async Task<IActionResult> ListWhsCliente([FromQuery] BaseFiltersRequest filters, string cliente, string whs)
         {
             var response = await _WhsApplication.ListWhsCliente(filters, cliente, whs);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsProveedores();
+                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
 
             return Ok(response);
         }

@@ -22,5 +22,14 @@ namespace TrackX.Application.Services
 
             return fileBytes;
         }
+
+        public byte[] GenerateToExcelGeneric<T>(IEnumerable<T> data, List<(string ColumnName, string PropertyName)> columns)
+        {
+            var excelColumns = ExcelColumnNames.GetColumns(columns);
+            var memoryStreamExcel = _generateExcel.GenerateToExcelGeneric(data, excelColumns);
+            var fileBytes = memoryStreamExcel.ToArray();
+
+            return fileBytes;
+        }
     }
 }
