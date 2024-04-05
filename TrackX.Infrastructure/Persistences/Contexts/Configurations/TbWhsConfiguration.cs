@@ -50,6 +50,7 @@ namespace TrackX.Infrastructure.Persistences.Contexts.Configurations
             builder.Property(e => e.NumeroWHS)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            builder.Property(e => e.NombreCliente).IsUnicode(false);
         }
     }
 }
