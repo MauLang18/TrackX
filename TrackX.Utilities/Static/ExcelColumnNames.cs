@@ -66,12 +66,15 @@
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
                 ("ID INTERNO", "Idtra"),
+                ("# WHS", "NumeroWHS"),
+                ("CLIENTE", "NombreCliente"),
                 ("TIPO REGISTRO", "TipoRegistro"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
                 ("PO","PO"),
                 ("STATUS", "StatusWHS"),
                 ("POL","POL"),
                 ("POD","POD"),
-                ("DETALLE","Detalle"),
+                ("CANT. BULTOS", "CantidadBultos"),
                 ("TIPO BULTOS","TipoBultos"),
                 ("VINCULADO","VinculacionOtroRegistro"),
                 ("WHS RECEIPT","WHSReceipt"),
@@ -81,7 +84,7 @@
                 ("IMAGEN3","Imagen3"),
                 ("IMAGEN4","Imagen4"),
                 ("IMAGEN5","Imagen5"),
-                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("DETALLE","Detalle"),
             };
 
             return columnsProperties;

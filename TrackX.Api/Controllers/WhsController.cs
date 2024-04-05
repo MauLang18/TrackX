@@ -25,6 +25,13 @@ namespace TrackX.Api.Controllers
         {
             var response = await _WhsApplication.ListWhs(filters, whs);
 
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsProveedores();
+                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
+
             return Ok(response);
         }
 
