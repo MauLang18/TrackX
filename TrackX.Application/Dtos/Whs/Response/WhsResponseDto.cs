@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace TrackX.Application.Dtos.Whs.Response
+﻿namespace TrackX.Application.Dtos.Whs.Response
 {
     public class WhsResponseDto
     {
         public int Id { get; set; }
         public string? Idtra { get; set; }
+        public string? NumeroWHS { get; set; }
         public string? Cliente { get; set; }
+        public string? NombreCliente { get; set; }
         public string? TipoRegistro { get; set; }
         public string? PO { get; set; }
         public string? StatusWHS { get; set; }

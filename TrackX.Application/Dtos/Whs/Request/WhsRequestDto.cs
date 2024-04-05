@@ -5,6 +5,7 @@ namespace TrackX.Application.Dtos.Whs.Request
     public class WhsRequestDto
     {
         public string? Idtra { get; set; }
+        public string? NumeroWHS { get; set; }
         public string? Cliente { get; set; }
         public string? TipoRegistro { get; set; }
         public string? PO { get; set; }

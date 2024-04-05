@@ -26,6 +26,14 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("Select")]
+        public async Task<IActionResult> ListSelectUsuarios()
+        {
+            var response = await _usuarioApplication.ListSelectUsuarios();
+
+            return Ok(response);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> UsuarioById(int id)
         {

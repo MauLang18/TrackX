@@ -39,4 +39,5 @@ public partial class TbWhs : BaseEntity
     public string? Imagen5 { get; set; }
 
     public string? NumeroWHS { get; set; }
+    public string? NombreCliente { get; set; }
 }

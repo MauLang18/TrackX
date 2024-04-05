@@ -19,13 +19,15 @@ namespace TrackX.Application.Services
         private readonly IMapper _mapper;
         private readonly IOrderingQuery _orderingQuery;
         private readonly IFileStorageLocalApplication _fileStorage;
+        private readonly IClienteApplication _clienteApplication;
 
-        public WhsApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage)
+        public WhsApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _orderingQuery = orderingQuery;
             _fileStorage = fileStorage;
+            _clienteApplication = clienteApplication;
         }
 
         public async Task<BaseResponse<IEnumerable<WhsResponseDto>>> ListWhs(BaseFiltersRequest filters, string whs)
@@ -81,6 +83,25 @@ namespace TrackX.Application.Services
                 var items = await _orderingQuery
                     .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
 
+                foreach (var item in items!)
+                {
+                    string shipperValue = item.Cliente!;
+
+                    if (shipperValue is not null)
+                    {
+                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
+
+                        foreach (var datos in nuevoValorCliente.Data!.value!)
+                        {
+                            item.NombreCliente = datos.name;
+                        }
+                    }
+                    else
+                    {
+                        item.NombreCliente = "";
+                    }
+                }
+
                 response.IsSuccess = true;
                 response.TotalRecords = await WHS.CountAsync();
                 response.Data = _mapper.Map<IEnumerable<WhsResponseDto>>(items);
@@ -134,6 +155,25 @@ namespace TrackX.Application.Services
 
                 var items = await _orderingQuery
                     .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
+
+                foreach (var item in items!)
+                {
+                    string shipperValue = item.Cliente!;
+
+                    if (shipperValue is not null)
+                    {
+                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
+
+                        foreach (var datos in nuevoValorCliente.Data!.value!)
+                        {
+                            item.NombreCliente = datos.name;
+                        }
+                    }
+                    else
+                    {
+                        item.NombreCliente = "";
+                    }
+                }
 
                 response.IsSuccess = true;
                 response.TotalRecords = await WHS.CountAsync();
