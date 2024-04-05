@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
+using System.Dynamic;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Commons.Ordering;
+using TrackX.Application.Commons.Select;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Dtos.Usuario.Response;
 using TrackX.Application.Interfaces;
@@ -20,13 +23,15 @@ namespace TrackX.Application.Services
         private readonly IMapper _mapper;
         private readonly IFileStorageLocalApplication _fileStorage;
         private readonly IOrderingQuery _orderingQuery;
+        private readonly IClienteApplication _clienteApplication;
 
-        public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorage, IOrderingQuery orderingQuery)
+        public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorage, IOrderingQuery orderingQuery, IClienteApplication clienteApplication)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _fileStorage = fileStorage;
             _orderingQuery = orderingQuery;
+            _clienteApplication = clienteApplication;
         }
 
         public async Task<BaseResponse<IEnumerable<UsuarioResponseDto>>> ListUsuarios(BaseFiltersRequest filters)
@@ -69,6 +74,54 @@ namespace TrackX.Application.Services
                 response.IsSuccess = true;
                 response.TotalRecords = await usuarios.CountAsync();
                 response.Data = _mapper.Map<IEnumerable<UsuarioResponseDto>>(items);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectUsuarios()
+        {
+            var response = new BaseResponse<IEnumerable<SelectResponse>>();
+
+            try
+            {
+                var usuarios = await _unitOfWork.Usuario.GetSelectAsync();
+
+                if (usuarios is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
+
+                foreach (var item in usuarios!)
+                {
+                    string shipperValue = item.Cliente!;
+
+                    if (shipperValue is not null)
+                    {
+                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
+
+                        foreach (var items in nuevoValorCliente.Data!.value!)
+                        {
+                            item.NombreCliente = items.name;
+                        }
+                    }
+                    else
+                    {
+                        item.NombreCliente = "";
+                    }
+                }
+
+                response.IsSuccess = true;
+                response.Data = _mapper.Map<IEnumerable<SelectResponse>>(usuarios);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)

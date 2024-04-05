@@ -46,6 +46,21 @@ namespace TrackX.Application.Services
                         case 1:
                             WHS = WHS.Where(x => x.StatusWHS!.Contains(filters.TextFilter));
                             break;
+                        case 2:
+                            WHS = WHS.Where(x => x.POL!.Contains(filters.TextFilter));
+                            break;
+                        case 3:
+                            WHS = WHS.Where(x => x.POD!.Contains(filters.TextFilter));
+                            break;
+                        case 4:
+                            WHS = WHS.Where(x => x.Idtra!.Contains(filters.TextFilter));
+                            break;
+                        case 5:
+                            WHS = WHS.Where(x => x.PO!.Contains(filters.TextFilter));
+                            break;
+                        case 6:
+                            WHS = WHS.Where(x => x.TipoRegistro!.Contains(filters.TextFilter));
+                            break;
                     }
                 }
 
@@ -88,8 +103,10 @@ namespace TrackX.Application.Services
             {
                 var WHS = _unitOfWork.Whs
                     .GetAllQueryable()
-                    .AsQueryable()
-                    .Where(x => x.Cliente.Equals(cliente) && x.POL.Equals(whs));
+                    .AsQueryable();
+
+
+                WHS = WHS.Where(x => x.POL!.Contains(whs) && x.Cliente.Equals(cliente));
 
                 if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {

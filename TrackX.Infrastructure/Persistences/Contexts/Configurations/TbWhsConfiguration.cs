@@ -47,6 +47,9 @@ namespace TrackX.Infrastructure.Persistences.Contexts.Configurations
                 .IsUnicode(false);
             builder.Property(e => e.WHSReceipt)
                 .IsUnicode(false);
+            builder.Property(e => e.NumeroWHS)
+                .HasMaxLength(100)
+                .IsUnicode(false);
         }
     }
 }
