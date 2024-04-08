@@ -35,6 +35,8 @@ namespace TrackX.Application.Extensions
             services.AddScoped<IClienteApplication, ClienteApplication>();
             services.AddScoped<ILoginTrackingApplication, LoginTrackingApplication>();
             services.AddScoped<IWhsApplication, WhsApplication>();
+            services.AddScoped<IFinanceApplication, FinanceApplication>();
+            services.AddScoped<IExoneracionApplication, ExoneracionApplication>();
 
             services.AddScoped<ISendEmailApplication, SendEmailApplication>();
 
