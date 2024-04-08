@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using TrackX.Domain.Entities;
-using TrackX.Infrastructure.FileStorage;
 using TrackX.Infrastructure.Persistences.Contexts;
 using TrackX.Infrastructure.Persistences.Interfaces;
 
@@ -15,6 +14,8 @@ namespace TrackX.Infrastructure.Persistences.Repository
         private IGenericRepository<TbItinerario> _itinerario = null!;
         private IGenericRepository<TbNoticia> _noticia = null!;
         private IGenericRepository<TbWhs> _whs = null!;
+        private IGenericRepository<TbFinance> _finance = null!;
+        private IGenericRepository<TbExoneracion> _exoneracion = null!;
 
         public UnitOfWork(DbCfContext context, IConfiguration configuration)
         {
@@ -32,6 +33,10 @@ namespace TrackX.Infrastructure.Persistences.Repository
         public IGenericRepository<TbNoticia> Noticia => _noticia ?? new GenericRepository<TbNoticia>(_context);
 
         public IGenericRepository<TbWhs> Whs => _whs ?? new GenericRepository<TbWhs>(_context);
+
+        public IGenericRepository<TbFinance> Finance => _finance ?? new GenericRepository<TbFinance>(_context);
+
+        public IGenericRepository<TbExoneracion> Exoneracion => _exoneracion ?? new GenericRepository<TbExoneracion>(_context);
 
         public void Dispose()
         {

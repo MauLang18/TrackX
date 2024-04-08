@@ -1,5 +1,4 @@
 ﻿using TrackX.Domain.Entities;
-using TrackX.Infrastructure.FileStorage;
 
 namespace TrackX.Infrastructure.Persistences.Interfaces
 {
@@ -13,6 +12,8 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         IGenericRepository<TbItinerario> Itinerario { get; }
         IGenericRepository<TbNoticia> Noticia { get; }
         IGenericRepository<TbWhs> Whs { get; }
+        IGenericRepository<TbFinance> Finance { get; }
+        IGenericRepository<TbExoneracion> Exoneracion { get; }
 
         void SaveChanges();
         Task SaveChangesAsync();
