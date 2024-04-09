@@ -92,6 +92,8 @@ namespace TrackX.Application.Services
             {
                 var usuarios = await _unitOfWork.Usuario.GetSelectAsync();
 
+                usuarios = usuarios.Where(x => !string.IsNullOrEmpty(x.Cliente)).GroupBy(x => x.Cliente).Select(g => g.First());
+
                 if (usuarios is null)
                 {
                     response.IsSuccess = false;

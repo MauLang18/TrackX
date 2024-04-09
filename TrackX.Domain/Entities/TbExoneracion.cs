@@ -2,25 +2,25 @@
 
 public partial class TbExoneracion : BaseEntity
 {
-    public string Idtra { get; set; } = null!;
+    public string? Idtra { get; set; }
 
-    public string Cliente { get; set; } = null!;
+    public string? Cliente { get; set; }
 
-    public string TipoExoneracion { get; set; } = null!;
+    public string? TipoExoneracion { get; set; }
 
-    public string StatusExoneracion { get; set; } = null!;
+    public string? StatusExoneracion { get; set; }
 
-    public string Producto { get; set; } = null!;
+    public string? Producto { get; set; }
 
-    public string Categoria { get; set; } = null!;
+    public string? Categoria { get; set; }
 
-    public string ClasificacionArancelaria { get; set; } = null!;
+    public string? ClasificacionArancelaria { get; set; }
 
     public string? NumeroSolicitud { get; set; }
 
-    public string? Solicitud { get; set; } = null!;
+    public string? Solicitud { get; set; }
 
-    public string? NumeroAutorizacion { get; set; } = null!;
+    public string? NumeroAutorizacion { get; set; }
 
     public string? Autorizacion { get; set; }
 
@@ -28,7 +28,7 @@ public partial class TbExoneracion : BaseEntity
 
     public DateTime? Hasta { get; set; }
 
-    public string Descripcion { get; set; } = null!;
+    public string? Descripcion { get; set; }
 
     public string? NombreCliente { get; set; }
 }

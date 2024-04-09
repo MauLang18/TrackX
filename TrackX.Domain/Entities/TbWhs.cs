@@ -2,33 +2,33 @@
 
 public partial class TbWhs : BaseEntity
 {
-    public string Idtra { get; set; } = null!;
+    public string? Idtra { get; set; }
 
-    public string Cliente { get; set; } = null!;
+    public string? Cliente { get; set; }
 
-    public string TipoRegistro { get; set; } = null!;
+    public string? TipoRegistro { get; set; }
+        
+    public string? PO { get; set; }
 
-    public string PO { get; set; } = null!;
+    public string? StatusWHS { get; set; }
 
-    public string StatusWHS { get; set; } = null!;
+    public string? POL { get; set; }
 
-    public string POL { get; set; } = null!;
+    public string? POD { get; set; }
 
-    public string POD { get; set; } = null!;
+    public string? Detalle { get; set; }
 
-    public string Detalle { get; set; } = null!;
+    public string? CantidadBultos { get; set; }
 
-    public string CantidadBultos { get; set; } = null!;
-
-    public string TipoBultos { get; set; } = null!;
+    public string? TipoBultos { get; set; }
 
     public string? VinculacionOtroRegistro { get; set; }
 
-    public string WHSReceipt { get; set; } = null!;
+    public string? WHSReceipt { get; set; }
 
     public string? Documentoregistro { get; set; }
 
-    public string Imagen1 { get; set; } = null!;
+    public string? Imagen1 { get; set; }
 
     public string? Imagen2 { get; set; }
 

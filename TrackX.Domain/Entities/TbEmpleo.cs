@@ -2,11 +2,11 @@
 
 public partial class TbEmpleo : BaseEntity
 {
-    public string Titulo { get; set; } = null!;
+    public string? Titulo { get; set; }
 
-    public string Puesto { get; set; } = null!;
+    public string? Puesto { get; set; }
 
-    public string Descripcion { get; set; } = null!;
+    public string? Descripcion { get; set; }
 
-    public string Imagen { get; set; } = null!;
+    public string? Imagen { get; set; }
 }

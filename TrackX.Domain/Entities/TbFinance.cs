@@ -2,9 +2,9 @@
 
 public partial class TbFinance : BaseEntity
 {
-    public string Cliente { get; set; } = null!;
+    public string? Cliente { get; set; }
 
-    public string EstadoCuenta { get; set; } = null!;
+    public string? EstadoCuenta { get; set; }
 
     public string? NombreCliente { get; set; }
 }
