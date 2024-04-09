@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Interfaces;
+using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
 {
@@ -12,16 +13,25 @@ namespace TrackX.Api.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioApplication _usuarioApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public UsuarioController(IUsuarioApplication usuarioApplication)
+        public UsuarioController(IUsuarioApplication usuarioApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _usuarioApplication = usuarioApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
         [HttpGet]
         public async Task<IActionResult> ListUsuarios([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _usuarioApplication.ListUsuarios(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsUsuarios();
+                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
 
             return Ok(response);
         }

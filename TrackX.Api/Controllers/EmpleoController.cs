@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Empleo.Request;
 using TrackX.Application.Interfaces;
+using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
 {
@@ -12,16 +13,25 @@ namespace TrackX.Api.Controllers
     public class EmpleoController : ControllerBase
     {
         private readonly IEmpleoApplication _empleoApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public EmpleoController(IEmpleoApplication empleoApplication)
+        public EmpleoController(IEmpleoApplication empleoApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _empleoApplication = empleoApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
         [HttpGet]
         public async Task<IActionResult> ListEmpleos([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _empleoApplication.ListEmpleos(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsEmpleos();
+                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
 
             return Ok(response);
         }

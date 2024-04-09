@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Itinerario.Request;
 using TrackX.Application.Interfaces;
+using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
 {
@@ -12,16 +13,25 @@ namespace TrackX.Api.Controllers
     public class ItinerarioController : ControllerBase
     {
         private readonly IItinerarioApplication _itinerarioApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public ItinerarioController(IItinerarioApplication itinerarioApplication)
+        public ItinerarioController(IItinerarioApplication itinerarioApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _itinerarioApplication = itinerarioApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
         [HttpGet]
         public async Task<IActionResult> ListItinerarios([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _itinerarioApplication.ListItinerarios(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsItinerarios();
+                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
 
             return Ok(response);
         }

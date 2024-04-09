@@ -27,7 +27,7 @@ namespace TrackX.Api.Controllers
 
             if ((bool)filters.Download!)
             {
-                var columnNames = ExcelColumnNames.GetColumnsProveedores();
+                var columnNames = ExcelColumnNames.GetColumnsWHS();
                 var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
@@ -42,7 +42,7 @@ namespace TrackX.Api.Controllers
 
             if ((bool)filters.Download!)
             {
-                var columnNames = ExcelColumnNames.GetColumnsProveedores();
+                var columnNames = ExcelColumnNames.GetColumnsWHS();
                 var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }

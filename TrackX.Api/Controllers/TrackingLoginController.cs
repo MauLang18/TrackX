@@ -44,7 +44,7 @@ namespace TrackX.Api.Controllers
         {
             var response = await _trackingLoginApplication.TrackingActivoByCliente(cliente);
 
-            var columnNames = ExcelColumnNames.GetColumnsCategorias();
+            var columnNames = ExcelColumnNames.GetColumnsTramitesActivos();
             var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!.value!, columnNames);
 
             return File(fileBytes, ContentType.ContentTypeExcel);

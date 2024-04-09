@@ -21,7 +21,7 @@
         }
 
         #region ColumnsTramitesActivos
-        public static List<(string ColumnName, string PropertyName)> GetColumnsCategorias()
+        public static List<(string ColumnName, string PropertyName)> GetColumnsTramitesActivos()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
@@ -61,10 +61,11 @@
         #endregion
 
         #region ColumnsWHS
-        public static List<(string ColumnName, string PropertyName)> GetColumnsProveedores()
+        public static List<(string ColumnName, string PropertyName)> GetColumnsWHS()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
+                ("ID", "Id"),
                 ("ID INTERNO", "Idtra"),
                 ("# WHS", "NumeroWHS"),
                 ("CLIENTE", "NombreCliente"),
@@ -85,6 +86,137 @@
                 ("IMAGEN4","Imagen4"),
                 ("IMAGEN5","Imagen5"),
                 ("DETALLE","Detalle"),
+                ("ESTADO", "EstadoWHS")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsUsuarios
+        public static List<(string ColumnName, string PropertyName)> GetColumnsUsuarios()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("IMAGEN","Imagen"),
+                ("NOMBRE", "Nombre"),
+                ("APELLIDO", "Apellido"),
+                ("CORREO", "Correo"),
+                ("CLIENTE","Cliente"),
+                ("ROL","Rol"),
+                ("EMPRESA","NombreEmpresa"),
+                ("TELEFONO","Telefono"),
+                ("PAIS","Pais"),
+                ("DIRECCION","Direccion"),
+                ("FECHA DE CREACION", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoUsuario"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsNoticias
+        public static List<(string ColumnName, string PropertyName)> GetColumnsNoticias()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("TITULO", "Titulo"),
+                ("SUBTITULO", "Subtitulo"),
+                ("CONTENIDO", "Contenido"),
+                ("IMAGEN","Imagen"),
+                ("FECHA DE CREACION", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoNoticia"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsItinerarios
+        public static List<(string ColumnName, string PropertyName)> GetColumnsItinerarios()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("ORIGEN", "Origen"),
+                ("POL", "POL"),
+                ("DESTINO", "Destino"),
+                ("POD", "POD"),
+                ("CLOSING", "Closing"),
+                ("ETD", "Closing"),
+                ("ETA", "Closing"),
+                ("CARRIER","Carrier"),
+                ("VESSEL","Vessel"),
+                ("VOYAGE","Voyage"),
+                ("TRANSPORTE","Transporte"),
+                ("MODALIDAD","Modalidad"),
+                ("FECHA DE CREACION", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoItinerario"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsFinance
+        public static List<(string ColumnName, string PropertyName)> GetColumnsFinance()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("CLIENTE", "NombreCliente"),
+                ("ESTADO DE CUENTA", "EstadoCuenta"),
+                ("FECHA DE CREACION", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoFinance"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsExoneraciones
+        public static List<(string ColumnName, string PropertyName)> GetColumnsExoneraciones()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("ID INTERNO", "Idtra"),
+                ("CLIENTE", "NombreCliente"),
+                ("TIPO EXONERACION", "TipoExoneracion"),
+                ("STATUS", "StatusExoneracion"),  
+                ("PRODUCTO","Producto"),
+                ("CATEGORIA","Categoria"),
+                ("CLASIFICACION ARANCELARIA","ClasificacionArancelaria"),
+                ("# SOLICITUD", "NumeroSolicitud"),
+                ("SOLICITUD","Solicitud"),
+                ("# AUTORIZACION","NumeroAutorizacion"),
+                ("AUTORIZACION","Autorizacion"),
+                ("DESDE","Desde"),
+                ("HASTA","Hasta"),
+                ("DESCRIPCION","Descripcion"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoExoneracion")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsEmpleos
+        public static List<(string ColumnName, string PropertyName)> GetColumnsEmpleos()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("TITULO", "Titulo"),
+                ("PUESTO", "Puesto"),
+                ("DESCRIPCION", "Descripcion"),
+                ("IMAGEN", "Imagen"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoEmpleo")
             };
 
             return columnsProperties;

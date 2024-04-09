@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Noticia.Request;
 using TrackX.Application.Interfaces;
+using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
 {
@@ -12,16 +13,25 @@ namespace TrackX.Api.Controllers
     public class NoticiaController : ControllerBase
     {
         private readonly INoticiaApplication _noticiaApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public NoticiaController(INoticiaApplication noticiaApplication)
+        public NoticiaController(INoticiaApplication noticiaApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _noticiaApplication = noticiaApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
         [HttpGet]
         public async Task<IActionResult> ListNoticias([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _noticiaApplication.ListNoticias(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsNoticias();
+                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
 
             return Ok(response);
         }

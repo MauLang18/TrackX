@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Finance.Request;
 using TrackX.Application.Interfaces;
-using TrackX.Application.Services;
 using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
@@ -26,12 +25,12 @@ namespace TrackX.Api.Controllers
         {
             var response = await _financeApplication.ListFinance(filters);
 
-            /*if ((bool)filters.Download!)
+            if ((bool)filters.Download!)
             {
-                var columnNames = ExcelColumnNames.GetColumnsProveedores();
+                var columnNames = ExcelColumnNames.GetColumnsFinance();
                 var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
-            }*/
+            }
 
             return Ok(response);
         }
