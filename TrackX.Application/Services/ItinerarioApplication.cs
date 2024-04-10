@@ -47,6 +47,12 @@ namespace TrackX.Application.Services
                         case 2:
                             itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.TextFilter));
                             break;
+                        case 3:
+                            itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TextFilter));
+                            break;
+                        case 4:
+                            itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.TextFilter));
+                            break;
                     }
                 }
 
