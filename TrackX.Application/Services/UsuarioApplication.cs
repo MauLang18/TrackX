@@ -49,6 +49,14 @@ namespace TrackX.Application.Services
                         case 1:
                             usuarios = usuarios.Where(x => x.Correo!.Contains(filters.TextFilter));
                             break;
+                        case 2:
+                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
+
+                            foreach (var datos in resp.Result.Data!.value!)
+                            {
+                                usuarios = usuarios.Where(x => x.Cliente!.Contains(datos.accountid!));
+                            }
+                            break;
                     }
                 }
 

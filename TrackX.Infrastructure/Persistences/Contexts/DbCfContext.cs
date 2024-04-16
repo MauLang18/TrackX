@@ -29,6 +29,10 @@ public partial class DbCfContext : DbContext
 
     public virtual DbSet<TbExoneracion> TbExoneracions { get; set; }
 
+    public virtual DbSet<TbRol> TbRols { get; set; }
+
+    public virtual DbSet<TbRolPrivilegio> TbRolPrivilegios { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasAnnotation("Relational.Collaction", "Modern_Spanish_CI_AS");

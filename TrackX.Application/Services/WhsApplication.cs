@@ -63,6 +63,14 @@ namespace TrackX.Application.Services
                         case 6:
                             WHS = WHS.Where(x => x.TipoRegistro!.Contains(filters.TextFilter));
                             break;
+                        case 7:
+                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
+
+                            foreach (var datos in resp.Result.Data!.value!)
+                            {
+                                WHS = WHS.Where(x => x.Cliente!.Contains(datos.accountid!));
+                            }
+                            break;
                     }
                 }
 

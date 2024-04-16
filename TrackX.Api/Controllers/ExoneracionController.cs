@@ -41,12 +41,12 @@ namespace TrackX.Api.Controllers
         {
             var response = await _exoneracionApplication.ListExoneracionCliente(filters, cliente);
 
-            /*if ((bool)filters.Download!)
+            if ((bool)filters.Download!)
             {
-                var columnNames = ExcelColumnNames.GetColumnsProveedores();
+                var columnNames = ExcelColumnNames.GetColumnsExoneraciones();
                 var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
-            }*/
+            }
 
             return Ok(response);
         }

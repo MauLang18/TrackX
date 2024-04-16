@@ -41,6 +41,17 @@ namespace TrackX.Application.Services
 
                 if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
+                    switch (filters.NumFilter)
+                    {
+                        case 1:
+                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
+
+                            foreach (var datos in resp.Result.Data!.value!)
+                            {
+                                Finance = Finance.Where(x => x.Cliente!.Contains(datos.accountid!));
+                            }
+                            break;
+                    }
                 }
 
                 if (filters.StateFilter is not null)

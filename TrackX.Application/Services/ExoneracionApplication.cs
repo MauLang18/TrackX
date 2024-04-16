@@ -61,6 +61,15 @@ namespace TrackX.Application.Services
                         case 6:
                             Exoneracion = Exoneracion.Where(x => x.TipoExoneracion!.Contains(filters.TextFilter));
                             break;
+                        case 7:
+                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
+
+                            foreach (var datos in resp.Result.Data!.value!)
+                            {
+                                Exoneracion = Exoneracion.Where(x => x.Cliente!.Contains(datos.accountid!));
+                            }
+                            break;
+
                     }
                 }
 
@@ -125,7 +134,7 @@ namespace TrackX.Application.Services
                     .AsQueryable();
 
 
-                Exoneracion = Exoneracion.Where(x => x.Cliente.Equals(cliente));
+                Exoneracion = Exoneracion.Where(x => x.Cliente!.Equals(cliente));
 
                 if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
