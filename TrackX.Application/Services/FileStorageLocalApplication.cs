@@ -24,7 +24,7 @@ namespace TrackX.Application.Services
             var scheme = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? _httpContextAccessor.HttpContext?.Request.Scheme;
             var host = _httpContextAccessor.HttpContext!.Request.Host;
 
-            return await _fileStorageLocal.SaveFile(container, file, webRootPath, scheme, host.Value);
+            return await _fileStorageLocal.SaveFile(container, file, webRootPath, scheme!, host.Value);
         }
 
         public async Task<string> EditFile(string container, IFormFile file, string route)
@@ -33,7 +33,7 @@ namespace TrackX.Application.Services
             var scheme = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? _httpContextAccessor.HttpContext?.Request.Scheme;
             var host = _httpContextAccessor.HttpContext!.Request.Host;
 
-            return await _fileStorageLocal.EditFile(container, file, route, webRootPath, scheme, host.Value);
+            return await _fileStorageLocal.EditFile(container, file, route, webRootPath, scheme!, host.Value);
         }
 
         public async Task RemoveFile(string route, string container)

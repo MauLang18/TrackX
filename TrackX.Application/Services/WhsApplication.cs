@@ -135,7 +135,7 @@ namespace TrackX.Application.Services
                     .AsQueryable();
 
 
-                WHS = WHS.Where(x => x.POL!.Contains(whs) && x.Cliente.Equals(cliente));
+                WHS = WHS.Where(x => x.POL!.Contains(whs) && x.Cliente!.Equals(cliente));
 
                 if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {

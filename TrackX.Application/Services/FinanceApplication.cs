@@ -115,7 +115,7 @@ namespace TrackX.Application.Services
                     .AsQueryable();
 
 
-                Finance = Finance.Where(x => x.Cliente.Equals(cliente));
+                Finance = Finance.Where(x => x.Cliente!.Equals(cliente));
 
                 if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
