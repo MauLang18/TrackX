@@ -13,6 +13,7 @@ namespace TrackX.Domain.Entities
     {
         [JsonProperty("@odata.etag")]
         public object? odataetag { get; set; }
+        public object? _transactioncurrencyid_value { get; set; }
         public object? new_financiamiento { get; set; }
         public object? paymenttermscode { get; set; }
         public object? new_3 { get; set; }

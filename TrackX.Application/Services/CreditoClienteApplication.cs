@@ -40,7 +40,7 @@ namespace TrackX.Application.Services
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     string entityName = "accounts";
 
-                    HttpResponseMessage httpResponseMessaje = await httpClient.GetAsync($"api/data/v9.2/{entityName}?$select=new_financiamiento,paymenttermscode,new_3,new_creditonoincluye,new_diasdecredito,new_fechadeiniciodecredito,new_fechaderenovaciondecredito,new_intersmoratoriomensual,creditlimit,new_tipodeproveedor&$filter=accountid eq {code}");
+                    HttpResponseMessage httpResponseMessaje = await httpClient.GetAsync($"api/data/v9.2/{entityName}?$select=_transactioncurrencyid_value,new_financiamiento,paymenttermscode,new_3,new_creditonoincluye,new_diasdecredito,new_fechadeiniciodecredito,new_fechaderenovaciondecredito,new_intersmoratoriomensual,creditlimit,new_tipodeproveedor&$filter=accountid eq {code}");
                     httpResponseMessaje.EnsureSuccessStatusCode();
 
                     if (httpResponseMessaje.IsSuccessStatusCode)
