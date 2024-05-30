@@ -29,7 +29,7 @@
                 ("# CONTENEDOR", "new_contenedor"),
                 ("# FACTURA", "new_factura"),
                 ("BCF", "new_bcf"),
-                ("PO", "new_PO"),
+                ("PO", "new_po"),
                 ("ORIGEN", "new_origen"),
                 ("POL", "new_pol"),
                 ("ETD", "new_etd1"),

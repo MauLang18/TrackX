@@ -22,7 +22,7 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ListItinerarios([FromQuery] BaseFiltersRequest filters)
+        public async Task<IActionResult> ListItinerarios([FromQuery] BaseFiltersItinerarioRequest filters)
         {
             var response = await _itinerarioApplication.ListItinerarios(filters);
 

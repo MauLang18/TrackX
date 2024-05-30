@@ -7,7 +7,7 @@ namespace TrackX.Application.Interfaces
 {
     public interface IItinerarioApplication
     {
-        Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersRequest filters);
+        Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersItinerarioRequest filters);
         Task<BaseResponse<ItinerarioByIdResponseDto>> ItinerarioById(int id);
         Task<BaseResponse<bool>> RegisterItinerario(ItinerarioRequestDto requestDto);
         Task<BaseResponse<bool>> EditItinerario(int id, ItinerarioRequestDto requestDto);

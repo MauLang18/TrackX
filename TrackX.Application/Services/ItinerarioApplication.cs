@@ -28,7 +28,7 @@ namespace TrackX.Application.Services
             _fileStorage = fileStorage;
         }
 
-        public async Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersItinerarioRequest filters)
         {
             var response = new BaseResponse<IEnumerable<ItinerarioResponseDto>>();
             try
@@ -42,18 +42,38 @@ namespace TrackX.Application.Services
                     switch (filters.NumFilter)
                     {
                         case 1:
-                            itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.TextFilter));
+                            itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.PolFilter!));
                             break;
                         case 2:
-                            itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.TextFilter));
+                            itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.PoeFilter!));
                             break;
                         case 3:
-                            itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TextFilter));
+                            itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.ModalidadFilter!));
                             break;
                         case 4:
-                            itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.TextFilter));
+                            itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TransporteFilter!));
                             break;
                     }
+                }
+
+                if (!string.IsNullOrEmpty(filters.PolFilter))
+                {
+                    itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.PolFilter));
+                }
+
+                if (!string.IsNullOrEmpty(filters.PoeFilter))
+                {
+                    itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.PoeFilter));
+                }
+
+                if (!string.IsNullOrEmpty(filters.ModalidadFilter))
+                {
+                    itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.ModalidadFilter));
+                }
+
+                if (!string.IsNullOrEmpty(filters.TransporteFilter))
+                {
+                    itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TransporteFilter));
                 }
 
                 if (filters.StateFilter is not null)
