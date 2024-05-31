@@ -17,7 +17,7 @@ var Cors = "Cors";
 builder.Services.AddInjectionInfrastructure(Configuration);
 builder.Services.AddInjectionApplication(Configuration);
 builder.Services.AddAuthentication(Configuration);
-builder.Services.AddHealthCheck(builder.Configuration);
+builder.Services.AddHealthCheck(Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

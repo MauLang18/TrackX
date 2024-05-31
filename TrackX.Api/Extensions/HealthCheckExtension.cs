@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace TrackX.Api.Extensions
 {
-    public static class HealtCheckExtension
+    public static class HealthCheckExtension
     {
         public static IServiceCollection AddHealthCheck(this IServiceCollection services, IConfiguration configuration)
         {
