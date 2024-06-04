@@ -13,13 +13,13 @@ namespace TrackX.Api.Extensions
             {
                 Title = "TrackX",
                 Version = "v1",
-                Description = "Tracking API 2023",
+                Description = "Tracking API 2024",
                 TermsOfService = new Uri("https://opensource.org/licenses/"),
                 Contact = new OpenApiContact
                 {
                     Name = "CustomCodeCR",
                     Email = "customcodecr@gmail.com",
-                    Url = new Uri("https://customcode-2c2f5.web.app/")
+                    Url = new Uri("https://customcodecr.com")
                 },
                 License = new OpenApiLicense
                 {

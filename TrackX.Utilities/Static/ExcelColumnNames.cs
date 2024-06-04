@@ -52,7 +52,7 @@
                 ("SHIPPER", "_new_shipper_value"),
                 ("COMMODITY", "new_commodity"),
                 ("TARIFA","new_ofertatarifaid"),
-                ("PROYECCION DE INGRESO", "new_montocostoestimado"),
+                ("PROYECCION DE INGRESO", "new_proyecciondeingreso"),
                 ("FACTURAS CF", "new_new_facturacompaia")
             };
 
