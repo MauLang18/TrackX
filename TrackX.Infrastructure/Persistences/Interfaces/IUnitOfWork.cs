@@ -14,6 +14,7 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         IGenericRepository<TbWhs> Whs { get; }
         IGenericRepository<TbFinance> Finance { get; }
         IGenericRepository<TbExoneracion> Exoneracion { get; }
+        IGenericRepository<TbLogs> Logs { get; }
 
         void SaveChanges();
         Task SaveChangesAsync();

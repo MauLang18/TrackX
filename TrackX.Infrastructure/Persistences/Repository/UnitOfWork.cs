@@ -16,6 +16,7 @@ namespace TrackX.Infrastructure.Persistences.Repository
         private IGenericRepository<TbWhs> _whs = null!;
         private IGenericRepository<TbFinance> _finance = null!;
         private IGenericRepository<TbExoneracion> _exoneracion = null!;
+        private IGenericRepository<TbLogs> _logs = null!;
 
         public UnitOfWork(DbCfContext context, IConfiguration configuration)
         {
@@ -37,6 +38,8 @@ namespace TrackX.Infrastructure.Persistences.Repository
         public IGenericRepository<TbFinance> Finance => _finance ?? new GenericRepository<TbFinance>(_context);
 
         public IGenericRepository<TbExoneracion> Exoneracion => _exoneracion ?? new GenericRepository<TbExoneracion>(_context);
+
+        public IGenericRepository<TbLogs> Logs => _logs ?? new GenericRepository<TbLogs>(_context);
 
         public void Dispose()
         {

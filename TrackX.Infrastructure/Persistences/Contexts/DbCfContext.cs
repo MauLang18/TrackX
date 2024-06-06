@@ -31,6 +31,8 @@ public partial class DbCfContext : DbContext
 
     public virtual DbSet<TbRol> TbRols { get; set; }
 
+    public virtual DbSet<TbLogs> TbLogs { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasAnnotation("Relational.Collaction", "Modern_Spanish_CI_AS");
