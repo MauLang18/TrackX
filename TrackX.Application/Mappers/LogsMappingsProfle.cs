@@ -11,7 +11,7 @@ namespace TrackX.Application.Mappers
         public LogsMappingsProfle()
         {
             CreateMap<TbLogs, LogsResponseDto>()
-                .ForMember(x => x.EstadoLogs, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
+                .ForMember(x => x.EstadoLogs, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Exito" : "Error"))
                 .ReverseMap();
             CreateMap<TbLogs, LogsByIdResponseDto>()
                 .ReverseMap();
