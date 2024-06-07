@@ -222,5 +222,23 @@
             return columnsProperties;
         }
         #endregion
+
+        #region ColumnsLogs
+        public static List<(string ColumnName, string PropertyName)> GetColumnsLogs()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("USUARIO", "Usuario"),
+                ("MODULO", "MODULO"),
+                ("ACCION", "TipoMetodo"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoLogs"),
+                ("PARAMETROS", "Parametros"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
     }
 }

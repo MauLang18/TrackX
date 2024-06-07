@@ -27,7 +27,7 @@ namespace TrackX.Api.Controllers
 
             if ((bool)filters.Download!)
             {
-                var columnNames = ExcelColumnNames.GetColumnsItinerarios();
+                var columnNames = ExcelColumnNames.GetColumnsLogs();
                 var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
