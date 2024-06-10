@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Commons.Bases.Response;
@@ -64,12 +65,7 @@ namespace TrackX.Application.Services
                             WHS = WHS.Where(x => x.TipoRegistro!.Contains(filters.TextFilter));
                             break;
                         case 7:
-                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
-
-                            foreach (var datos in resp.Result.Data!.value!)
-                            {
-                                WHS = WHS.Where(x => x.Cliente!.Contains(datos.accountid!));
-                            }
+                            WHS = WHS.Where(x => x.NombreCliente!.Contains(filters.TextFilter));
                             break;
                     }
                 }
@@ -90,25 +86,6 @@ namespace TrackX.Application.Services
 
                 var items = await _orderingQuery
                     .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
-
-                foreach (var item in items!)
-                {
-                    string shipperValue = item.Cliente!;
-
-                    if (shipperValue is not null)
-                    {
-                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
-
-                        foreach (var datos in nuevoValorCliente.Data!.value!)
-                        {
-                            item.NombreCliente = datos.name;
-                        }
-                    }
-                    else
-                    {
-                        item.NombreCliente = "";
-                    }
-                }
 
                 response.IsSuccess = true;
                 response.TotalRecords = await WHS.CountAsync();
@@ -163,25 +140,6 @@ namespace TrackX.Application.Services
 
                 var items = await _orderingQuery
                     .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
-
-                foreach (var item in items!)
-                {
-                    string shipperValue = item.Cliente!;
-
-                    if (shipperValue is not null)
-                    {
-                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
-
-                        foreach (var datos in nuevoValorCliente.Data!.value!)
-                        {
-                            item.NombreCliente = datos.name;
-                        }
-                    }
-                    else
-                    {
-                        item.NombreCliente = "";
-                    }
-                }
 
                 response.IsSuccess = true;
                 response.TotalRecords = await WHS.CountAsync();
@@ -254,6 +212,13 @@ namespace TrackX.Application.Services
 
                 if (requestDto.Imagen5 is not null)
                     Whs.Imagen5 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen5);
+
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Whs.NombreCliente = datos.name;
+                }
 
                 response.Data = await _unitOfWork.Whs.RegisterAsync(Whs);
                 if (response.Data)
@@ -342,6 +307,13 @@ namespace TrackX.Application.Services
 
                 if (requestDto.Imagen5 is null)
                     Whs.Imagen5 = WhsEdit.Data!.Imagen5!;
+
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Whs.NombreCliente = datos.name;
+                }
 
                 response.Data = await _unitOfWork.Whs.EditAsync(Whs);
 

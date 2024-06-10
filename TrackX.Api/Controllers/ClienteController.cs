@@ -17,9 +17,17 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ListEmpleos(string name)
+        public async Task<IActionResult> ListClientesName(string name)
         {
             var response = await _clienteApplication.CodeCliente(name);
+
+            return Ok(response);
+        }
+
+        [HttpGet("Code")]
+        public async Task<IActionResult> ListClientesCode(string code)
+        {
+            var response = await _clienteApplication.NombreCliente(code);
 
             return Ok(response);
         }

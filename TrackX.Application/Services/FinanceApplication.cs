@@ -44,12 +44,7 @@ namespace TrackX.Application.Services
                     switch (filters.NumFilter)
                     {
                         case 1:
-                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
-
-                            foreach (var datos in resp.Result.Data!.value!)
-                            {
-                                Finance = Finance.Where(x => x.Cliente!.Contains(datos.accountid!));
-                            }
+                            Finance = Finance.Where(x => x.NombreCliente!.Contains(filters.TextFilter!));
                             break;
                     }
                 }
@@ -70,25 +65,6 @@ namespace TrackX.Application.Services
 
                 var items = await _orderingQuery
                     .Ordering(filters, Finance, !(bool)filters.Download!).ToListAsync();
-
-                foreach (var item in items!)
-                {
-                    string shipperValue = item.Cliente!;
-
-                    if (shipperValue is not null)
-                    {
-                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
-
-                        foreach (var datos in nuevoValorCliente.Data!.value!)
-                        {
-                            item.NombreCliente = datos.name;
-                        }
-                    }
-                    else
-                    {
-                        item.NombreCliente = "";
-                    }
-                }
 
                 response.IsSuccess = true;
                 response.TotalRecords = await Finance.CountAsync();
@@ -137,25 +113,6 @@ namespace TrackX.Application.Services
 
                 var items = await _orderingQuery
                     .Ordering(filters, Finance, !(bool)filters.Download!).ToListAsync();
-
-                foreach (var item in items!)
-                {
-                    string shipperValue = item.Cliente!;
-
-                    if (shipperValue is not null)
-                    {
-                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
-
-                        foreach (var datos in nuevoValorCliente.Data!.value!)
-                        {
-                            item.NombreCliente = datos.name;
-                        }
-                    }
-                    else
-                    {
-                        item.NombreCliente = "";
-                    }
-                }
 
                 response.IsSuccess = true;
                 response.TotalRecords = await Finance.CountAsync();
@@ -211,6 +168,13 @@ namespace TrackX.Application.Services
                 if (requestDto.EstadoCuenta is not null)
                     Finance.EstadoCuenta = await _fileStorage.SaveFile(AzureContainers.FINANCES, requestDto.EstadoCuenta);
 
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Finance.NombreCliente = datos.name;
+                }
+
                 response.Data = await _unitOfWork.Finance.RegisterAsync(Finance);
                 if (response.Data)
                 {
@@ -256,6 +220,13 @@ namespace TrackX.Application.Services
 
                 if (requestDto.EstadoCuenta is null)
                     Finance.EstadoCuenta = FinanceEdit.Data!.EstadoCuenta!;
+
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Finance.NombreCliente = datos.name;
+                }
 
                 response.Data = await _unitOfWork.Finance.EditAsync(Finance);
 

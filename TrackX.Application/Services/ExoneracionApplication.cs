@@ -62,12 +62,7 @@ namespace TrackX.Application.Services
                             Exoneracion = Exoneracion.Where(x => x.TipoExoneracion!.Contains(filters.TextFilter));
                             break;
                         case 7:
-                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
-
-                            foreach (var datos in resp.Result.Data!.value!)
-                            {
-                                Exoneracion = Exoneracion.Where(x => x.Cliente!.Contains(datos.accountid!));
-                            }
+                            Exoneracion = Exoneracion.Where(x => x.NombreCliente!.Contains(filters.TextFilter!));
                             break;
 
                     }
@@ -89,25 +84,6 @@ namespace TrackX.Application.Services
 
                 var items = await _orderingQuery
                     .Ordering(filters, Exoneracion, !(bool)filters.Download!).ToListAsync();
-
-                foreach (var item in items!)
-                {
-                    string shipperValue = item.Cliente!;
-
-                    if (shipperValue is not null)
-                    {
-                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
-
-                        foreach (var datos in nuevoValorCliente.Data!.value!)
-                        {
-                            item.NombreCliente = datos.name;
-                        }
-                    }
-                    else
-                    {
-                        item.NombreCliente = "";
-                    }
-                }
 
                 response.IsSuccess = true;
                 response.TotalRecords = await Exoneracion.CountAsync();
@@ -162,25 +138,6 @@ namespace TrackX.Application.Services
 
                 var items = await _orderingQuery
                     .Ordering(filters, Exoneracion, !(bool)filters.Download!).ToListAsync();
-
-                foreach (var item in items!)
-                {
-                    string shipperValue = item.Cliente!;
-
-                    if (shipperValue is not null)
-                    {
-                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
-
-                        foreach (var datos in nuevoValorCliente.Data!.value!)
-                        {
-                            item.NombreCliente = datos.name;
-                        }
-                    }
-                    else
-                    {
-                        item.NombreCliente = "";
-                    }
-                }
 
                 response.IsSuccess = true;
                 response.TotalRecords = await Exoneracion.CountAsync();
@@ -239,6 +196,13 @@ namespace TrackX.Application.Services
                 if (requestDto.Autorizacion is not null)
                     Exoneracion.Autorizacion = await _fileStorage.SaveFile(AzureContainers.EXONERACIONES, requestDto.Autorizacion);
 
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Exoneracion.NombreCliente = datos.name;
+                }
+
                 response.Data = await _unitOfWork.Exoneracion.RegisterAsync(Exoneracion);
                 if (response.Data)
                 {
@@ -291,6 +255,13 @@ namespace TrackX.Application.Services
 
                 if (requestDto.Autorizacion is null)
                     Exoneracion.Autorizacion = ExoneracionEdit.Data!.Autorizacion!;
+
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Exoneracion.NombreCliente = datos.name;
+                }
 
                 response.Data = await _unitOfWork.Exoneracion.EditAsync(Exoneracion);
 
