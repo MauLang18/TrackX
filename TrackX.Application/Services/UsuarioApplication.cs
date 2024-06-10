@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Commons.Ordering;
@@ -50,12 +51,7 @@ namespace TrackX.Application.Services
                             usuarios = usuarios.Where(x => x.Correo!.Contains(filters.TextFilter));
                             break;
                         case 2:
-                            var resp = _clienteApplication.CodeCliente(filters.TextFilter!);
-
-                            foreach (var datos in resp.Result.Data!.value!)
-                            {
-                                usuarios = usuarios.Where(x => x.Cliente!.Contains(datos.accountid!));
-                            }
+                            usuarios = usuarios.Where(x => x.NombreEmpresa!.Contains(filters.TextFilter));
                             break;
                     }
                 }
@@ -109,24 +105,7 @@ namespace TrackX.Application.Services
                     return response;
                 }
 
-                foreach (var item in usuarios!)
-                {
-                    string shipperValue = item.Cliente!;
-
-                    if (shipperValue is not null)
-                    {
-                        var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValue);
-
-                        foreach (var items in nuevoValorCliente.Data!.value!)
-                        {
-                            item.NombreCliente = items.name;
-                        }
-                    }
-                    else
-                    {
-                        item.NombreCliente = "";
-                    }
-                }
+                usuarios = usuarios.Where(x => !string.IsNullOrEmpty(x.NombreEmpresa) && x.NombreEmpresa != "CustomCodeCR");
 
                 response.IsSuccess = true;
                 response.Data = _mapper.Map<IEnumerable<SelectResponse>>(usuarios);

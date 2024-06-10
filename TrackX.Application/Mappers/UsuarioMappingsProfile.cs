@@ -16,7 +16,7 @@ namespace TrackX.Application.Mappers
                 .ForMember(x => x.EstadoUsuario, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
                 .ReverseMap();
             CreateMap<TbUsuario, SelectResponse>()
-                .ForMember(x => x.Description, x => x.MapFrom(y => y.NombreCliente))
+                .ForMember(x => x.Description, x => x.MapFrom(y => y.NombreEmpresa))
                 .ForMember(x => x.Id, x => x.MapFrom(y => y.Cliente))
                 .ReverseMap();
             CreateMap<UsuarioRequestDto, TbUsuario>()
