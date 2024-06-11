@@ -230,7 +230,7 @@
             {
                 ("ID", "Id"),
                 ("USUARIO", "Usuario"),
-                ("MODULO", "MODULO"),
+                ("MODULO", "Modulo"),
                 ("ACCION", "TipoMetodo"),
                 ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
                 ("ESTADO", "EstadoLogs"),
