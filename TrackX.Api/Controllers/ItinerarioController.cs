@@ -57,6 +57,14 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
+        [HttpPut("State/{id:int}")]
+        public async Task<IActionResult> EditStateItinerario(int id)
+        {
+            var response = await _itinerarioApplication.EditStateItinerario(id);
+
+            return Ok(response);
+        }
+
         [HttpPut("Remove/{id:int}")]
         public async Task<IActionResult> RemoveItinerario(int id)
         {

@@ -11,6 +11,7 @@ namespace TrackX.Application.Interfaces
         Task<BaseResponse<ItinerarioByIdResponseDto>> ItinerarioById(int id);
         Task<BaseResponse<bool>> RegisterItinerario(ItinerarioRequestDto requestDto);
         Task<BaseResponse<bool>> EditItinerario(int id, ItinerarioRequestDto requestDto);
+        Task<BaseResponse<bool>> EditStateItinerario(int id);
         Task<BaseResponse<bool>> RemoveItinerario(int id);
     }
 }

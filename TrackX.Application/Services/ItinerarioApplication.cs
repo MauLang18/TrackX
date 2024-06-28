@@ -42,16 +42,16 @@ namespace TrackX.Application.Services
                     switch (filters.NumFilter)
                     {
                         case 1:
-                            itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.PolFilter!));
+                            itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.TextFilter!));
                             break;
                         case 2:
-                            itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.PoeFilter!));
+                            itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.TextFilter!));
                             break;
                         case 3:
-                            itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.ModalidadFilter!));
+                            itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.TextFilter!));
                             break;
                         case 4:
-                            itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TransporteFilter!));
+                            itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TextFilter!));
                             break;
                     }
                 }
@@ -202,6 +202,52 @@ namespace TrackX.Application.Services
 
                 if (requestDto.Destino is null)
                     itinerario.Destino = itinerarioEdit.Data!.Destino;
+
+                response.Data = await _unitOfWork.Itinerario.EditAsync(itinerario);
+
+                if (response.Data)
+                {
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_UPDATE;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_FAILED;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<bool>> EditStateItinerario(int id)
+        {
+            var response = new BaseResponse<bool>();
+            try
+            {
+                var itinerarioEdit = await ItinerarioById(id);
+
+                if (itinerarioEdit.Data is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
+
+                var itinerario = _mapper.Map<TbItinerario>(itinerarioEdit.Data);
+                itinerario.Id = id;
+
+                itinerario.Estado =
+                    itinerarioEdit.Data.Estado ==
+                    (int)StateTypes.Inactivo
+                    ? (int)StateTypes.Activo
+                    : (int)StateTypes.Inactivo;
 
                 response.Data = await _unitOfWork.Itinerario.EditAsync(itinerario);
 
