@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Commons.Ordering;
-using TrackX.Application.Dtos.Itinerario.Request;
-using TrackX.Application.Dtos.Itinerario.Response;
+using TrackX.Application.Commons.Select;
+using TrackX.Application.Dtos.Destino.Request;
+using TrackX.Application.Dtos.Destino.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
 using TrackX.Infrastructure.Persistences.Interfaces;
@@ -13,25 +14,27 @@ using WatchDog;
 
 namespace TrackX.Application.Services
 {
-    public class ItinerarioApplication : IItinerarioApplication
+    public class DestinoApplication : IDestinoApplication
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IOrderingQuery _orderingQuery;
+        private readonly IFileStorageLocalApplication _fileStorage;
 
-        public ItinerarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
+        public DestinoApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _orderingQuery = orderingQuery;
+            _fileStorage = fileStorage;
         }
 
-        public async Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersItinerarioRequest filters)
+        public async Task<BaseResponse<IEnumerable<DestinoResponseDto>>> ListDestinos(BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<IEnumerable<ItinerarioResponseDto>>();
+            var response = new BaseResponse<IEnumerable<DestinoResponseDto>>();
             try
             {
-                var itinerarios = _unitOfWork.Itinerario
+                var destinos = _unitOfWork.Destino
                     .GetAllQueryable()
                     .AsQueryable();
 
@@ -40,48 +43,19 @@ namespace TrackX.Application.Services
                     switch (filters.NumFilter)
                     {
                         case 1:
-                            itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.TextFilter!));
-                            break;
-                        case 2:
-                            itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.TextFilter!));
-                            break;
-                        case 3:
-                            itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.TextFilter!));
-                            break;
-                        case 4:
-                            itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TextFilter!));
+                            destinos = destinos.Where(x => x.Nombre!.Contains(filters.TextFilter));
                             break;
                     }
                 }
 
-                if (!string.IsNullOrEmpty(filters.PolFilter))
-                {
-                    itinerarios = itinerarios.Where(x => x.POL!.Contains(filters.PolFilter));
-                }
-
-                if (!string.IsNullOrEmpty(filters.PoeFilter))
-                {
-                    itinerarios = itinerarios.Where(x => x.POD!.Contains(filters.PoeFilter));
-                }
-
-                if (!string.IsNullOrEmpty(filters.ModalidadFilter))
-                {
-                    itinerarios = itinerarios.Where(x => x.Modalidad!.Contains(filters.ModalidadFilter));
-                }
-
-                if (!string.IsNullOrEmpty(filters.TransporteFilter))
-                {
-                    itinerarios = itinerarios.Where(x => x.Transporte!.Contains(filters.TransporteFilter));
-                }
-
                 if (filters.StateFilter is not null)
                 {
-                    itinerarios = itinerarios.Where(x => x.Estado.Equals(filters.StateFilter));
+                    destinos = destinos.Where(x => x.Estado.Equals(filters.StateFilter));
                 }
 
                 if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
                 {
-                    itinerarios = itinerarios.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                    destinos = destinos.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
                         && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
                         .AddDays(1));
                 }
@@ -89,11 +63,11 @@ namespace TrackX.Application.Services
                 filters.Sort ??= "Id";
 
                 var items = await _orderingQuery
-                    .Ordering(filters, itinerarios, !(bool)filters.Download!).ToListAsync();
+                    .Ordering(filters, destinos, !(bool)filters.Download!).ToListAsync();
 
                 response.IsSuccess = true;
-                response.TotalRecords = await itinerarios.CountAsync();
-                response.Data = _mapper.Map<IEnumerable<ItinerarioResponseDto>>(items);
+                response.TotalRecords = await destinos.CountAsync();
+                response.Data = _mapper.Map<IEnumerable<DestinoResponseDto>>(items);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
@@ -106,17 +80,48 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<ItinerarioByIdResponseDto>> ItinerarioById(int id)
+        public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectDestino()
         {
-            var response = new BaseResponse<ItinerarioByIdResponseDto>();
+            var response = new BaseResponse<IEnumerable<SelectResponse>>();
+
             try
             {
-                var itinerario = await _unitOfWork.Itinerario.GetByIdAsync(id);
+                var destinos = await _unitOfWork.Destino.GetSelectAsync();
 
-                if (itinerario is not null)
+                destinos = destinos.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+
+                if (destinos is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
+
+                response.IsSuccess = true;
+                response.Data = _mapper.Map<IEnumerable<SelectResponse>>(destinos);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<DestinoResponseDto>> DestinoById(int id)
+        {
+            var response = new BaseResponse<DestinoResponseDto>();
+            try
+            {
+                var destino = await _unitOfWork.Destino.GetByIdAsync(id);
+
+                if (destino is not null)
                 {
                     response.IsSuccess = true;
-                    response.Data = _mapper.Map<ItinerarioByIdResponseDto>(itinerario);
+                    response.Data = _mapper.Map<DestinoResponseDto>(destino);
                     response.Message = ReplyMessage.MESSAGE_QUERY;
                 }
                 else
@@ -135,14 +140,17 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RegisterItinerario(ItinerarioRequestDto requestDto)
+        public async Task<BaseResponse<bool>> RegisterDestino(DestinoRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
             try
             {
-                var itinerario = _mapper.Map<TbItinerario>(requestDto);
+                var destino = _mapper.Map<TbDestino>(requestDto);
 
-                response.Data = await _unitOfWork.Itinerario.RegisterAsync(itinerario);
+                if (requestDto.Imagen is not null)
+                    destino.Imagen = await _fileStorage.SaveFile(AzureContainers.DESTINO, requestDto.Imagen);
+
+                response.Data = await _unitOfWork.Destino.RegisterAsync(destino);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -164,24 +172,31 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditItinerario(int id, ItinerarioRequestDto requestDto)
+        public async Task<BaseResponse<bool>> EditDestino(int id, DestinoRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
             try
             {
-                var itinerarioEdit = await ItinerarioById(id);
+                var destinoEdit = await DestinoById(id);
 
-                if (itinerarioEdit.Data is null)
+                if (destinoEdit.Data is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
 
-                var itinerario = _mapper.Map<TbItinerario>(requestDto);
-                itinerario.Id = id;
+                var destino = _mapper.Map<TbDestino>(requestDto);
+                destino.Id = id;
 
-                response.Data = await _unitOfWork.Itinerario.EditAsync(itinerario);
+                if (requestDto.Imagen is not null)
+                    destino.Imagen = await _fileStorage
+                        .EditFile(AzureContainers.DESTINO, requestDto.Imagen, destinoEdit.Data!.Imagen!);
+
+                if (requestDto.Imagen is null)
+                    destino.Imagen = destinoEdit.Data!.Imagen;
+
+                response.Data = await _unitOfWork.Destino.EditAsync(destino);
 
                 if (response.Data)
                 {
@@ -204,67 +219,23 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditStateItinerario(int id)
+        public async Task<BaseResponse<bool>> RemoveDestino(int id)
         {
             var response = new BaseResponse<bool>();
             try
             {
-                var itinerarioEdit = await ItinerarioById(id);
+                var destino = await DestinoById(id);
 
-                if (itinerarioEdit.Data is null)
+                if (destino.Data is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
 
-                var itinerario = _mapper.Map<TbItinerario>(itinerarioEdit.Data);
-                itinerario.Id = id;
+                response.Data = await _unitOfWork.Destino.RemoveAsync(id);
 
-                itinerario.Estado =
-                    itinerarioEdit.Data.Estado ==
-                    (int)StateTypes.Inactivo
-                    ? (int)StateTypes.Activo
-                    : (int)StateTypes.Inactivo;
-
-                response.Data = await _unitOfWork.Itinerario.EditAsync(itinerario);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_UPDATE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
-            }
-
-            return response;
-        }
-
-        public async Task<BaseResponse<bool>> RemoveItinerario(int id)
-        {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var itinerario = await ItinerarioById(id);
-
-                if (itinerario.Data is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
-                response.Data = await _unitOfWork.Itinerario.RemoveAsync(id);
+                await _fileStorage.RemoveFile(destino.Data!.Imagen!, AzureContainers.DESTINO);
 
                 if (response.Data)
                 {

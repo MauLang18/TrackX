@@ -9,5 +9,7 @@
         public const string WHS = "whs";
         public const string FINANCES = "finances";
         public const string EXONERACIONES = "exoneraciones";
+        public const string ORIGEN = "origen";
+        public const string DESTINO = "destino";
     }
 }

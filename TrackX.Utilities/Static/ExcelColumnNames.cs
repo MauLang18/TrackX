@@ -186,7 +186,7 @@
                 ("ID INTERNO", "Idtra"),
                 ("CLIENTE", "NombreCliente"),
                 ("TIPO EXONERACION", "TipoExoneracion"),
-                ("STATUS", "StatusExoneracion"),  
+                ("STATUS", "StatusExoneracion"),
                 ("PRODUCTO","Producto"),
                 ("CATEGORIA","Categoria"),
                 ("CLASIFICACION ARANCELARIA","ClasificacionArancelaria"),
@@ -235,6 +235,69 @@
                 ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
                 ("ESTADO", "EstadoLogs"),
                 ("PARAMETROS", "Parametros"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsOrigen
+        public static List<(string ColumnName, string PropertyName)> GetColumnsOrigen()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("PAIS", "Nombre"),
+                ("IMAGEN", "Imagen"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoOrigen"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsDestino
+        public static List<(string ColumnName, string PropertyName)> GetColumnsDestino()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("PAIS", "Nombre"),
+                ("IMAGEN", "Imagen"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoOrigen"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsPol
+        public static List<(string ColumnName, string PropertyName)> GetColumnsPol()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("POL", "Nombre"),
+                ("WHS","EstadoWHS"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoPol"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsPod
+        public static List<(string ColumnName, string PropertyName)> GetColumnsPod()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("POD", "Nombre"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoPod"),
             };
 
             return columnsProperties;

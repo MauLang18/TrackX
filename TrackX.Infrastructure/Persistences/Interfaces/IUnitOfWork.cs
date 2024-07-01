@@ -7,7 +7,7 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         //Declaracion o matricula de nuestra interfaces a nivel de repository
 
         IUsuarioRepository Usuario { get; }
-        IGenericRepository<TbRol> Rol {  get; }
+        IGenericRepository<TbRol> Rol { get; }
         IGenericRepository<TbEmpleo> Empleo { get; }
         IGenericRepository<TbItinerario> Itinerario { get; }
         IGenericRepository<TbNoticia> Noticia { get; }
@@ -15,6 +15,10 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         IGenericRepository<TbFinance> Finance { get; }
         IGenericRepository<TbExoneracion> Exoneracion { get; }
         IGenericRepository<TbLogs> Logs { get; }
+        IGenericRepository<TbOrigen> Origen { get; }
+        IGenericRepository<TbPol> Pol { get; }
+        IGenericRepository<TbDestino> Destino { get; }
+        IGenericRepository<TbPod> Pod { get; }
 
         void SaveChanges();
         Task SaveChangesAsync();

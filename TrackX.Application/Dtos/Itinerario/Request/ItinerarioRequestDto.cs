@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace TrackX.Application.Dtos.Itinerario.Request
+﻿namespace TrackX.Application.Dtos.Itinerario.Request
 {
     public class ItinerarioRequestDto
     {
@@ -13,8 +11,8 @@ namespace TrackX.Application.Dtos.Itinerario.Request
         public string? Carrier { get; set; }
         public string? Vessel { get; set; }
         public string? Voyage { get; set; }
-        public IFormFile? Origen { get; set; }
-        public IFormFile? Destino { get; set; }
+        public string? Origen { get; set; }
+        public string? Destino { get; set; }
         public string? Transporte { get; set; }
         public string? Modalidad { get; set; }
         public int Estado { get; set; }
