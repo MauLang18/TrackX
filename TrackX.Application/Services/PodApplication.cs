@@ -4,8 +4,8 @@ using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Commons.Ordering;
 using TrackX.Application.Commons.Select;
-using TrackX.Application.Dtos.Origen.Request;
-using TrackX.Application.Dtos.Origen.Response;
+using TrackX.Application.Dtos.Pod.Request;
+using TrackX.Application.Dtos.Pod.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
 using TrackX.Infrastructure.Persistences.Interfaces;
@@ -14,27 +14,25 @@ using WatchDog;
 
 namespace TrackX.Application.Services
 {
-    public class OrigenApplication : IOrigenApplication
+    public class PodApplication : IPodApplication
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IOrderingQuery _orderingQuery;
-        private readonly IFileStorageLocalApplication _fileStorage;
 
-        public OrigenApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage)
+        public PodApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _orderingQuery = orderingQuery;
-            _fileStorage = fileStorage;
         }
 
-        public async Task<BaseResponse<IEnumerable<OrigenResponseDto>>> ListOrigenes(BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<PodResponseDto>>> ListPod(BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<IEnumerable<OrigenResponseDto>>();
+            var response = new BaseResponse<IEnumerable<PodResponseDto>>();
             try
             {
-                var origenes = _unitOfWork.Origen
+                var pod = _unitOfWork.Pod
                     .GetAllQueryable()
                     .AsQueryable();
 
@@ -43,19 +41,19 @@ namespace TrackX.Application.Services
                     switch (filters.NumFilter)
                     {
                         case 1:
-                            origenes = origenes.Where(x => x.Nombre!.Contains(filters.TextFilter));
+                            pod = pod.Where(x => x.Nombre!.Contains(filters.TextFilter));
                             break;
                     }
                 }
 
                 if (filters.StateFilter is not null)
                 {
-                    origenes = origenes.Where(x => x.Estado.Equals(filters.StateFilter));
+                    pod = pod.Where(x => x.Estado.Equals(filters.StateFilter));
                 }
 
                 if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
                 {
-                    origenes = origenes.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                    pod = pod.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
                         && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
                         .AddDays(1));
                 }
@@ -63,11 +61,11 @@ namespace TrackX.Application.Services
                 filters.Sort ??= "Id";
 
                 var items = await _orderingQuery
-                    .Ordering(filters, origenes, !(bool)filters.Download!).ToListAsync();
+                    .Ordering(filters, pod, !(bool)filters.Download!).ToListAsync();
 
                 response.IsSuccess = true;
-                response.TotalRecords = await origenes.CountAsync();
-                response.Data = _mapper.Map<IEnumerable<OrigenResponseDto>>(items);
+                response.TotalRecords = await pod.CountAsync();
+                response.Data = _mapper.Map<IEnumerable<PodResponseDto>>(items);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
@@ -80,17 +78,17 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectOrigen()
+        public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectPod()
         {
             var response = new BaseResponse<IEnumerable<SelectResponse>>();
 
             try
             {
-                var origenes = await _unitOfWork.Origen.GetSelectAsync();
+                var pod = await _unitOfWork.Pod.GetSelectAsync();
 
-                origenes = origenes.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+                pod = pod.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
 
-                if (origenes is null)
+                if (pod is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
@@ -98,7 +96,7 @@ namespace TrackX.Application.Services
                 }
 
                 response.IsSuccess = true;
-                response.Data = _mapper.Map<IEnumerable<SelectResponse>>(origenes);
+                response.Data = _mapper.Map<IEnumerable<SelectResponse>>(pod);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
@@ -111,17 +109,17 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<OrigenByIdResponseDto>> OrigenById(int id)
+        public async Task<BaseResponse<PodByIdResponseDto>> PodById(int id)
         {
-            var response = new BaseResponse<OrigenByIdResponseDto>();
+            var response = new BaseResponse<PodByIdResponseDto>();
             try
             {
-                var origen = await _unitOfWork.Origen.GetByIdAsync(id);
+                var pod = await _unitOfWork.Pod.GetByIdAsync(id);
 
-                if (origen is not null)
+                if (pod is not null)
                 {
                     response.IsSuccess = true;
-                    response.Data = _mapper.Map<OrigenByIdResponseDto>(origen);
+                    response.Data = _mapper.Map<PodByIdResponseDto>(pod);
                     response.Message = ReplyMessage.MESSAGE_QUERY;
                 }
                 else
@@ -140,17 +138,14 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RegisterOrigen(OrigenRequestDto requestDto)
+        public async Task<BaseResponse<bool>> RegisterPod(PodRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
             try
             {
-                var origen = _mapper.Map<TbOrigen>(requestDto);
+                var pod = _mapper.Map<TbPod>(requestDto);
 
-                if (requestDto.Imagen is not null)
-                    origen.Imagen = await _fileStorage.SaveFile(AzureContainers.ORIGEN, requestDto.Imagen);
-
-                response.Data = await _unitOfWork.Origen.RegisterAsync(origen);
+                response.Data = await _unitOfWork.Pod.RegisterAsync(pod);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -172,31 +167,24 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditOrigen(int id, OrigenRequestDto requestDto)
+        public async Task<BaseResponse<bool>> EditPod(int id, PodRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
             try
             {
-                var origenEdit = await OrigenById(id);
+                var podEdit = await PodById(id);
 
-                if (origenEdit.Data is null)
+                if (podEdit.Data is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
 
-                var origen = _mapper.Map<TbOrigen>(requestDto);
-                origen.Id = id;
+                var pod = _mapper.Map<TbPod>(requestDto);
+                pod.Id = id;
 
-                if (requestDto.Imagen is not null)
-                    origen.Imagen = await _fileStorage
-                        .EditFile(AzureContainers.ORIGEN, requestDto.Imagen, origenEdit.Data!.Imagen!);
-
-                if (requestDto.Imagen is null)
-                    origen.Imagen = origenEdit.Data!.Imagen;
-
-                response.Data = await _unitOfWork.Origen.EditAsync(origen);
+                response.Data = await _unitOfWork.Pod.EditAsync(pod);
 
                 if (response.Data)
                 {
@@ -219,23 +207,21 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RemoveOrigen(int id)
+        public async Task<BaseResponse<bool>> RemovePod(int id)
         {
             var response = new BaseResponse<bool>();
             try
             {
-                var origen = await OrigenById(id);
+                var pod = await PodById(id);
 
-                if (origen.Data is null)
+                if (pod.Data is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
 
-                response.Data = await _unitOfWork.Origen.RemoveAsync(id);
-
-                await _fileStorage.RemoveFile(origen.Data!.Imagen!, AzureContainers.ORIGEN);
+                response.Data = await _unitOfWork.Pod.RemoveAsync(id);
 
                 if (response.Data)
                 {

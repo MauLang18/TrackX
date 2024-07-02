@@ -59,7 +59,7 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditRol(int id, [FromBody] OrigenRequestDto requestDto)
+        public async Task<IActionResult> EditRol(int id, [FromForm] OrigenRequestDto requestDto)
         {
             var response = await _origenApplication.EditOrigen(id, requestDto);
             return Ok(response);

@@ -10,7 +10,7 @@ namespace TrackX.Application.Interfaces
     {
         Task<BaseResponse<IEnumerable<OrigenResponseDto>>> ListOrigenes(BaseFiltersRequest filters);
         Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectOrigen();
-        Task<BaseResponse<OrigenResponseDto>> OrigenById(int id);
+        Task<BaseResponse<OrigenByIdResponseDto>> OrigenById(int id);
         Task<BaseResponse<bool>> RegisterOrigen(OrigenRequestDto requestDto);
         Task<BaseResponse<bool>> EditOrigen(int id, OrigenRequestDto requestDto);
         Task<BaseResponse<bool>> RemoveOrigen(int id);

@@ -41,6 +41,8 @@ namespace TrackX.Application.Extensions
             services.AddScoped<ILogsApplication, LogsApplication>();
             services.AddScoped<IOrigenApplication, OrigenApplication>();
             services.AddScoped<IDestinoApplication, DestinoApplication>();
+            services.AddScoped<IPolApplication, PolApplication>();
+            services.AddScoped<IPodApplication, PodApplication>();
 
             services.AddScoped<ISendEmailApplication, SendEmailApplication>();
 

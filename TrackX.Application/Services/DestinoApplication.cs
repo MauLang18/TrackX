@@ -111,9 +111,9 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<DestinoResponseDto>> DestinoById(int id)
+        public async Task<BaseResponse<DestinoByIdResponseDto>> DestinoById(int id)
         {
-            var response = new BaseResponse<DestinoResponseDto>();
+            var response = new BaseResponse<DestinoByIdResponseDto>();
             try
             {
                 var destino = await _unitOfWork.Destino.GetByIdAsync(id);
@@ -121,7 +121,7 @@ namespace TrackX.Application.Services
                 if (destino is not null)
                 {
                     response.IsSuccess = true;
-                    response.Data = _mapper.Map<DestinoResponseDto>(destino);
+                    response.Data = _mapper.Map<DestinoByIdResponseDto>(destino);
                     response.Message = ReplyMessage.MESSAGE_QUERY;
                 }
                 else
