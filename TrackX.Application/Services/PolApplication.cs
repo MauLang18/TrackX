@@ -86,7 +86,12 @@ namespace TrackX.Application.Services
             {
                 var pol = await _unitOfWork.Pol.GetSelectAsync();
 
-                pol = pol.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+                pol = pol
+                    .Where(x => !string.IsNullOrEmpty(x.Nombre))
+                    .GroupBy(x => x.Nombre)
+                    .Select(g => g.First())
+                    .OrderBy(x => x.Nombre)
+                    .ToList();
 
                 if (pol is null)
                 {
@@ -127,6 +132,37 @@ namespace TrackX.Application.Services
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                 }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+                WatchLogger.Log(ex.Message);
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<IEnumerable<PolByWhsResponseDto>>> ListSelectPolWhs()
+        {
+            var response = new BaseResponse<IEnumerable<PolByWhsResponseDto>>();
+
+            try
+            {
+                var pol = await _unitOfWork.Pol.GetSelectAsync();
+
+                pol = pol.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+
+                if (pol is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
+
+                response.IsSuccess = true;
+                response.Data = _mapper.Map<IEnumerable<PolByWhsResponseDto>>(pol);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
             }
             catch (Exception ex)
             {

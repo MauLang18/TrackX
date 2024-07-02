@@ -1,13 +1,10 @@
 ﻿namespace TrackX.Application.Dtos.Pol.Response
 {
-    public class PolResponseDto
+    public class PolByWhsResponseDto
     {
         public int Id { get; set; }
         public string? Nombre { get; set; }
         public int WHS { get; set; }
-        public string? EstadoWHS { get; set; }
-        public DateTime FechaCreacionAuditoria { get; set; }
         public int Estado { get; set; }
-        public string? EstadoPol { get; set; }
     }
 }

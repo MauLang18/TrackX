@@ -17,6 +17,8 @@ namespace TrackX.Application.Mappers
                 .ReverseMap();
             CreateMap<TbPol, PolByIdResponseDto>()
                 .ReverseMap();
+            CreateMap<TbPol, PolByWhsResponseDto>()
+                .ReverseMap();
             CreateMap<PolRequestDto, TbPol>()
                 .ReverseMap();
             CreateMap<TbPol, SelectResponse>()

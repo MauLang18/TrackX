@@ -50,6 +50,14 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("Whs")]
+        public async Task<IActionResult> PolByWhs()
+        {
+            var response = await _polApplication.ListSelectPolWhs();
+
+            return Ok(response);
+        }
+
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterPol([FromBody] PolRequestDto requestDto)
         {

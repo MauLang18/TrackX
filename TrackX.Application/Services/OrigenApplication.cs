@@ -88,7 +88,12 @@ namespace TrackX.Application.Services
             {
                 var origenes = await _unitOfWork.Origen.GetSelectAsync();
 
-                origenes = origenes.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+                origenes = origenes
+                    .Where(x => !string.IsNullOrEmpty(x.Nombre))
+                    .GroupBy(x => x.Nombre)
+                    .Select(g => g.First())
+                    .OrderBy(x => x.Nombre)
+                    .ToList();
 
                 if (origenes is null)
                 {

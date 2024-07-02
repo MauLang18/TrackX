@@ -86,7 +86,12 @@ namespace TrackX.Application.Services
             {
                 var pod = await _unitOfWork.Pod.GetSelectAsync();
 
-                pod = pod.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+                pod = pod
+                    .Where(x => !string.IsNullOrEmpty(x.Nombre))
+                    .GroupBy(x => x.Nombre)
+                    .Select(g => g.First())
+                    .OrderBy(x => x.Nombre)
+                    .ToList();
 
                 if (pod is null)
                 {

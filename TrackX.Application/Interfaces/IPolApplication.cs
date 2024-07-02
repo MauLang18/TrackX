@@ -10,6 +10,7 @@ namespace TrackX.Application.Interfaces
     {
         Task<BaseResponse<IEnumerable<PolResponseDto>>> ListPol(BaseFiltersRequest filters);
         Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectPol();
+        Task<BaseResponse<IEnumerable<PolByWhsResponseDto>>> ListSelectPolWhs();
         Task<BaseResponse<PolByIdResponseDto>> PolById(int id);
         Task<BaseResponse<bool>> RegisterPol(PolRequestDto requestDto);
         Task<BaseResponse<bool>> EditPol(int id, PolRequestDto requestDto);

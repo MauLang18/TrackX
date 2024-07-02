@@ -88,7 +88,12 @@ namespace TrackX.Application.Services
             {
                 var destinos = await _unitOfWork.Destino.GetSelectAsync();
 
-                destinos = destinos.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+                destinos = destinos
+                    .Where(x => !string.IsNullOrEmpty(x.Nombre))
+                    .GroupBy(x => x.Nombre)
+                    .Select(g => g.First())
+                    .OrderBy(x => x.Nombre)
+                    .ToList();
 
                 if (destinos is null)
                 {
