@@ -21,6 +21,7 @@ namespace TrackX.Infrastructure.Persistences.Repository
         private IGenericRepository<TbPol> _pol = null!;
         private IGenericRepository<TbDestino> _destino = null!;
         private IGenericRepository<TbPod> _pod = null!;
+        private IGenericRepository<TbControlInventarioWhs> _controlInventario = null!;
 
         public UnitOfWork(DbCfContext context, IConfiguration configuration)
         {
@@ -52,6 +53,8 @@ namespace TrackX.Infrastructure.Persistences.Repository
         public IGenericRepository<TbDestino> Destino => _destino ?? new GenericRepository<TbDestino>(_context);
 
         public IGenericRepository<TbPod> Pod => _pod ?? new GenericRepository<TbPod>(_context);
+
+        public IGenericRepository<TbControlInventarioWhs> ControlInventario => _controlInventario ?? new GenericRepository<TbControlInventarioWhs>(_context);
 
         public void Dispose()
         {

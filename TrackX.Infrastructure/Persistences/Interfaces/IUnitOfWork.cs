@@ -19,6 +19,7 @@ namespace TrackX.Infrastructure.Persistences.Interfaces
         IGenericRepository<TbPol> Pol { get; }
         IGenericRepository<TbDestino> Destino { get; }
         IGenericRepository<TbPod> Pod { get; }
+        IGenericRepository<TbControlInventarioWhs> ControlInventario { get; }
 
         void SaveChanges();
         Task SaveChangesAsync();

@@ -303,5 +303,20 @@
             return columnsProperties;
         }
         #endregion
+
+        #region ColumnsControlInventario
+        public static List<(string ColumnName, string PropertyName)> GetColumnsControlInventario()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("ID", "Id"),
+                ("POD", "Nombre"),
+                ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+                ("ESTADO", "EstadoPod"),
+            };
+
+            return columnsProperties;
+        }
+        #endregion
     }
 }

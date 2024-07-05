@@ -7,7 +7,7 @@ public partial class TbWhs : BaseEntity
     public string? Cliente { get; set; }
 
     public string? TipoRegistro { get; set; }
-        
+
     public string? PO { get; set; }
 
     public string? StatusWHS { get; set; }

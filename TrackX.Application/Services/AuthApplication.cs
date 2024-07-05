@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Google.Apis.Auth;
+﻿using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -152,6 +151,9 @@ namespace TrackX.Application.Services
                 new Claim(JwtRegisteredClaimNames.Acr, usuario.NombreCliente ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Typ, usuario.Paginas ?? ""),
+                new Claim(JwtRegisteredClaimNames.Nonce, usuario.Telefono ?? ""),
+                new Claim(JwtRegisteredClaimNames.Exp, usuario.Direccion ?? ""),
+                new Claim(JwtRegisteredClaimNames.Aud, usuario.Pais ?? ""),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
             };
 
