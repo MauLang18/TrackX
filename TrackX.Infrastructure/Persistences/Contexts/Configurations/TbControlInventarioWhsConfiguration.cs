@@ -13,7 +13,7 @@ namespace TrackX.Infrastructure.Persistences.Contexts.Configurations
 
             builder.Property(e => e.Cliente).IsUnicode(false);
             builder.Property(e => e.NombreCliente).IsUnicode(false);
-            builder.Property(e => e.ControlInventaio).IsUnicode(false);
+            builder.Property(e => e.ControlInventario).IsUnicode(false);
             builder.Property(e => e.Pol).IsUnicode(false);
         }
     }
