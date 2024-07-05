@@ -1,8 +1,7 @@
-﻿namespace TrackX.Application.Commons.Select
+﻿namespace TrackX.Application.Commons.Select;
+
+public class SelectResponse
 {
-    public class SelectResponse
-    {
-        public object? Id { get; set; }
-        public string? Description { get; set; }
-    }
+    public object? Id { get; set; }
+    public string? Description { get; set; }
 }

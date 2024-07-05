@@ -12,272 +12,271 @@ using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
 
-namespace TrackX.Application.Services
+namespace TrackX.Application.Services;
+
+public class PolApplication : IPolApplication
 {
-    public class PolApplication : IPolApplication
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly IOrderingQuery _orderingQuery;
+
+    public PolApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly IOrderingQuery _orderingQuery;
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _orderingQuery = orderingQuery;
+    }
 
-        public PolApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
+    public async Task<BaseResponse<IEnumerable<PolResponseDto>>> ListPol(BaseFiltersRequest filters)
+    {
+        var response = new BaseResponse<IEnumerable<PolResponseDto>>();
+        try
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _orderingQuery = orderingQuery;
+            var pol = _unitOfWork.Pol
+                .GetAllQueryable()
+                .AsQueryable();
+
+            if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
+            {
+                switch (filters.NumFilter)
+                {
+                    case 1:
+                        pol = pol.Where(x => x.Nombre!.Contains(filters.TextFilter));
+                        break;
+                }
+            }
+
+            if (filters.StateFilter is not null)
+            {
+                pol = pol.Where(x => x.Estado.Equals(filters.StateFilter));
+            }
+
+            if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+            {
+                pol = pol.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                    && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                    .AddDays(1));
+            }
+
+            filters.Sort ??= "Id";
+
+            var items = await _orderingQuery
+                .Ordering(filters, pol, !(bool)filters.Download!).ToListAsync();
+
+            response.IsSuccess = true;
+            response.TotalRecords = await pol.CountAsync();
+            response.Data = _mapper.Map<IEnumerable<PolResponseDto>>(items);
+            response.Message = ReplyMessage.MESSAGE_QUERY;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<IEnumerable<PolResponseDto>>> ListPol(BaseFiltersRequest filters)
+        return response;
+    }
+
+    public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectPol()
+    {
+        var response = new BaseResponse<IEnumerable<SelectResponse>>();
+
+        try
         {
-            var response = new BaseResponse<IEnumerable<PolResponseDto>>();
-            try
+            var pol = await _unitOfWork.Pol.GetSelectAsync();
+
+            pol = pol
+                .Where(x => !string.IsNullOrEmpty(x.Nombre))
+                .GroupBy(x => x.Nombre)
+                .Select(g => g.First())
+                .OrderBy(x => x.Nombre)
+                .ToList();
+
+            if (pol is null)
             {
-                var pol = _unitOfWork.Pol
-                    .GetAllQueryable()
-                    .AsQueryable();
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
+            }
 
-                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
-                {
-                    switch (filters.NumFilter)
-                    {
-                        case 1:
-                            pol = pol.Where(x => x.Nombre!.Contains(filters.TextFilter));
-                            break;
-                    }
-                }
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<IEnumerable<SelectResponse>>(pol);
+            response.Message = ReplyMessage.MESSAGE_QUERY;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
 
-                if (filters.StateFilter is not null)
-                {
-                    pol = pol.Where(x => x.Estado.Equals(filters.StateFilter));
-                }
+        return response;
+    }
 
-                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
-                {
-                    pol = pol.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
-                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
-                        .AddDays(1));
-                }
+    public async Task<BaseResponse<PolByIdResponseDto>> PolById(int id)
+    {
+        var response = new BaseResponse<PolByIdResponseDto>();
+        try
+        {
+            var pol = await _unitOfWork.Pol.GetByIdAsync(id);
 
-                filters.Sort ??= "Id";
-
-                var items = await _orderingQuery
-                    .Ordering(filters, pol, !(bool)filters.Download!).ToListAsync();
-
+            if (pol is not null)
+            {
                 response.IsSuccess = true;
-                response.TotalRecords = await pol.CountAsync();
-                response.Data = _mapper.Map<IEnumerable<PolResponseDto>>(items);
+                response.Data = _mapper.Map<PolByIdResponseDto>(pol);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
             }
-
-            return response;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectPol()
+        return response;
+    }
+
+    public async Task<BaseResponse<IEnumerable<PolByWhsResponseDto>>> ListSelectPolWhs()
+    {
+        var response = new BaseResponse<IEnumerable<PolByWhsResponseDto>>();
+
+        try
         {
-            var response = new BaseResponse<IEnumerable<SelectResponse>>();
+            var pol = await _unitOfWork.Pol.GetSelectAsync();
 
-            try
+            pol = pol.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+
+            if (pol is null)
             {
-                var pol = await _unitOfWork.Pol.GetSelectAsync();
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
+            }
 
-                pol = pol
-                    .Where(x => !string.IsNullOrEmpty(x.Nombre))
-                    .GroupBy(x => x.Nombre)
-                    .Select(g => g.First())
-                    .OrderBy(x => x.Nombre)
-                    .ToList();
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<IEnumerable<PolByWhsResponseDto>>(pol);
+            response.Message = ReplyMessage.MESSAGE_QUERY;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
 
-                if (pol is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
+        return response;
+    }
 
+    public async Task<BaseResponse<bool>> RegisterPol(PolRequestDto requestDto)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            var pol = _mapper.Map<TbPol>(requestDto);
+
+            response.Data = await _unitOfWork.Pol.RegisterAsync(pol);
+            if (response.Data)
+            {
                 response.IsSuccess = true;
-                response.Data = _mapper.Map<IEnumerable<SelectResponse>>(pol);
-                response.Message = ReplyMessage.MESSAGE_QUERY;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_FAILED;
             }
-
-            return response;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<PolByIdResponseDto>> PolById(int id)
-        {
-            var response = new BaseResponse<PolByIdResponseDto>();
-            try
-            {
-                var pol = await _unitOfWork.Pol.GetByIdAsync(id);
+        return response;
+    }
 
-                if (pol is not null)
-                {
-                    response.IsSuccess = true;
-                    response.Data = _mapper.Map<PolByIdResponseDto>(pol);
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                }
-            }
-            catch (Exception ex)
+    public async Task<BaseResponse<bool>> EditPol(int id, PolRequestDto requestDto)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            var polEdit = await PolById(id);
+
+            if (polEdit.Data is null)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
             }
 
-            return response;
-        }
+            var pol = _mapper.Map<TbPol>(requestDto);
+            pol.Id = id;
 
-        public async Task<BaseResponse<IEnumerable<PolByWhsResponseDto>>> ListSelectPolWhs()
-        {
-            var response = new BaseResponse<IEnumerable<PolByWhsResponseDto>>();
+            response.Data = await _unitOfWork.Pol.EditAsync(pol);
 
-            try
+            if (response.Data)
             {
-                var pol = await _unitOfWork.Pol.GetSelectAsync();
-
-                pol = pol.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
-
-                if (pol is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
                 response.IsSuccess = true;
-                response.Data = _mapper.Map<IEnumerable<PolByWhsResponseDto>>(pol);
-                response.Message = ReplyMessage.MESSAGE_QUERY;
+                response.Message = ReplyMessage.MESSAGE_UPDATE;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_FAILED;
             }
-
-            return response;
         }
-
-        public async Task<BaseResponse<bool>> RegisterPol(PolRequestDto requestDto)
+        catch (Exception ex)
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var pol = _mapper.Map<TbPol>(requestDto);
-
-                response.Data = await _unitOfWork.Pol.RegisterAsync(pol);
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_SAVE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
-            }
-
-            return response;
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<bool>> EditPol(int id, PolRequestDto requestDto)
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> RemovePol(int id)
+    {
+        var response = new BaseResponse<bool>();
+        try
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var polEdit = await PolById(id);
+            var pol = await PolById(id);
 
-                if (polEdit.Data is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
-                var pol = _mapper.Map<TbPol>(requestDto);
-                pol.Id = id;
-
-                response.Data = await _unitOfWork.Pol.EditAsync(pol);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_UPDATE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
+            if (pol.Data is null)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
             }
 
-            return response;
-        }
+            response.Data = await _unitOfWork.Pol.RemoveAsync(id);
 
-        public async Task<BaseResponse<bool>> RemovePol(int id)
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var pol = await PolById(id);
-
-                if (pol.Data is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
-                response.Data = await _unitOfWork.Pol.RemoveAsync(id);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_DELETE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
-            }
-
-            return response;
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
+
+        return response;
     }
 }

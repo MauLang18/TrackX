@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace TrackX.Application.Interfaces
+namespace TrackX.Application.Interfaces;
+
+public interface IFileStorageLocalApplication
 {
-    public interface IFileStorageLocalApplication
-    {
-        Task<string> SaveFile(string container, IFormFile file);
-        Task<string> EditFile(string container, IFormFile file, string route);
-        Task RemoveFile(string route, string container);
-    }
+    Task<string> SaveFile(string container, IFormFile file);
+    Task<string> EditFile(string container, IFormFile file, string route);
+    Task RemoveFile(string route, string container);
 }

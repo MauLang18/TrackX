@@ -12,255 +12,254 @@ using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
 
-namespace TrackX.Application.Services
+namespace TrackX.Application.Services;
+
+public class OrigenApplication : IOrigenApplication
 {
-    public class OrigenApplication : IOrigenApplication
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly IOrderingQuery _orderingQuery;
+    private readonly IFileStorageLocalApplication _fileStorage;
+
+    public OrigenApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly IOrderingQuery _orderingQuery;
-        private readonly IFileStorageLocalApplication _fileStorage;
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _orderingQuery = orderingQuery;
+        _fileStorage = fileStorage;
+    }
 
-        public OrigenApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage)
+    public async Task<BaseResponse<IEnumerable<OrigenResponseDto>>> ListOrigenes(BaseFiltersRequest filters)
+    {
+        var response = new BaseResponse<IEnumerable<OrigenResponseDto>>();
+        try
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _orderingQuery = orderingQuery;
-            _fileStorage = fileStorage;
+            var origenes = _unitOfWork.Origen
+                .GetAllQueryable()
+                .AsQueryable();
+
+            if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
+            {
+                switch (filters.NumFilter)
+                {
+                    case 1:
+                        origenes = origenes.Where(x => x.Nombre!.Contains(filters.TextFilter));
+                        break;
+                }
+            }
+
+            if (filters.StateFilter is not null)
+            {
+                origenes = origenes.Where(x => x.Estado.Equals(filters.StateFilter));
+            }
+
+            if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+            {
+                origenes = origenes.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                    && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                    .AddDays(1));
+            }
+
+            filters.Sort ??= "Id";
+
+            var items = await _orderingQuery
+                .Ordering(filters, origenes, !(bool)filters.Download!).ToListAsync();
+
+            response.IsSuccess = true;
+            response.TotalRecords = await origenes.CountAsync();
+            response.Data = _mapper.Map<IEnumerable<OrigenResponseDto>>(items);
+            response.Message = ReplyMessage.MESSAGE_QUERY;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<IEnumerable<OrigenResponseDto>>> ListOrigenes(BaseFiltersRequest filters)
+        return response;
+    }
+
+    public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectOrigen()
+    {
+        var response = new BaseResponse<IEnumerable<SelectResponse>>();
+
+        try
         {
-            var response = new BaseResponse<IEnumerable<OrigenResponseDto>>();
-            try
+            var origenes = await _unitOfWork.Origen.GetSelectAsync();
+
+            origenes = origenes
+                .Where(x => !string.IsNullOrEmpty(x.Nombre))
+                .GroupBy(x => x.Nombre)
+                .Select(g => g.First())
+                .OrderBy(x => x.Nombre)
+                .ToList();
+
+            if (origenes is null)
             {
-                var origenes = _unitOfWork.Origen
-                    .GetAllQueryable()
-                    .AsQueryable();
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
+            }
 
-                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
-                {
-                    switch (filters.NumFilter)
-                    {
-                        case 1:
-                            origenes = origenes.Where(x => x.Nombre!.Contains(filters.TextFilter));
-                            break;
-                    }
-                }
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<IEnumerable<SelectResponse>>(origenes);
+            response.Message = ReplyMessage.MESSAGE_QUERY;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
 
-                if (filters.StateFilter is not null)
-                {
-                    origenes = origenes.Where(x => x.Estado.Equals(filters.StateFilter));
-                }
+        return response;
+    }
 
-                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
-                {
-                    origenes = origenes.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
-                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
-                        .AddDays(1));
-                }
+    public async Task<BaseResponse<OrigenByIdResponseDto>> OrigenById(int id)
+    {
+        var response = new BaseResponse<OrigenByIdResponseDto>();
+        try
+        {
+            var origen = await _unitOfWork.Origen.GetByIdAsync(id);
 
-                filters.Sort ??= "Id";
-
-                var items = await _orderingQuery
-                    .Ordering(filters, origenes, !(bool)filters.Download!).ToListAsync();
-
+            if (origen is not null)
+            {
                 response.IsSuccess = true;
-                response.TotalRecords = await origenes.CountAsync();
-                response.Data = _mapper.Map<IEnumerable<OrigenResponseDto>>(items);
+                response.Data = _mapper.Map<OrigenByIdResponseDto>(origen);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
             }
-
-            return response;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectOrigen()
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> RegisterOrigen(OrigenRequestDto requestDto)
+    {
+        var response = new BaseResponse<bool>();
+        try
         {
-            var response = new BaseResponse<IEnumerable<SelectResponse>>();
+            var origen = _mapper.Map<TbOrigen>(requestDto);
 
-            try
+            if (requestDto.Imagen is not null)
+                origen.Imagen = await _fileStorage.SaveFile(AzureContainers.ORIGEN, requestDto.Imagen);
+
+            response.Data = await _unitOfWork.Origen.RegisterAsync(origen);
+            if (response.Data)
             {
-                var origenes = await _unitOfWork.Origen.GetSelectAsync();
-
-                origenes = origenes
-                    .Where(x => !string.IsNullOrEmpty(x.Nombre))
-                    .GroupBy(x => x.Nombre)
-                    .Select(g => g.First())
-                    .OrderBy(x => x.Nombre)
-                    .ToList();
-
-                if (origenes is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
                 response.IsSuccess = true;
-                response.Data = _mapper.Map<IEnumerable<SelectResponse>>(origenes);
-                response.Message = ReplyMessage.MESSAGE_QUERY;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_FAILED;
             }
-
-            return response;
         }
-
-        public async Task<BaseResponse<OrigenByIdResponseDto>> OrigenById(int id)
+        catch (Exception ex)
         {
-            var response = new BaseResponse<OrigenByIdResponseDto>();
-            try
-            {
-                var origen = await _unitOfWork.Origen.GetByIdAsync(id);
-
-                if (origen is not null)
-                {
-                    response.IsSuccess = true;
-                    response.Data = _mapper.Map<OrigenByIdResponseDto>(origen);
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
-            }
-
-            return response;
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<bool>> RegisterOrigen(OrigenRequestDto requestDto)
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> EditOrigen(int id, OrigenRequestDto requestDto)
+    {
+        var response = new BaseResponse<bool>();
+        try
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var origen = _mapper.Map<TbOrigen>(requestDto);
+            var origenEdit = await OrigenById(id);
 
-                if (requestDto.Imagen is not null)
-                    origen.Imagen = await _fileStorage.SaveFile(AzureContainers.ORIGEN, requestDto.Imagen);
-
-                response.Data = await _unitOfWork.Origen.RegisterAsync(origen);
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_SAVE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
+            if (origenEdit.Data is null)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
             }
 
-            return response;
-        }
+            var origen = _mapper.Map<TbOrigen>(requestDto);
+            origen.Id = id;
 
-        public async Task<BaseResponse<bool>> EditOrigen(int id, OrigenRequestDto requestDto)
+            if (requestDto.Imagen is not null)
+                origen.Imagen = await _fileStorage
+                    .EditFile(AzureContainers.ORIGEN, requestDto.Imagen, origenEdit.Data!.Imagen!);
+
+            if (requestDto.Imagen is null)
+                origen.Imagen = origenEdit.Data!.Imagen;
+
+            response.Data = await _unitOfWork.Origen.EditAsync(origen);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_UPDATE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var origenEdit = await OrigenById(id);
-
-                if (origenEdit.Data is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
-                var origen = _mapper.Map<TbOrigen>(requestDto);
-                origen.Id = id;
-
-                if (requestDto.Imagen is not null)
-                    origen.Imagen = await _fileStorage
-                        .EditFile(AzureContainers.ORIGEN, requestDto.Imagen, origenEdit.Data!.Imagen!);
-
-                if (requestDto.Imagen is null)
-                    origen.Imagen = origenEdit.Data!.Imagen;
-
-                response.Data = await _unitOfWork.Origen.EditAsync(origen);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_UPDATE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
-            }
-
-            return response;
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<bool>> RemoveOrigen(int id)
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> RemoveOrigen(int id)
+    {
+        var response = new BaseResponse<bool>();
+        try
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var origen = await OrigenById(id);
+            var origen = await OrigenById(id);
 
-                if (origen.Data is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
-                response.Data = await _unitOfWork.Origen.RemoveAsync(id);
-
-                await _fileStorage.RemoveFile(origen.Data!.Imagen!, AzureContainers.ORIGEN);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_DELETE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
+            if (origen.Data is null)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
             }
 
-            return response;
+            response.Data = await _unitOfWork.Origen.RemoveAsync(id);
+
+            await _fileStorage.RemoveFile(origen.Data!.Imagen!, AzureContainers.ORIGEN);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
         }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
     }
 }

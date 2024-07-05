@@ -4,19 +4,18 @@ using TrackX.Application.Dtos.Noticia.Response;
 using TrackX.Domain.Entities;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Application.Mappers
+namespace TrackX.Application.Mappers;
+
+public class NoticiaMappingsProfile : Profile
 {
-    public class NoticiaMappingsProfile : Profile
+    public NoticiaMappingsProfile()
     {
-        public NoticiaMappingsProfile()
-        {
-            CreateMap<TbNoticia, NoticiaResponseDto>()
-                .ForMember(x => x.EstadoNoticia, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
-                .ReverseMap();
-            CreateMap<TbNoticia, NoticiaByIdResponseDto>()
-                .ReverseMap();
-            CreateMap<NoticiaRequestDto, TbNoticia>()
-                .ReverseMap();
-        }
+        CreateMap<TbNoticia, NoticiaResponseDto>()
+            .ForMember(x => x.EstadoNoticia, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
+            .ReverseMap();
+        CreateMap<TbNoticia, NoticiaByIdResponseDto>()
+            .ReverseMap();
+        CreateMap<NoticiaRequestDto, TbNoticia>()
+            .ReverseMap();
     }
 }

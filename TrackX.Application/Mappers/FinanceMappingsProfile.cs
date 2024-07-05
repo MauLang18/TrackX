@@ -4,19 +4,18 @@ using TrackX.Application.Dtos.Finance.Response;
 using TrackX.Domain.Entities;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Application.Mappers
+namespace TrackX.Application.Mappers;
+
+public class FinanceMappingsProfile : Profile
 {
-    public class FinanceMappingsProfile : Profile
+    public FinanceMappingsProfile()
     {
-        public FinanceMappingsProfile()
-        {
-            CreateMap<TbFinance, FinanceResponseDto>()
-                .ForMember(x => x.EstadoFinance, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
-                .ReverseMap();
-            CreateMap<TbFinance, FinanceByIdResponeDto>()
-                .ReverseMap();
-            CreateMap<FinanceRequestDto, TbFinance>()
-                .ReverseMap();
-        }
+        CreateMap<TbFinance, FinanceResponseDto>()
+            .ForMember(x => x.EstadoFinance, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
+            .ReverseMap();
+        CreateMap<TbFinance, FinanceByIdResponeDto>()
+            .ReverseMap();
+        CreateMap<FinanceRequestDto, TbFinance>()
+            .ReverseMap();
     }
 }

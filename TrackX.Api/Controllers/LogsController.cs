@@ -5,56 +5,55 @@ using TrackX.Application.Dtos.Logs.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Api.Controllers
+namespace TrackX.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class LogsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class LogsController : ControllerBase
+    private readonly ILogsApplication _logsApplication;
+    private readonly IGenerateExcelApplication _generateExcelApplication;
+
+    public LogsController(ILogsApplication logsApplication, IGenerateExcelApplication generateExcelApplication)
     {
-        private readonly ILogsApplication _logsApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        _logsApplication = logsApplication;
+        _generateExcelApplication = generateExcelApplication;
+    }
 
-        public LogsController(ILogsApplication logsApplication, IGenerateExcelApplication generateExcelApplication)
+    [HttpGet]
+    public async Task<IActionResult> ListLogs([FromQuery] BaseFiltersRequest filters)
+    {
+        var response = await _logsApplication.ListLogs(filters);
+
+        if ((bool)filters.Download!)
         {
-            _logsApplication = logsApplication;
-            _generateExcelApplication = generateExcelApplication;
+            var columnNames = ExcelColumnNames.GetColumnsLogs();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListLogs([FromQuery] BaseFiltersRequest filters)
-        {
-            var response = await _logsApplication.ListLogs(filters);
+        return Ok(response);
+    }
 
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsLogs();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> LogById(int id)
+    {
+        var response = await _logsApplication.LogById(id);
+        return Ok(response);
+    }
 
-            return Ok(response);
-        }
+    [HttpPost("Register")]
+    public async Task<IActionResult> RegisterLog([FromBody] LogsRequestDto requestDto)
+    {
+        var response = await _logsApplication.RegisterLog(requestDto);
+        return Ok(response);
+    }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> LogById(int id)
-        {
-            var response = await _logsApplication.LogById(id);
-            return Ok(response);
-        }
+    [HttpPut("Remove/{id:int}")]
+    public async Task<IActionResult> RemoveLog(int id)
+    {
+        var response = await _logsApplication.RemoveLog(id);
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterLog([FromBody] LogsRequestDto requestDto)
-        {
-            var response = await _logsApplication.RegisterLog(requestDto);
-            return Ok(response);
-        }
-
-        [HttpPut("Remove/{id:int}")]
-        public async Task<IActionResult> RemoveLog(int id)
-        {
-            var response = await _logsApplication.RemoveLog(id);
-
-            return Ok(response);
-        }
+        return Ok(response);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Commons.Bases.Response;
@@ -12,375 +11,374 @@ using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
 
-namespace TrackX.Application.Services
+namespace TrackX.Application.Services;
+
+public class WhsApplication : IWhsApplication
 {
-    public class WhsApplication : IWhsApplication
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly IOrderingQuery _orderingQuery;
+    private readonly IFileStorageLocalApplication _fileStorage;
+    private readonly IClienteApplication _clienteApplication;
+
+    public WhsApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly IOrderingQuery _orderingQuery;
-        private readonly IFileStorageLocalApplication _fileStorage;
-        private readonly IClienteApplication _clienteApplication;
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _orderingQuery = orderingQuery;
+        _fileStorage = fileStorage;
+        _clienteApplication = clienteApplication;
+    }
 
-        public WhsApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication)
+    public async Task<BaseResponse<IEnumerable<WhsResponseDto>>> ListWhs(BaseFiltersRequest filters, string whs)
+    {
+        var response = new BaseResponse<IEnumerable<WhsResponseDto>>();
+        try
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _orderingQuery = orderingQuery;
-            _fileStorage = fileStorage;
-            _clienteApplication = clienteApplication;
+            var WHS = _unitOfWork.Whs
+                .GetAllQueryable()
+                .AsQueryable();
+
+            WHS = WHS.Where(x => x.POL!.Contains(whs));
+
+            if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
+            {
+                switch (filters.NumFilter)
+                {
+                    case 1:
+                        WHS = WHS.Where(x => x.StatusWHS!.Contains(filters.TextFilter));
+                        break;
+                    case 2:
+                        WHS = WHS.Where(x => x.POL!.Contains(filters.TextFilter));
+                        break;
+                    case 3:
+                        WHS = WHS.Where(x => x.POD!.Contains(filters.TextFilter));
+                        break;
+                    case 4:
+                        WHS = WHS.Where(x => x.Idtra!.Contains(filters.TextFilter));
+                        break;
+                    case 5:
+                        WHS = WHS.Where(x => x.PO!.Contains(filters.TextFilter));
+                        break;
+                    case 6:
+                        WHS = WHS.Where(x => x.TipoRegistro!.Contains(filters.TextFilter));
+                        break;
+                    case 7:
+                        WHS = WHS.Where(x => x.NombreCliente!.Contains(filters.TextFilter));
+                        break;
+                }
+            }
+
+            if (filters.StateFilter is not null)
+            {
+                WHS = WHS.Where(x => x.Estado.Equals(filters.StateFilter));
+            }
+
+            if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+            {
+                WHS = WHS.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                    && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                    .AddDays(1));
+            }
+
+            filters.Sort ??= "Id";
+
+            var items = await _orderingQuery
+                .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
+
+            response.IsSuccess = true;
+            response.TotalRecords = await WHS.CountAsync();
+            response.Data = _mapper.Map<IEnumerable<WhsResponseDto>>(items);
+            response.Message = ReplyMessage.MESSAGE_QUERY;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<IEnumerable<WhsResponseDto>>> ListWhs(BaseFiltersRequest filters, string whs)
+        return response;
+    }
+
+    public async Task<BaseResponse<IEnumerable<WhsResponseDto>>> ListWhsCliente(BaseFiltersRequest filters, string cliente, string whs)
+    {
+        var response = new BaseResponse<IEnumerable<WhsResponseDto>>();
+        try
         {
-            var response = new BaseResponse<IEnumerable<WhsResponseDto>>();
-            try
+            var WHS = _unitOfWork.Whs
+                .GetAllQueryable()
+                .AsQueryable();
+
+
+            WHS = WHS.Where(x => x.POL!.Contains(whs) && x.Cliente!.Equals(cliente));
+
+            if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
             {
-                var WHS = _unitOfWork.Whs
-                    .GetAllQueryable()
-                    .AsQueryable();
-
-                WHS = WHS.Where(x => x.POL!.Contains(whs));
-
-                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
+                switch (filters.NumFilter)
                 {
-                    switch (filters.NumFilter)
-                    {
-                        case 1:
-                            WHS = WHS.Where(x => x.StatusWHS!.Contains(filters.TextFilter));
-                            break;
-                        case 2:
-                            WHS = WHS.Where(x => x.POL!.Contains(filters.TextFilter));
-                            break;
-                        case 3:
-                            WHS = WHS.Where(x => x.POD!.Contains(filters.TextFilter));
-                            break;
-                        case 4:
-                            WHS = WHS.Where(x => x.Idtra!.Contains(filters.TextFilter));
-                            break;
-                        case 5:
-                            WHS = WHS.Where(x => x.PO!.Contains(filters.TextFilter));
-                            break;
-                        case 6:
-                            WHS = WHS.Where(x => x.TipoRegistro!.Contains(filters.TextFilter));
-                            break;
-                        case 7:
-                            WHS = WHS.Where(x => x.NombreCliente!.Contains(filters.TextFilter));
-                            break;
-                    }
+                    case 1:
+                        WHS = WHS.Where(x => x.StatusWHS!.Contains(filters.TextFilter));
+                        break;
                 }
+            }
 
-                if (filters.StateFilter is not null)
-                {
-                    WHS = WHS.Where(x => x.Estado.Equals(filters.StateFilter));
-                }
+            if (filters.StateFilter is not null)
+            {
+                WHS = WHS.Where(x => x.Estado.Equals(filters.StateFilter));
+            }
 
-                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
-                {
-                    WHS = WHS.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
-                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
-                        .AddDays(1));
-                }
+            if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+            {
+                WHS = WHS.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
+                    && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                    .AddDays(1));
+            }
 
-                filters.Sort ??= "Id";
+            filters.Sort ??= "Id";
 
-                var items = await _orderingQuery
-                    .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
+            var items = await _orderingQuery
+                .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
 
+            response.IsSuccess = true;
+            response.TotalRecords = await WHS.CountAsync();
+            response.Data = _mapper.Map<IEnumerable<WhsResponseDto>>(items);
+            response.Message = ReplyMessage.MESSAGE_QUERY;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<WhsResponseByIdDto>> WhsById(int id)
+    {
+        var response = new BaseResponse<WhsResponseByIdDto>();
+        try
+        {
+            var Whs = await _unitOfWork.Whs.GetByIdAsync(id);
+
+            if (Whs is not null)
+            {
                 response.IsSuccess = true;
-                response.TotalRecords = await WHS.CountAsync();
-                response.Data = _mapper.Map<IEnumerable<WhsResponseDto>>(items);
+                response.Data = _mapper.Map<WhsResponseByIdDto>(Whs);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
             }
-
-            return response;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<IEnumerable<WhsResponseDto>>> ListWhsCliente(BaseFiltersRequest filters, string cliente, string whs)
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> RegisterWhs(WhsRequestDto requestDto)
+    {
+        var response = new BaseResponse<bool>();
+        try
         {
-            var response = new BaseResponse<IEnumerable<WhsResponseDto>>();
-            try
+            var Whs = _mapper.Map<TbWhs>(requestDto);
+
+            if (requestDto.WHSReceipt is not null)
+                Whs.WHSReceipt = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.WHSReceipt);
+
+            if (requestDto.Documentoregistro is not null)
+                Whs.Documentoregistro = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Documentoregistro);
+
+            if (requestDto.Imagen1 is not null)
+                Whs.Imagen1 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen1);
+
+            if (requestDto.Imagen2 is not null)
+                Whs.Imagen2 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen2);
+
+            if (requestDto.Imagen3 is not null)
+                Whs.Imagen3 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen3);
+
+            if (requestDto.Imagen4 is not null)
+                Whs.Imagen4 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen4);
+
+            if (requestDto.Imagen5 is not null)
+                Whs.Imagen5 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen5);
+
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+            foreach (var datos in nuevoValorCliente.Data!.value!)
             {
-                var WHS = _unitOfWork.Whs
-                    .GetAllQueryable()
-                    .AsQueryable();
+                Whs.NombreCliente = datos.name;
+            }
 
-
-                WHS = WHS.Where(x => x.POL!.Contains(whs) && x.Cliente!.Equals(cliente));
-
-                if (filters.NumFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
-                {
-                    switch (filters.NumFilter)
-                    {
-                        case 1:
-                            WHS = WHS.Where(x => x.StatusWHS!.Contains(filters.TextFilter));
-                            break;
-                    }
-                }
-
-                if (filters.StateFilter is not null)
-                {
-                    WHS = WHS.Where(x => x.Estado.Equals(filters.StateFilter));
-                }
-
-                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
-                {
-                    WHS = WHS.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
-                        && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
-                        .AddDays(1));
-                }
-
-                filters.Sort ??= "Id";
-
-                var items = await _orderingQuery
-                    .Ordering(filters, WHS, !(bool)filters.Download!).ToListAsync();
-
+            response.Data = await _unitOfWork.Whs.RegisterAsync(Whs);
+            if (response.Data)
+            {
                 response.IsSuccess = true;
-                response.TotalRecords = await WHS.CountAsync();
-                response.Data = _mapper.Map<IEnumerable<WhsResponseDto>>(items);
-                response.Message = ReplyMessage.MESSAGE_QUERY;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_FAILED;
             }
-
-            return response;
         }
-
-        public async Task<BaseResponse<WhsResponseByIdDto>> WhsById(int id)
+        catch (Exception ex)
         {
-            var response = new BaseResponse<WhsResponseByIdDto>();
-            try
-            {
-                var Whs = await _unitOfWork.Whs.GetByIdAsync(id);
-
-                if (Whs is not null)
-                {
-                    response.IsSuccess = true;
-                    response.Data = _mapper.Map<WhsResponseByIdDto>(Whs);
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
-            }
-
-            return response;
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<bool>> RegisterWhs(WhsRequestDto requestDto)
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> EditWhs(int id, WhsRequestDto requestDto)
+    {
+        var response = new BaseResponse<bool>();
+        try
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var Whs = _mapper.Map<TbWhs>(requestDto);
+            var WhsEdit = await WhsById(id);
 
-                if (requestDto.WHSReceipt is not null)
-                    Whs.WHSReceipt = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.WHSReceipt);
-
-                if (requestDto.Documentoregistro is not null)
-                    Whs.Documentoregistro = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Documentoregistro);
-
-                if (requestDto.Imagen1 is not null)
-                    Whs.Imagen1 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen1);
-
-                if (requestDto.Imagen2 is not null)
-                    Whs.Imagen2 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen2);
-
-                if (requestDto.Imagen3 is not null)
-                    Whs.Imagen3 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen3);
-
-                if (requestDto.Imagen4 is not null)
-                    Whs.Imagen4 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen4);
-
-                if (requestDto.Imagen5 is not null)
-                    Whs.Imagen5 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen5);
-
-                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
-
-                foreach (var datos in nuevoValorCliente.Data!.value!)
-                {
-                    Whs.NombreCliente = datos.name;
-                }
-
-                response.Data = await _unitOfWork.Whs.RegisterAsync(Whs);
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_SAVE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
+            if (WhsEdit.Data is null)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
             }
 
-            return response;
-        }
+            var Whs = _mapper.Map<TbWhs>(requestDto);
+            Whs.Id = id;
 
-        public async Task<BaseResponse<bool>> EditWhs(int id, WhsRequestDto requestDto)
+            if (requestDto.WHSReceipt is not null)
+                Whs.WHSReceipt = await _fileStorage
+                    .EditFile(AzureContainers.WHS, requestDto.WHSReceipt, WhsEdit.Data!.WHSReceipt!);
+
+            if (requestDto.WHSReceipt is null)
+                Whs.WHSReceipt = WhsEdit.Data!.WHSReceipt!;
+
+            if (requestDto.Documentoregistro is not null)
+                Whs.Documentoregistro = await _fileStorage
+                    .EditFile(AzureContainers.WHS, requestDto.Documentoregistro, WhsEdit.Data!.Documentoregistro!);
+
+            if (requestDto.Documentoregistro is null)
+                Whs.Documentoregistro = WhsEdit.Data!.Documentoregistro!;
+
+            if (requestDto.Imagen1 is not null)
+                Whs.Imagen1 = await _fileStorage
+                    .EditFile(AzureContainers.WHS, requestDto.Imagen1, WhsEdit.Data!.Imagen1!);
+
+            if (requestDto.Imagen1 is null)
+                Whs.Imagen1 = WhsEdit.Data!.Imagen1!;
+
+            if (requestDto.Imagen2 is not null)
+                Whs.Imagen2 = await _fileStorage
+                    .EditFile(AzureContainers.WHS, requestDto.Imagen2, WhsEdit.Data!.Imagen2!);
+
+            if (requestDto.Imagen2 is null)
+                Whs.Imagen2 = WhsEdit.Data!.Imagen2!;
+
+            if (requestDto.Imagen3 is not null)
+                Whs.Imagen3 = await _fileStorage
+                    .EditFile(AzureContainers.WHS, requestDto.Imagen3, WhsEdit.Data!.Imagen3!);
+
+            if (requestDto.Imagen3 is null)
+                Whs.Imagen3 = WhsEdit.Data!.Imagen3!;
+
+            if (requestDto.Imagen4 is not null)
+                Whs.Imagen4 = await _fileStorage
+                    .EditFile(AzureContainers.WHS, requestDto.Imagen4, WhsEdit.Data!.Imagen4!);
+
+            if (requestDto.Imagen4 is null)
+                Whs.Imagen4 = WhsEdit.Data!.Imagen4!;
+
+            if (requestDto.Imagen5 is not null)
+                Whs.Imagen5 = await _fileStorage
+                    .EditFile(AzureContainers.WHS, requestDto.Imagen5, WhsEdit.Data!.Imagen5!);
+
+            if (requestDto.Imagen5 is null)
+                Whs.Imagen5 = WhsEdit.Data!.Imagen5!;
+
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+
+            foreach (var datos in nuevoValorCliente.Data!.value!)
+            {
+                Whs.NombreCliente = datos.name;
+            }
+
+            response.Data = await _unitOfWork.Whs.EditAsync(Whs);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_UPDATE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var WhsEdit = await WhsById(id);
-
-                if (WhsEdit.Data is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
-                var Whs = _mapper.Map<TbWhs>(requestDto);
-                Whs.Id = id;
-
-                if (requestDto.WHSReceipt is not null)
-                    Whs.WHSReceipt = await _fileStorage
-                        .EditFile(AzureContainers.WHS, requestDto.WHSReceipt, WhsEdit.Data!.WHSReceipt!);
-
-                if (requestDto.WHSReceipt is null)
-                    Whs.WHSReceipt = WhsEdit.Data!.WHSReceipt!;
-
-                if (requestDto.Documentoregistro is not null)
-                    Whs.Documentoregistro = await _fileStorage
-                        .EditFile(AzureContainers.WHS, requestDto.Documentoregistro, WhsEdit.Data!.Documentoregistro!);
-
-                if (requestDto.Documentoregistro is null)
-                    Whs.Documentoregistro = WhsEdit.Data!.Documentoregistro!;
-
-                if (requestDto.Imagen1 is not null)
-                    Whs.Imagen1 = await _fileStorage
-                        .EditFile(AzureContainers.WHS, requestDto.Imagen1, WhsEdit.Data!.Imagen1!);
-
-                if (requestDto.Imagen1 is null)
-                    Whs.Imagen1 = WhsEdit.Data!.Imagen1!;
-
-                if (requestDto.Imagen2 is not null)
-                    Whs.Imagen2 = await _fileStorage
-                        .EditFile(AzureContainers.WHS, requestDto.Imagen2, WhsEdit.Data!.Imagen2!);
-
-                if (requestDto.Imagen2 is null)
-                    Whs.Imagen2 = WhsEdit.Data!.Imagen2!;
-
-                if (requestDto.Imagen3 is not null)
-                    Whs.Imagen3 = await _fileStorage
-                        .EditFile(AzureContainers.WHS, requestDto.Imagen3, WhsEdit.Data!.Imagen3!);
-
-                if (requestDto.Imagen3 is null)
-                    Whs.Imagen3 = WhsEdit.Data!.Imagen3!;
-
-                if (requestDto.Imagen4 is not null)
-                    Whs.Imagen4 = await _fileStorage
-                        .EditFile(AzureContainers.WHS, requestDto.Imagen4, WhsEdit.Data!.Imagen4!);
-
-                if (requestDto.Imagen4 is null)
-                    Whs.Imagen4 = WhsEdit.Data!.Imagen4!;
-
-                if (requestDto.Imagen5 is not null)
-                    Whs.Imagen5 = await _fileStorage
-                        .EditFile(AzureContainers.WHS, requestDto.Imagen5, WhsEdit.Data!.Imagen5!);
-
-                if (requestDto.Imagen5 is null)
-                    Whs.Imagen5 = WhsEdit.Data!.Imagen5!;
-
-                var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
-
-                foreach (var datos in nuevoValorCliente.Data!.value!)
-                {
-                    Whs.NombreCliente = datos.name;
-                }
-
-                response.Data = await _unitOfWork.Whs.EditAsync(Whs);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_UPDATE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
-            }
-
-            return response;
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<bool>> RemoveWhs(int id)
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> RemoveWhs(int id)
+    {
+        var response = new BaseResponse<bool>();
+        try
         {
-            var response = new BaseResponse<bool>();
-            try
-            {
-                var Whs = await WhsById(id);
+            var Whs = await WhsById(id);
 
-                if (Whs.Data is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
-
-                response.Data = await _unitOfWork.Whs.RemoveAsync(id);
-
-                await _fileStorage.RemoveFile(Whs.Data!.WHSReceipt!, AzureContainers.WHS);
-                await _fileStorage.RemoveFile(Whs.Data!.Documentoregistro!, AzureContainers.WHS);
-                await _fileStorage.RemoveFile(Whs.Data!.Imagen1!, AzureContainers.WHS);
-                await _fileStorage.RemoveFile(Whs.Data!.Imagen2!, AzureContainers.WHS);
-                await _fileStorage.RemoveFile(Whs.Data!.Imagen3!, AzureContainers.WHS);
-                await _fileStorage.RemoveFile(Whs.Data!.Imagen4!, AzureContainers.WHS);
-                await _fileStorage.RemoveFile(Whs.Data!.Imagen5!, AzureContainers.WHS);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = ReplyMessage.MESSAGE_DELETE;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_FAILED;
-                }
-            }
-            catch (Exception ex)
+            if (Whs.Data is null)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_EXCEPTION;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
             }
 
-            return response;
+            response.Data = await _unitOfWork.Whs.RemoveAsync(id);
+
+            await _fileStorage.RemoveFile(Whs.Data!.WHSReceipt!, AzureContainers.WHS);
+            await _fileStorage.RemoveFile(Whs.Data!.Documentoregistro!, AzureContainers.WHS);
+            await _fileStorage.RemoveFile(Whs.Data!.Imagen1!, AzureContainers.WHS);
+            await _fileStorage.RemoveFile(Whs.Data!.Imagen2!, AzureContainers.WHS);
+            await _fileStorage.RemoveFile(Whs.Data!.Imagen3!, AzureContainers.WHS);
+            await _fileStorage.RemoveFile(Whs.Data!.Imagen4!, AzureContainers.WHS);
+            await _fileStorage.RemoveFile(Whs.Data!.Imagen5!, AzureContainers.WHS);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
         }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
     }
 }

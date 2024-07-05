@@ -4,15 +4,14 @@ using TrackX.Application.Commons.Select;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Dtos.Usuario.Response;
 
-namespace TrackX.Application.Interfaces
+namespace TrackX.Application.Interfaces;
+
+public interface IUsuarioApplication
 {
-    public interface IUsuarioApplication
-    {
-        Task<BaseResponse<IEnumerable<UsuarioResponseDto>>> ListUsuarios(BaseFiltersRequest filters);
-        Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectUsuarios();
-        Task<BaseResponse<UsuarioResponseDto>> UsuarioById(int id);
-        Task<BaseResponse<bool>> RegisterUsuario(UsuarioRequestDto requestDto);
-        Task<BaseResponse<bool>> EditUsuario(int id, UsuarioRequestDto requestDto);
-        Task<BaseResponse<bool>> RemoveUsuario(int id);
-    }
+    Task<BaseResponse<IEnumerable<UsuarioResponseDto>>> ListUsuarios(BaseFiltersRequest filters);
+    Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectUsuarios();
+    Task<BaseResponse<UsuarioResponseDto>> UsuarioById(int id);
+    Task<BaseResponse<bool>> RegisterUsuario(UsuarioRequestDto requestDto);
+    Task<BaseResponse<bool>> EditUsuario(int id, UsuarioRequestDto requestDto);
+    Task<BaseResponse<bool>> RemoveUsuario(int id);
 }

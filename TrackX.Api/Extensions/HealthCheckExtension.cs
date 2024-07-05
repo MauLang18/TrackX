@@ -1,22 +1,21 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TrackX.Api.Extensions
+namespace TrackX.Api.Extensions;
+
+public static class HealthCheckExtension
 {
-    public static class HealthCheckExtension
+    public static IServiceCollection AddHealthCheck(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddHealthCheck(this IServiceCollection services, IConfiguration configuration)
-        {
-            services
-            .AddHealthChecks()
-            .AddSqlServer(configuration.GetConnectionString("Connection")!, tags: new[] { "sqlserver" })
-            .AddRedis(configuration.GetConnectionString("Redis")!, tags: new[] { "redis" });
+        services
+        .AddHealthChecks()
+        .AddSqlServer(configuration.GetConnectionString("Connection")!, tags: new[] { "sqlserver" })
+        .AddRedis(configuration.GetConnectionString("Redis")!, tags: new[] { "redis" });
 
-            services
-                .AddHealthChecksUI()
-                .AddInMemoryStorage();
+        services
+            .AddHealthChecksUI()
+            .AddInMemoryStorage();
 
-            return services;
-        }
+        return services;
     }
 }

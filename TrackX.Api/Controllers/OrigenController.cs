@@ -5,72 +5,71 @@ using TrackX.Application.Dtos.Origen.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Api.Controllers
+namespace TrackX.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class OrigenController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class OrigenController : ControllerBase
+    private readonly IOrigenApplication _origenApplication;
+    private readonly IGenerateExcelApplication _generateExcelApplication;
+
+    public OrigenController(IOrigenApplication origenApplication, IGenerateExcelApplication generateExcelApplication)
     {
-        private readonly IOrigenApplication _origenApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        _origenApplication = origenApplication;
+        _generateExcelApplication = generateExcelApplication;
+    }
 
-        public OrigenController(IOrigenApplication origenApplication, IGenerateExcelApplication generateExcelApplication)
+    [HttpGet]
+    public async Task<IActionResult> ListOrigenes([FromQuery] BaseFiltersRequest filters)
+    {
+        var response = await _origenApplication.ListOrigenes(filters);
+
+        if ((bool)filters.Download!)
         {
-            _origenApplication = origenApplication;
-            _generateExcelApplication = generateExcelApplication;
+            var columnNames = ExcelColumnNames.GetColumnsOrigen();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListOrigenes([FromQuery] BaseFiltersRequest filters)
-        {
-            var response = await _origenApplication.ListOrigenes(filters);
+        return Ok(response);
+    }
 
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsOrigen();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
+    [HttpGet("Select")]
+    public async Task<IActionResult> ListSelectOrigenes()
+    {
+        var response = await _origenApplication.ListSelectOrigen();
+        return Ok(response);
+    }
 
-            return Ok(response);
-        }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> OrigenById(int id)
+    {
+        var response = await _origenApplication.OrigenById(id);
 
-        [HttpGet("Select")]
-        public async Task<IActionResult> ListSelectOrigenes()
-        {
-            var response = await _origenApplication.ListSelectOrigen();
-            return Ok(response);
-        }
+        return Ok(response);
+    }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> OrigenById(int id)
-        {
-            var response = await _origenApplication.OrigenById(id);
+    [HttpPost("Register")]
+    public async Task<IActionResult> RegisterOrigen([FromForm] OrigenRequestDto requestDto)
+    {
+        var response = await _origenApplication.RegisterOrigen(requestDto);
 
-            return Ok(response);
-        }
+        return Ok(response);
+    }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterOrigen([FromForm] OrigenRequestDto requestDto)
-        {
-            var response = await _origenApplication.RegisterOrigen(requestDto);
+    [HttpPut("Edit/{id:int}")]
+    public async Task<IActionResult> EditRol(int id, [FromForm] OrigenRequestDto requestDto)
+    {
+        var response = await _origenApplication.EditOrigen(id, requestDto);
+        return Ok(response);
+    }
 
-            return Ok(response);
-        }
+    [HttpPut("Remove/{id:int}")]
+    public async Task<IActionResult> RemoveOrigen(int id)
+    {
+        var response = await _origenApplication.RemoveOrigen(id);
 
-        [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditRol(int id, [FromForm] OrigenRequestDto requestDto)
-        {
-            var response = await _origenApplication.EditOrigen(id, requestDto);
-            return Ok(response);
-        }
-
-        [HttpPut("Remove/{id:int}")]
-        public async Task<IActionResult> RemoveOrigen(int id)
-        {
-            var response = await _origenApplication.RemoveOrigen(id);
-
-            return Ok(response);
-        }
+        return Ok(response);
     }
 }

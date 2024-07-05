@@ -43,6 +43,8 @@ public partial class DbCfContext : DbContext
 
     public virtual DbSet<TbControlInventarioWhs> TbControlInventarioWhs { get; set; }
 
+    public virtual DbSet<TbMultimedia> TbMultimedias { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasAnnotation("Relational.Collaction", "Modern_Spanish_CI_AS");

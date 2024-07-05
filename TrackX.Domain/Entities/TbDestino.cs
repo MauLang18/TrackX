@@ -1,8 +1,7 @@
-﻿namespace TrackX.Domain.Entities
+﻿namespace TrackX.Domain.Entities;
+
+public class TbDestino : BaseEntity
 {
-    public class TbDestino : BaseEntity
-    {
-        public string? Nombre { get; set; }
-        public string? Imagen { get; set; }
-    }
+    public string? Nombre { get; set; }
+    public string? Imagen { get; set; }
 }

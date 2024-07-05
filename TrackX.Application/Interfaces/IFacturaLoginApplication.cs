@@ -1,10 +1,9 @@
 ﻿using TrackX.Application.Commons.Bases.Response;
 using TrackX.Domain.Entities;
 
-namespace TrackX.Application.Interfaces
+namespace TrackX.Application.Interfaces;
+
+public interface IFacturaLoginApplication
 {
-    public interface IFacturaLoginApplication
-    {
-        Task<BaseResponse<DynamicsFacturas>> TrackingByFactura(string factura, string cliente);
-    }
+    Task<BaseResponse<DynamicsFacturas>> TrackingByFactura(string factura, string cliente);
 }

@@ -1,8 +1,7 @@
-﻿namespace TrackX.Application.Dtos.Pod.Request
+﻿namespace TrackX.Application.Dtos.Pod.Request;
+
+public class PodRequestDto
 {
-    public class PodRequestDto
-    {
-        public string? Nombre { get; set; }
-        public int Estado { get; set; }
-    }
+    public string? Nombre { get; set; }
+    public int Estado { get; set; }
 }

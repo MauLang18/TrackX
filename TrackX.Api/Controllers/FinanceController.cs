@@ -5,79 +5,78 @@ using TrackX.Application.Dtos.Finance.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Api.Controllers
+namespace TrackX.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class FinanceController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class FinanceController : ControllerBase
+    private readonly IFinanceApplication _financeApplication;
+    private readonly IGenerateExcelApplication _generateExcelApplication;
+
+    public FinanceController(IFinanceApplication financeApplication, IGenerateExcelApplication generateExcelApplication)
     {
-        private readonly IFinanceApplication _financeApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        _financeApplication = financeApplication;
+        _generateExcelApplication = generateExcelApplication;
+    }
 
-        public FinanceController(IFinanceApplication financeApplication, IGenerateExcelApplication generateExcelApplication)
+    [HttpGet]
+    public async Task<IActionResult> ListFinance([FromQuery] BaseFiltersRequest filters)
+    {
+        var response = await _financeApplication.ListFinance(filters);
+
+        if ((bool)filters.Download!)
         {
-            _financeApplication = financeApplication;
-            _generateExcelApplication = generateExcelApplication;
+            var columnNames = ExcelColumnNames.GetColumnsFinance();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListFinance([FromQuery] BaseFiltersRequest filters)
+        return Ok(response);
+    }
+
+    [HttpGet("Cliente")]
+    public async Task<IActionResult> ListFinanceCliente([FromQuery] BaseFiltersRequest filters, string cliente)
+    {
+        var response = await _financeApplication.ListFinanceCliente(filters, cliente);
+
+        /*if ((bool)filters.Download!)
         {
-            var response = await _financeApplication.ListFinance(filters);
+            var columnNames = ExcelColumnNames.GetColumnsProveedores();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
+        }*/
 
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsFinance();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
+        return Ok(response);
+    }
 
-            return Ok(response);
-        }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> FinanceById(int id)
+    {
+        var response = await _financeApplication.FinanceById(id);
+        return Ok(response);
+    }
 
-        [HttpGet("Cliente")]
-        public async Task<IActionResult> ListFinanceCliente([FromQuery] BaseFiltersRequest filters, string cliente)
-        {
-            var response = await _financeApplication.ListFinanceCliente(filters, cliente);
+    [HttpPost("Register")]
+    public async Task<IActionResult> RegisterFinance([FromForm] FinanceRequestDto requestDto)
+    {
+        var response = await _financeApplication.RegisterFinance(requestDto);
+        return Ok(response);
+    }
 
-            /*if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsProveedores();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }*/
+    [HttpPut("Edit/{id:int}")]
+    public async Task<IActionResult> EditFinance(int id, [FromForm] FinanceRequestDto requestDto)
+    {
+        var response = await _financeApplication.EditFinance(id, requestDto);
 
-            return Ok(response);
-        }
+        return Ok(response);
+    }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> FinanceById(int id)
-        {
-            var response = await _financeApplication.FinanceById(id);
-            return Ok(response);
-        }
+    [HttpPut("Remove/{id:int}")]
+    public async Task<IActionResult> RemoveFinance(int id)
+    {
+        var response = await _financeApplication.RemoveFinance(id);
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterFinance([FromForm] FinanceRequestDto requestDto)
-        {
-            var response = await _financeApplication.RegisterFinance(requestDto);
-            return Ok(response);
-        }
-
-        [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditFinance(int id, [FromForm] FinanceRequestDto requestDto)
-        {
-            var response = await _financeApplication.EditFinance(id, requestDto);
-
-            return Ok(response);
-        }
-
-        [HttpPut("Remove/{id:int}")]
-        public async Task<IActionResult> RemoveFinance(int id)
-        {
-            var response = await _financeApplication.RemoveFinance(id);
-
-            return Ok(response);
-        }
+        return Ok(response);
     }
 }

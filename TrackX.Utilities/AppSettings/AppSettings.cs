@@ -1,7 +1,6 @@
-﻿namespace TrackX.Utilities.AppSettings
+﻿namespace TrackX.Utilities.AppSettings;
+
+public class AppSettings
 {
-    public class AppSettings
-    {
-        public string? ClientId { get; set; }
-    }
+    public string? ClientId { get; set; }
 }

@@ -1,8 +1,7 @@
-﻿namespace TrackX.Application.Dtos.Rol.Request
+﻿namespace TrackX.Application.Dtos.Rol.Request;
+
+public class RolRequestDto
 {
-    public class RolRequestDto
-    {
-        public string? Nombre { get; set; }
-        public int Estado { get; set; }
-    }
+    public string? Nombre { get; set; }
+    public int Estado { get; set; }
 }

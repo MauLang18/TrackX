@@ -1,8 +1,7 @@
-﻿namespace TrackX.Application.Dtos.Usuario.Request
+﻿namespace TrackX.Application.Dtos.Usuario.Request;
+
+public class TokenRequestDto
 {
-    public class TokenRequestDto
-    {
-        public string? Correo { get; set; }
-        public string? Pass { get; set; }
-    }
+    public string? Correo { get; set; }
+    public string? Pass { get; set; }
 }

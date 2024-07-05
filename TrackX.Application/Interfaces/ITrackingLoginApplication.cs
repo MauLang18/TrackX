@@ -1,11 +1,10 @@
 ﻿using TrackX.Application.Commons.Bases.Response;
 using TrackX.Domain.Entities;
 
-namespace TrackX.Application.Interfaces
+namespace TrackX.Application.Interfaces;
+
+public interface ITrackingLoginApplication
 {
-    public interface ITrackingLoginApplication
-    {
-        Task<BaseResponse<DynamicsTrackingLogin>> TrackingActivoByCliente(string cliente);
-        Task<BaseResponse<DynamicsTrackingLogin>> TrackingFinalizadoByCliente(string cliente);
-    }
+    Task<BaseResponse<DynamicsTrackingLogin>> TrackingActivoByCliente(string cliente);
+    Task<BaseResponse<DynamicsTrackingLogin>> TrackingFinalizadoByCliente(string cliente);
 }

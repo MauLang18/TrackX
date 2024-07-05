@@ -3,81 +3,79 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Exoneracion.Request;
 using TrackX.Application.Interfaces;
-using TrackX.Application.Services;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Api.Controllers
+namespace TrackX.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ExoneracionController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ExoneracionController : ControllerBase
+    private readonly IExoneracionApplication _exoneracionApplication;
+    private readonly IGenerateExcelApplication _generateExcelApplication;
+
+    public ExoneracionController(IExoneracionApplication exoneracionApplication, IGenerateExcelApplication generateExcelApplication)
     {
-        private readonly IExoneracionApplication _exoneracionApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        _exoneracionApplication = exoneracionApplication;
+        _generateExcelApplication = generateExcelApplication;
+    }
 
-        public ExoneracionController(IExoneracionApplication exoneracionApplication, IGenerateExcelApplication generateExcelApplication)
+    [HttpGet]
+    public async Task<IActionResult> ListExoneracion([FromQuery] BaseFiltersRequest filters)
+    {
+        var response = await _exoneracionApplication.ListExoneracion(filters);
+
+        if ((bool)filters.Download!)
         {
-            _exoneracionApplication = exoneracionApplication;
-            _generateExcelApplication = generateExcelApplication;
+            var columnNames = ExcelColumnNames.GetColumnsExoneraciones();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListExoneracion([FromQuery] BaseFiltersRequest filters)
+        return Ok(response);
+    }
+
+    [HttpGet("Cliente")]
+    public async Task<IActionResult> ListExoneracionCliente([FromQuery] BaseFiltersRequest filters, string cliente)
+    {
+        var response = await _exoneracionApplication.ListExoneracionCliente(filters, cliente);
+
+        if ((bool)filters.Download!)
         {
-            var response = await _exoneracionApplication.ListExoneracion(filters);
-
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsExoneraciones();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
-
-            return Ok(response);
+            var columnNames = ExcelColumnNames.GetColumnsExoneraciones();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
 
-        [HttpGet("Cliente")]
-        public async Task<IActionResult> ListExoneracionCliente([FromQuery] BaseFiltersRequest filters, string cliente)
-        {
-            var response = await _exoneracionApplication.ListExoneracionCliente(filters, cliente);
+        return Ok(response);
+    }
 
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsExoneraciones();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> ExoneracionById(int id)
+    {
+        var response = await _exoneracionApplication.ExoneracionById(id);
+        return Ok(response);
+    }
 
-            return Ok(response);
-        }
+    [HttpPost("Register")]
+    public async Task<IActionResult> RegisterExoneracion([FromForm] ExoneracionRequestDto requestDto)
+    {
+        var response = await _exoneracionApplication.RegisterExoneracion(requestDto);
+        return Ok(response);
+    }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> ExoneracionById(int id)
-        {
-            var response = await _exoneracionApplication.ExoneracionById(id);
-            return Ok(response);
-        }
+    [HttpPut("Edit/{id:int}")]
+    public async Task<IActionResult> EditExoneracion(int id, [FromForm] ExoneracionRequestDto requestDto)
+    {
+        var response = await _exoneracionApplication.EditExoneracion(id, requestDto);
+        return Ok(response);
+    }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterExoneracion([FromForm] ExoneracionRequestDto requestDto)
-        {
-            var response = await _exoneracionApplication.RegisterExoneracion(requestDto);
-            return Ok(response);
-        }
+    [HttpPut("Remove/{id:int}")]
+    public async Task<IActionResult> RemoveExoneracion(int id)
+    {
+        var response = await _exoneracionApplication.RemoveExoneracion(id);
 
-        [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditExoneracion(int id, [FromForm] ExoneracionRequestDto requestDto)
-        {
-            var response = await _exoneracionApplication.EditExoneracion(id, requestDto);
-            return Ok(response);
-        }
-
-        [HttpPut("Remove/{id:int}")]
-        public async Task<IActionResult> RemoveExoneracion(int id)
-        {
-            var response = await _exoneracionApplication.RemoveExoneracion(id);
-
-            return Ok(response);
-        }
+        return Ok(response);
     }
 }

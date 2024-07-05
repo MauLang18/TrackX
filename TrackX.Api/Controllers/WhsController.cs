@@ -5,79 +5,78 @@ using TrackX.Application.Dtos.Whs.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Api.Controllers
+namespace TrackX.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class WhsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class WhsController : ControllerBase
+    private readonly IWhsApplication _WhsApplication;
+    private readonly IGenerateExcelApplication _generateExcelApplication;
+
+    public WhsController(IWhsApplication WhsApplication, IGenerateExcelApplication generateExcelApplication)
     {
-        private readonly IWhsApplication _WhsApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        _WhsApplication = WhsApplication;
+        _generateExcelApplication = generateExcelApplication;
+    }
 
-        public WhsController(IWhsApplication WhsApplication, IGenerateExcelApplication generateExcelApplication)
+    [HttpGet]
+    public async Task<IActionResult> ListWhs([FromQuery] BaseFiltersRequest filters, string whs)
+    {
+        var response = await _WhsApplication.ListWhs(filters, whs);
+
+        if ((bool)filters.Download!)
         {
-            _WhsApplication = WhsApplication;
-            _generateExcelApplication = generateExcelApplication;
+            var columnNames = ExcelColumnNames.GetColumnsWHS();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListWhs([FromQuery] BaseFiltersRequest filters, string whs)
+        return Ok(response);
+    }
+
+    [HttpGet("Cliente")]
+    public async Task<IActionResult> ListWhsCliente([FromQuery] BaseFiltersRequest filters, string cliente, string whs)
+    {
+        var response = await _WhsApplication.ListWhsCliente(filters, cliente, whs);
+
+        if ((bool)filters.Download!)
         {
-            var response = await _WhsApplication.ListWhs(filters, whs);
-
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsWHS();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
-
-            return Ok(response);
+            var columnNames = ExcelColumnNames.GetColumnsWHS();
+            var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
+            return File(fileBytes, ContentType.ContentTypeExcel);
         }
 
-        [HttpGet("Cliente")]
-        public async Task<IActionResult> ListWhsCliente([FromQuery] BaseFiltersRequest filters, string cliente, string whs)
-        {
-            var response = await _WhsApplication.ListWhsCliente(filters, cliente, whs);
+        return Ok(response);
+    }
 
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsWHS();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> WhsById(int id)
+    {
+        var response = await _WhsApplication.WhsById(id);
+        return Ok(response);
+    }
 
-            return Ok(response);
-        }
+    [HttpPost("Register")]
+    public async Task<IActionResult> RegisterWhs([FromForm] WhsRequestDto requestDto)
+    {
+        var response = await _WhsApplication.RegisterWhs(requestDto);
+        return Ok(response);
+    }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> WhsById(int id)
-        {
-            var response = await _WhsApplication.WhsById(id);
-            return Ok(response);
-        }
+    [HttpPut("Edit/{id:int}")]
+    public async Task<IActionResult> EditWhs(int id, [FromForm] WhsRequestDto requestDto)
+    {
+        var response = await _WhsApplication.EditWhs(id, requestDto);
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterWhs([FromForm] WhsRequestDto requestDto)
-        {
-            var response = await _WhsApplication.RegisterWhs(requestDto);
-            return Ok(response);
-        }
+        return Ok(response);
+    }
 
-        [HttpPut("Edit/{id:int}")]
-        public async Task<IActionResult> EditWhs(int id, [FromForm] WhsRequestDto requestDto)
-        {
-            var response = await _WhsApplication.EditWhs(id, requestDto);
+    [HttpPut("Remove/{id:int}")]
+    public async Task<IActionResult> RemoveWhs(int id)
+    {
+        var response = await _WhsApplication.RemoveWhs(id);
 
-            return Ok(response);
-        }
-
-        [HttpPut("Remove/{id:int}")]
-        public async Task<IActionResult> RemoveWhs(int id)
-        {
-            var response = await _WhsApplication.RemoveWhs(id);
-
-            return Ok(response);
-        }
+        return Ok(response);
     }
 }

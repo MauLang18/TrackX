@@ -4,15 +4,14 @@ using TrackX.Application.Commons.Select;
 using TrackX.Application.Dtos.Pod.Request;
 using TrackX.Application.Dtos.Pod.Response;
 
-namespace TrackX.Application.Interfaces
+namespace TrackX.Application.Interfaces;
+
+public interface IPodApplication
 {
-    public interface IPodApplication
-    {
-        Task<BaseResponse<IEnumerable<PodResponseDto>>> ListPod(BaseFiltersRequest filters);
-        Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectPod();
-        Task<BaseResponse<PodByIdResponseDto>> PodById(int id);
-        Task<BaseResponse<bool>> RegisterPod(PodRequestDto requestDto);
-        Task<BaseResponse<bool>> EditPod(int id, PodRequestDto requestDto);
-        Task<BaseResponse<bool>> RemovePod(int id);
-    }
+    Task<BaseResponse<IEnumerable<PodResponseDto>>> ListPod(BaseFiltersRequest filters);
+    Task<BaseResponse<IEnumerable<SelectResponse>>> ListSelectPod();
+    Task<BaseResponse<PodByIdResponseDto>> PodById(int id);
+    Task<BaseResponse<bool>> RegisterPod(PodRequestDto requestDto);
+    Task<BaseResponse<bool>> EditPod(int id, PodRequestDto requestDto);
+    Task<BaseResponse<bool>> RemovePod(int id);
 }

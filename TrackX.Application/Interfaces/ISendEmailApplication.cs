@@ -1,9 +1,8 @@
 ﻿using TrackX.Application.Dtos.Mail.Request;
 
-namespace TrackX.Application.Interfaces
+namespace TrackX.Application.Interfaces;
+
+public interface ISendEmailApplication
 {
-    public interface ISendEmailApplication
-    {
-        void SendEmail(MailRequestDto request);
-    }
+    void SendEmail(MailRequestDto request);
 }

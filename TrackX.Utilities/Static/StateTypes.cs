@@ -1,8 +1,7 @@
-﻿namespace TrackX.Utilities.Static
+﻿namespace TrackX.Utilities.Static;
+
+public enum StateTypes
 {
-    public enum StateTypes
-    {
-        Inactivo = 0,
-        Activo = 1
-    }
+    Inactivo = 0,
+    Activo = 1
 }

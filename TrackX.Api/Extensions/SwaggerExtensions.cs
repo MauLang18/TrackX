@@ -3,59 +3,58 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System;
 
-namespace TrackX.Api.Extensions
+namespace TrackX.Api.Extensions;
+
+public static class SwaggerExtensions
 {
-    public static class SwaggerExtensions
+    public static IServiceCollection AddSwagger(this IServiceCollection services)
     {
-        public static IServiceCollection AddSwagger(this IServiceCollection services)
+        var openApi = new OpenApiInfo
         {
-            var openApi = new OpenApiInfo
+            Title = "TrackX",
+            Version = "v1",
+            Description = "Tracking API 2024",
+            TermsOfService = new Uri("https://opensource.org/licenses/"),
+            Contact = new OpenApiContact
             {
-                Title = "TrackX",
-                Version = "v1",
-                Description = "Tracking API 2024",
-                TermsOfService = new Uri("https://opensource.org/licenses/"),
-                Contact = new OpenApiContact
+                Name = "CustomCodeCR",
+                Email = "customcodecr@gmail.com",
+                Url = new Uri("https://customcodecr.com")
+            },
+            License = new OpenApiLicense
+            {
+                Name = "Use under LICX",
+                Url = new Uri("https://opensource.org/licenses/")
+            }
+        };
+
+        services.AddSwaggerGen(x =>
+        {
+            openApi.Version = "v1";
+            x.SwaggerDoc("v1", openApi);
+
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Name = "JWT Authentication",
+                Description = "JWT Bearer Token",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
                 {
-                    Name = "CustomCodeCR",
-                    Email = "customcodecr@gmail.com",
-                    Url = new Uri("https://customcodecr.com")
-                },
-                License = new OpenApiLicense
-                {
-                    Name = "Use under LICX",
-                    Url = new Uri("https://opensource.org/licenses/")
+                    Id = JwtBearerDefaults.AuthenticationScheme,
+                    Type = ReferenceType.SecurityScheme
                 }
             };
 
-            services.AddSwaggerGen(x =>
+            x.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+            x.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                openApi.Version = "v1";
-                x.SwaggerDoc("v1", openApi);
-
-                var securityScheme = new OpenApiSecurityScheme
-                {
-                    Name = "JWT Authentication",
-                    Description = "JWT Bearer Token",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    Reference = new OpenApiReference
-                    {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
-
-                x.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-                x.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    { securityScheme, new string[]{ } }
-                });
+                { securityScheme, new string[]{ } }
             });
+        });
 
-            return services;
-        }
+        return services;
     }
 }

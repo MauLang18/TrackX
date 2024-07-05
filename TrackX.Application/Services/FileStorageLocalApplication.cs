@@ -3,44 +3,43 @@ using Microsoft.AspNetCore.Http;
 using TrackX.Application.Interfaces;
 using TrackX.Infrastructure.FileStorage;
 
-namespace TrackX.Application.Services
+namespace TrackX.Application.Services;
+
+public class FileStorageLocalApplication : IFileStorageLocalApplication
 {
-    public class FileStorageLocalApplication : IFileStorageLocalApplication
+    private readonly IWebHostEnvironment _env;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IFileStorageLocal _fileStorageLocal;
+
+    public FileStorageLocalApplication(IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, IFileStorageLocal fileStorageLocal)
     {
-        private readonly IWebHostEnvironment _env;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IFileStorageLocal _fileStorageLocal;
+        _env = env;
+        _httpContextAccessor = httpContextAccessor;
+        _fileStorageLocal = fileStorageLocal;
+    }
 
-        public FileStorageLocalApplication(IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, IFileStorageLocal fileStorageLocal)
-        {
-            _env = env;
-            _httpContextAccessor = httpContextAccessor;
-            _fileStorageLocal = fileStorageLocal;
-        }
+    public async Task<string> SaveFile(string container, IFormFile file)
+    {
+        var webRootPath = _env.WebRootPath;
+        var scheme = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? _httpContextAccessor.HttpContext?.Request.Scheme;
+        var host = _httpContextAccessor.HttpContext!.Request.Host;
 
-        public async Task<string> SaveFile(string container, IFormFile file)
-        {
-            var webRootPath = _env.WebRootPath;
-            var scheme = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? _httpContextAccessor.HttpContext?.Request.Scheme;
-            var host = _httpContextAccessor.HttpContext!.Request.Host;
+        return await _fileStorageLocal.SaveFile(container, file, webRootPath, scheme!, host.Value);
+    }
 
-            return await _fileStorageLocal.SaveFile(container, file, webRootPath, scheme!, host.Value);
-        }
+    public async Task<string> EditFile(string container, IFormFile file, string route)
+    {
+        var webRootPath = _env.WebRootPath;
+        var scheme = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? _httpContextAccessor.HttpContext?.Request.Scheme;
+        var host = _httpContextAccessor.HttpContext!.Request.Host;
 
-        public async Task<string> EditFile(string container, IFormFile file, string route)
-        {
-            var webRootPath = _env.WebRootPath;
-            var scheme = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? _httpContextAccessor.HttpContext?.Request.Scheme;
-            var host = _httpContextAccessor.HttpContext!.Request.Host;
+        return await _fileStorageLocal.EditFile(container, file, route, webRootPath, scheme!, host.Value);
+    }
 
-            return await _fileStorageLocal.EditFile(container, file, route, webRootPath, scheme!, host.Value);
-        }
+    public async Task RemoveFile(string route, string container)
+    {
+        var webRootPath = _env.WebRootPath;
 
-        public async Task RemoveFile(string route, string container)
-        {
-            var webRootPath = _env.WebRootPath;
-
-            await _fileStorageLocal.RemoveFile(route, container, webRootPath);
-        }
+        await _fileStorageLocal.RemoveFile(route, container, webRootPath);
     }
 }

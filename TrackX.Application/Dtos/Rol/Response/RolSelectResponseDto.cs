@@ -1,8 +1,7 @@
-﻿namespace TrackX.Application.Dtos.Rol.Response
+﻿namespace TrackX.Application.Dtos.Rol.Response;
+
+public class RolSelectResponseDto
 {
-    public class RolSelectResponseDto
-    {
-        public int Id { get; set; }
-        public string? Nombre { get; set; }
-    }
+    public int Id { get; set; }
+    public string? Nombre { get; set; }
 }

@@ -4,19 +4,18 @@ using TrackX.Application.Dtos.ControlInventario.Response;
 using TrackX.Domain.Entities;
 using TrackX.Utilities.Static;
 
-namespace TrackX.Application.Mappers
+namespace TrackX.Application.Mappers;
+
+public class ControlInventarioMappingsProfile : Profile
 {
-    public class ControlInventarioMappingsProfile : Profile
+    public ControlInventarioMappingsProfile()
     {
-        public ControlInventarioMappingsProfile()
-        {
-            CreateMap<TbControlInventarioWhs, ControlInventarioResponseDto>()
-                .ForMember(x => x.EstadoControlInventario, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
-                .ReverseMap();
-            CreateMap<TbControlInventarioWhs, ControlInventarioByIdResponseDto>()
-                .ReverseMap();
-            CreateMap<ControlInventarioRequestDto, TbControlInventarioWhs>()
-                .ReverseMap();
-        }
+        CreateMap<TbControlInventarioWhs, ControlInventarioResponseDto>()
+            .ForMember(x => x.EstadoControlInventario, x => x.MapFrom(y => y.Estado.Equals((int)StateTypes.Activo) ? "Activo" : "Inactivo"))
+            .ReverseMap();
+        CreateMap<TbControlInventarioWhs, ControlInventarioByIdResponseDto>()
+            .ReverseMap();
+        CreateMap<ControlInventarioRequestDto, TbControlInventarioWhs>()
+            .ReverseMap();
     }
 }
