@@ -21,7 +21,7 @@ public class MultimediaController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> ListMultimedia(BaseFiltersRequest filters)
+    public async Task<IActionResult> ListMultimedia([FromQuery] BaseFiltersRequest filters)
     {
         var response = await _multimediaApplication.ListMultimedia(filters);
 

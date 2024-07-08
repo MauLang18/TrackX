@@ -47,7 +47,7 @@ public class FacturaLoginApplication : IFacturaLoginApplication
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                 string entityName = "incidents";
 
-                HttpResponseMessage httpResponseMessaje = await httpClient.GetAsync($"api/data/v9.2/{entityName}?$select=title,new_contenedor,_new_shipper_value,new_commodity&$filter=((_customerid_value eq {cliente}) and contains(new_factura,'{factura}'))&$orderby=title asc");
+                HttpResponseMessage httpResponseMessaje = await httpClient.GetAsync($"api/data/v9.2/{entityName}?$select=title,new_contenedor,_new_shipper_value,new_commodity&$filter=((_customerid_value eq {cliente}) and contains(new_new_facturacompaia,'{factura}'))&$orderby=title asc");
                 httpResponseMessaje.EnsureSuccessStatusCode();
 
                 if (httpResponseMessaje.IsSuccessStatusCode)
