@@ -17,4 +17,5 @@ public class Value6
     public string? new_contenedor { get; set; }
     public string? _new_shipper_value { get; set; }
     public string? new_commodity { get; set; }
+    public object? new_servicio { get; set; }
 }
