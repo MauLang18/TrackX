@@ -10,6 +10,7 @@ public interface IGenericRepository<T> where T : BaseEntity
     Task<IEnumerable<T>> GetSelectAsync();
     Task<T> GetByIdAsync(int id);
     Task<bool> RegisterAsync(T entity);
+    Task<bool> RegisterRangeAsync(IEnumerable<T> entities);
     Task<bool> EditAsync(T entity);
     Task<bool> RemoveAsync(int id);
     IQueryable<T> GetEntityQuery(Expression<Func<T, bool>>? filter = null);

@@ -23,6 +23,7 @@ public static class InjectionExtensions
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddTransient<IFileStorageLocal, FileStorageLocal>();
         services.AddTransient<IGenerateExcel, GenerateExcel>();
+        services.AddTransient<IImportExcel, ImportExcel>();
 
         services.AddStackExchangeRedisCache(options =>
         {

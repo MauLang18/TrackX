@@ -72,4 +72,12 @@ public class ItinerarioController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("Import")]
+    public async Task<IActionResult> ImportExcelItinerario(ImportItinerarioRequest request)
+    {
+        var response = await _itinerarioApplication.ImportExcelItinerario(request);
+
+        return Ok(response);
+    }
 }

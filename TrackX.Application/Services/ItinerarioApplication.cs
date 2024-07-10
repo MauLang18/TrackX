@@ -7,6 +7,7 @@ using TrackX.Application.Dtos.Itinerario.Request;
 using TrackX.Application.Dtos.Itinerario.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
+using TrackX.Infrastructure.FileExcel;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -18,12 +19,14 @@ public class ItinerarioApplication : IItinerarioApplication
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IOrderingQuery _orderingQuery;
+    private readonly IImportExcel _importExcel;
 
-    public ItinerarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery)
+    public ItinerarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IImportExcel importExcel)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _orderingQuery = orderingQuery;
+        _importExcel = importExcel;
     }
 
     public async Task<BaseResponse<IEnumerable<ItinerarioResponseDto>>> ListItinerarios(BaseFiltersItinerarioRequest filters)
@@ -270,6 +273,61 @@ public class ItinerarioApplication : IItinerarioApplication
             {
                 response.IsSuccess = true;
                 response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> ImportExcelItinerario(ImportItinerarioRequest request)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            using var stream = new MemoryStream();
+            await request.excel!.CopyToAsync(stream);
+            stream.Position = 0;
+
+            var data = _importExcel.ImportFromExcel<TbItinerario>(stream);
+            var paises = await _unitOfWork.Origen.GetSelectAsync();
+
+            foreach (var itinerario in data)
+            {
+                if (!string.IsNullOrEmpty(itinerario.Origen))
+                {
+                    var origen = paises.FirstOrDefault(o => o.Nombre == itinerario.Origen);
+                    if (origen != null)
+                    {
+                        itinerario.Origen = origen.Imagen;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(itinerario.Destino))
+                {
+                    var destino = paises.FirstOrDefault(d => d.Nombre == itinerario.Destino);
+                    if (destino != null)
+                    {
+                        itinerario.Destino = destino.Imagen;
+                    }
+                }
+            }
+
+            response.Data = await _unitOfWork.Itinerario.RegisterRangeAsync(data);
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
             else
             {

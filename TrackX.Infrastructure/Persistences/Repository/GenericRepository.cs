@@ -66,6 +66,22 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         return recordsAffected > 0;
     }
 
+    public async Task<bool> RegisterRangeAsync(IEnumerable<T> entities)
+    {
+        foreach (var entity in entities)
+        {
+            entity.UsuarioCreacionAuditoria = 1;
+            entity.FechaCreacionAuditoria = DateTime.Now;
+
+            await _context.AddAsync(entity);
+        }
+
+        var recordsAffected = await _context.SaveChangesAsync();
+
+        return recordsAffected > 0;
+    }
+
+
     public async Task<bool> EditAsync(T entity)
     {
         entity.UsuarioActualizacionAuditoria = 1;
