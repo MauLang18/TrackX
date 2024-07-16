@@ -2,14 +2,6 @@ pipeline {
     agent any
 
     stages {
-        // stage('Debug') {
-        //     steps {
-        //         script {
-        //             echo "Current branch: ${env.BRANCH_NAME}"
-        //             echo "Git branch: ${env.GIT_BRANCH}"
-        //         }
-        //     }
-        // }
         stage('Docker Build') {
             steps {
                 script {
@@ -23,10 +15,11 @@ pipeline {
             }
             steps {
                 script {
-                    bat '''
-                        docker stop TrackXDev || true
-                        docker rm TrackXDev || true
-                    '''
+                    // Detener y eliminar el contenedor TrackXDev si existe
+                    bat 'docker stop TrackXDev 2>NUL || exit 0'
+                    bat 'docker rm TrackXDev 2>NUL || exit 0'
+                    
+                    // Ejecutar el contenedor de desarrollo
                     bat 'docker run -d -p 10108:8080 --name TrackXDev maulang18/trackx:latest'
                 }
             }
@@ -37,10 +30,11 @@ pipeline {
             }
             steps {
                 script {
-                    bat '''
-                        docker stop TrackXDev || true
-                        docker rm TrackXDev || true
-                    '''
+                    // Detener y eliminar el contenedor TrackXDev si existe
+                    bat 'docker stop TrackXDev 2>NUL || exit 0'
+                    bat 'docker rm TrackXDev 2>NUL || exit 0'
+                    
+                    // Ejecutar docker-compose para producción
                     dir('C:/Users/administrador/Desktop/Docker/CastroFallas') {
                         bat 'docker-compose up -d'
                     }
@@ -52,7 +46,7 @@ pipeline {
     post {
         always {
             script {
-                echo 'Cleaning up...'
+                // Limpieza después de cada ejecución
                 bat 'docker system prune -af'
             }
         }
