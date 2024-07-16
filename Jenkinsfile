@@ -6,6 +6,7 @@ pipeline {
             steps {
                 script {
                     echo "Current branch: ${env.BRANCH_NAME}"
+                    echo "Git branch: ${env.GIT_BRANCH}"
                 }
             }
         }
