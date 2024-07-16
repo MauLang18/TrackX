@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     stages {
-        stage('Debug') {
-            steps {
-                script {
-                    echo "Current branch: ${env.BRANCH_NAME}"
-                    echo "Git branch: ${env.GIT_BRANCH}"
-                }
-            }
-        }
-        /*stage('Docker Build') {
+        // stage('Debug') {
+        //     steps {
+        //         script {
+        //             echo "Current branch: ${env.BRANCH_NAME}"
+        //             echo "Git branch: ${env.GIT_BRANCH}"
+        //         }
+        //     }
+        // }
+        stage('Docker Build') {
             steps {
                 script {
                     bat "docker build -f TrackX.Api/Dockerfile -t maulang18/trackx:latest ."
@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Docker Run (Development)') {
             when {
-                branch 'develop'
+                expression { env.GIT_BRANCH == 'origin/develop' }
             }
             steps {
                 script {
@@ -33,7 +33,7 @@ pipeline {
         }
         stage('Docker Compose Up (Production)') {
             when {
-                branch 'master'
+                expression { env.GIT_BRANCH == 'origin/master' }
             }
             steps {
                 script {
@@ -46,16 +46,16 @@ pipeline {
                     }
                 }
             }
-        }*/
+        }
     }
 
     post {
-        /*always {
+        always {
             script {
                 echo 'Cleaning up...'
                 bat 'docker system prune -af'
             }
-        }*/
+        }
 
         success {
             script {
