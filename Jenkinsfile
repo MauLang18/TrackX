@@ -5,7 +5,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    bat "docker build -f TrackX.Api/Dockerfile -t maulang18/trackx:latest ."
+                    bat "docker build -f TrackX.Api/Dockerfile -t maulang18/trackx.api:latest ."
                 }
             }
         }
@@ -20,7 +20,7 @@ pipeline {
                     bat 'docker rm TrackXDev 2>NUL || exit 0'
                     
                     // Ejecutar el contenedor de desarrollo
-                    bat 'docker run -d -p 10108:8080 --name TrackXDev maulang18/trackx:latest'
+                    bat 'docker run -d -p 10108:8080 --name TrackXDev maulang18/trackx.api:latest'
                 }
             }
         }
