@@ -2,7 +2,14 @@ pipeline {
     agent any
 
     stages {
-        stage('Docker Build') {
+        stage('Debug') {
+            steps {
+                script {
+                    echo "Current branch: ${env.BRANCH_NAME}"
+                }
+            }
+        }
+        /*stage('Docker Build') {
             steps {
                 script {
                     bat "docker build -f TrackX.Api/Dockerfile -t maulang18/trackx:latest ."
@@ -38,16 +45,16 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
     }
 
     post {
-        always {
+        /*always {
             script {
                 echo 'Cleaning up...'
                 bat 'docker system prune -af'
             }
-        }
+        }*/
 
         success {
             script {
