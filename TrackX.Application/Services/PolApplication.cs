@@ -87,10 +87,10 @@ public class PolApplication : IPolApplication
             var pol = await _unitOfWork.Pol.GetSelectAsync();
 
             pol = pol
+                .OrderBy(x => x.Nombre, StringComparer.OrdinalIgnoreCase)
                 .Where(x => !string.IsNullOrEmpty(x.Nombre))
                 .GroupBy(x => x.Nombre)
                 .Select(g => g.First())
-                .OrderBy(x => x.Nombre)
                 .ToList();
 
             if (pol is null)
@@ -151,7 +151,12 @@ public class PolApplication : IPolApplication
         {
             var pol = await _unitOfWork.Pol.GetSelectAsync();
 
-            pol = pol.Where(x => !string.IsNullOrEmpty(x.Nombre)).GroupBy(x => x.Nombre).Select(g => g.First());
+            pol = pol
+                .OrderBy(x => x.Nombre, StringComparer.OrdinalIgnoreCase)
+                .Where(x => !string.IsNullOrEmpty(x.Nombre))
+                .GroupBy(x => x.Nombre)
+                .Select(g => g.First())
+                .ToList();
 
             if (pol is null)
             {
