@@ -80,4 +80,12 @@ public class PolController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("Import")]
+    public async Task<IActionResult> ImportExcelPol(ImportRequest request)
+    {
+        var response = await _polApplication.ImportExcelPol(request);
+
+        return Ok(response);
+    }
 }

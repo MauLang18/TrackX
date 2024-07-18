@@ -15,4 +15,5 @@ public interface IPolApplication
     Task<BaseResponse<bool>> RegisterPol(PolRequestDto requestDto);
     Task<BaseResponse<bool>> EditPol(int id, PolRequestDto requestDto);
     Task<BaseResponse<bool>> RemovePol(int id);
+    Task<BaseResponse<bool>> ImportExcelPol(ImportRequest request);
 }

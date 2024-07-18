@@ -13,5 +13,5 @@ public interface IItinerarioApplication
     Task<BaseResponse<bool>> EditItinerario(int id, ItinerarioRequestDto requestDto);
     Task<BaseResponse<bool>> EditStateItinerario(int id);
     Task<BaseResponse<bool>> RemoveItinerario(int id);
-    Task<BaseResponse<bool>> ImportExcelItinerario(ImportItinerarioRequest request);
+    Task<BaseResponse<bool>> ImportExcelItinerario(ImportRequest request);
 }

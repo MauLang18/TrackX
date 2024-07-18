@@ -66,4 +66,12 @@ public class EmpleoController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("Import")]
+    public async Task<IActionResult> ImportExcelEmpleo(ImportRequest request)
+    {
+        var response = await _empleoApplication.ImportExcelEmpleo(request);
+
+        return Ok(response);
+    }
 }

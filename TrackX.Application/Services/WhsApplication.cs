@@ -7,6 +7,7 @@ using TrackX.Application.Dtos.Whs.Request;
 using TrackX.Application.Dtos.Whs.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
+using TrackX.Infrastructure.FileExcel;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -20,14 +21,16 @@ public class WhsApplication : IWhsApplication
     private readonly IOrderingQuery _orderingQuery;
     private readonly IFileStorageLocalApplication _fileStorage;
     private readonly IClienteApplication _clienteApplication;
+    private readonly IImportExcel _importExcel;
 
-    public WhsApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication)
+    public WhsApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication, IImportExcel importExcel)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _orderingQuery = orderingQuery;
         _fileStorage = fileStorage;
         _clienteApplication = clienteApplication;
+        _importExcel = importExcel;
     }
 
     public async Task<BaseResponse<IEnumerable<WhsResponseDto>>> ListWhs(BaseFiltersRequest filters, string whs)
@@ -365,6 +368,39 @@ public class WhsApplication : IWhsApplication
             {
                 response.IsSuccess = true;
                 response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> ImportExcelWhs(ImportRequest request)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            using var stream = new MemoryStream();
+            await request.excel!.CopyToAsync(stream);
+            stream.Position = 0;
+
+            var data = _importExcel.ImportFromExcel<TbWhs>(stream);
+
+            response.Data = await _unitOfWork.Whs.RegisterRangeAsync(data);
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
             else
             {

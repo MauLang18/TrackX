@@ -12,4 +12,5 @@ public interface INoticiaApplication
     Task<BaseResponse<bool>> RegisterNoticia(NoticiaRequestDto requestDto);
     Task<BaseResponse<bool>> EditNoticia(int id, NoticiaRequestDto requestDto);
     Task<BaseResponse<bool>> RemoveNoticia(int id);
+    Task<BaseResponse<bool>> ImportExcelNoticia(ImportRequest request);
 }

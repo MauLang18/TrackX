@@ -13,4 +13,5 @@ public interface IExoneracionApplication
     Task<BaseResponse<bool>> RegisterExoneracion(ExoneracionRequestDto requestDto);
     Task<BaseResponse<bool>> EditExoneracion(int id, ExoneracionRequestDto requestDto);
     Task<BaseResponse<bool>> RemoveExoneracion(int id);
+    Task<BaseResponse<bool>> ImportExcelExoneracion(ImportRequest request);
 }

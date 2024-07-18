@@ -12,4 +12,5 @@ public interface IEmpleoApplication
     Task<BaseResponse<bool>> RegisterEmpleo(EmpleoRequestDto requestDto);
     Task<BaseResponse<bool>> EditEmpleo(int id, EmpleoRequestDto requestDto);
     Task<BaseResponse<bool>> RemoveEmpleo(int id);
+    Task<BaseResponse<bool>> ImportExcelEmpleo(ImportRequest request);
 }

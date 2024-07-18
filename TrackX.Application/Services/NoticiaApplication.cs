@@ -7,6 +7,7 @@ using TrackX.Application.Dtos.Noticia.Request;
 using TrackX.Application.Dtos.Noticia.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
+using TrackX.Infrastructure.FileExcel;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -19,13 +20,15 @@ public class NoticiaApplication : INoticiaApplication
     private readonly IMapper _mapper;
     private readonly IFileStorageLocalApplication _fileStorageLocalApplication;
     private readonly IOrderingQuery _orderingQuery;
+    private readonly IImportExcel _importExcel;
 
-    public NoticiaApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorageLocalApplication, IOrderingQuery orderingQuery)
+    public NoticiaApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorageLocalApplication, IOrderingQuery orderingQuery, IImportExcel importExcel)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _fileStorageLocalApplication = fileStorageLocalApplication;
         _orderingQuery = orderingQuery;
+        _importExcel = importExcel;
     }
 
     public async Task<BaseResponse<IEnumerable<NoticiaResponseDto>>> ListNoticias(BaseFiltersRequest filters)
@@ -213,6 +216,39 @@ public class NoticiaApplication : INoticiaApplication
             {
                 response.IsSuccess = true;
                 response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> ImportExcelNoticia(ImportRequest request)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            using var stream = new MemoryStream();
+            await request.excel!.CopyToAsync(stream);
+            stream.Position = 0;
+
+            var data = _importExcel.ImportFromExcel<TbNoticia>(stream);
+
+            response.Data = await _unitOfWork.Noticia.RegisterRangeAsync(data);
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
             else
             {

@@ -13,4 +13,5 @@ public interface IRolApplication
     Task<BaseResponse<bool>> RegisterRol(RolRequestDto requestDto);
     Task<BaseResponse<bool>> EditRol(int id, RolRequestDto requestDto);
     Task<BaseResponse<bool>> RemoveRol(int id);
+    Task<BaseResponse<bool>> ImportExcelRol(ImportRequest request);
 }
