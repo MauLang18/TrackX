@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'maulang18/trackx.api:latest'
+        DOCKER_IMAGE = 'maulang18/backend.api:latest'
         CONTAINER_NAME_DEV = 'TrackXCFDev'
         PORT_DEV = '10108'
         PORT_CONTAINER = '8080'
