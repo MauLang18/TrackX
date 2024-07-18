@@ -290,7 +290,7 @@ public class ItinerarioApplication : IItinerarioApplication
         return response;
     }
 
-    public async Task<BaseResponse<bool>> ImportExcelItinerario(ImportItinerarioRequest request)
+    public async Task<BaseResponse<bool>> ImportExcelItinerario(ImportRequest request)
     {
         var response = new BaseResponse<bool>();
         try

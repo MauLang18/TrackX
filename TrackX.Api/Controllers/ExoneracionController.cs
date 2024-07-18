@@ -78,4 +78,12 @@ public class ExoneracionController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("Import")]
+    public async Task<IActionResult> ImportExcelExoneracion(ImportRequest request)
+    {
+        var response = await _exoneracionApplication.ImportExcelExoneracion(request);
+
+        return Ok(response);
+    }
 }

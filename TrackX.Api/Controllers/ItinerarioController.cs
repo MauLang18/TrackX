@@ -74,7 +74,7 @@ public class ItinerarioController : ControllerBase
     }
 
     [HttpPost("Import")]
-    public async Task<IActionResult> ImportExcelItinerario(ImportItinerarioRequest request)
+    public async Task<IActionResult> ImportExcelItinerario(ImportRequest request)
     {
         var response = await _itinerarioApplication.ImportExcelItinerario(request);
 

@@ -14,4 +14,5 @@ public interface IUsuarioApplication
     Task<BaseResponse<bool>> RegisterUsuario(UsuarioRequestDto requestDto);
     Task<BaseResponse<bool>> EditUsuario(int id, UsuarioRequestDto requestDto);
     Task<BaseResponse<bool>> RemoveUsuario(int id);
+    Task<BaseResponse<bool>> ImportExcelUsuario(ImportRequest request);
 }

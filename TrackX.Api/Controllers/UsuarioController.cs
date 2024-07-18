@@ -76,4 +76,12 @@ public class UsuarioController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("Import")]
+    public async Task<IActionResult> ImportExcelUsuario(ImportRequest request)
+    {
+        var response = await _usuarioApplication.ImportExcelUsuario(request);
+
+        return Ok(response);
+    }
 }

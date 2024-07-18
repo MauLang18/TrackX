@@ -8,6 +8,7 @@ using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Dtos.Usuario.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
+using TrackX.Infrastructure.FileExcel;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -22,14 +23,16 @@ public class UsuarioApplication : IUsuarioApplication
     private readonly IFileStorageLocalApplication _fileStorage;
     private readonly IOrderingQuery _orderingQuery;
     private readonly IClienteApplication _clienteApplication;
+    private readonly IImportExcel _importExcel;
 
-    public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorage, IOrderingQuery orderingQuery, IClienteApplication clienteApplication)
+    public UsuarioApplication(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageLocalApplication fileStorage, IOrderingQuery orderingQuery, IClienteApplication clienteApplication, IImportExcel importExcel)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _fileStorage = fileStorage;
         _orderingQuery = orderingQuery;
         _clienteApplication = clienteApplication;
+        _importExcel = importExcel;
     }
 
     public async Task<BaseResponse<IEnumerable<UsuarioResponseDto>>> ListUsuarios(BaseFiltersRequest filters)
@@ -261,6 +264,44 @@ public class UsuarioApplication : IUsuarioApplication
             {
                 response.IsSuccess = true;
                 response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> ImportExcelUsuario(ImportRequest request)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            using var stream = new MemoryStream();
+            await request.excel!.CopyToAsync(stream);
+            stream.Position = 0;
+
+            var data = _importExcel.ImportFromExcel<TbUsuario>(stream);
+
+            foreach (var account in data)
+            {
+                account.Pass = BC.HashPassword(account.Pass);
+            }
+
+            response.Data = await _unitOfWork.Usuario.RegisterRangeAsync(data);
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
             else
             {

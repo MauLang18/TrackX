@@ -79,4 +79,12 @@ public class WhsController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("Import")]
+    public async Task<IActionResult> ImportExcelWhs(ImportRequest request)
+    {
+        var response = await _WhsApplication.ImportExcelWhs(request);
+
+        return Ok(response);
+    }
 }

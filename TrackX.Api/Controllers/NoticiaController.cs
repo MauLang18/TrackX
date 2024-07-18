@@ -66,4 +66,12 @@ public class NoticiaController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("Import")]
+    public async Task<IActionResult> ImportExcelNoticia(ImportRequest request)
+    {
+        var response = await _noticiaApplication.ImportExcelNoticia(request);
+
+        return Ok(response);
+    }
 }

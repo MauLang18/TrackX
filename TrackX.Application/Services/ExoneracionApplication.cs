@@ -7,6 +7,7 @@ using TrackX.Application.Dtos.Exoneracion.Request;
 using TrackX.Application.Dtos.Exoneracion.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
+using TrackX.Infrastructure.FileExcel;
 using TrackX.Infrastructure.Persistences.Interfaces;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -20,14 +21,16 @@ public class ExoneracionApplication : IExoneracionApplication
     private readonly IOrderingQuery _orderingQuery;
     private readonly IFileStorageLocalApplication _fileStorage;
     private readonly IClienteApplication _clienteApplication;
+    private readonly IImportExcel _importExcel;
 
-    public ExoneracionApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication)
+    public ExoneracionApplication(IUnitOfWork unitOfWork, IMapper mapper, IOrderingQuery orderingQuery, IFileStorageLocalApplication fileStorage, IClienteApplication clienteApplication, IImportExcel importExcel)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _orderingQuery = orderingQuery;
         _fileStorage = fileStorage;
         _clienteApplication = clienteApplication;
+        _importExcel = importExcel;
     }
 
     public async Task<BaseResponse<IEnumerable<ExoneracionResponseDto>>> ListExoneracion(BaseFiltersRequest filters)
@@ -309,6 +312,39 @@ public class ExoneracionApplication : IExoneracionApplication
             {
                 response.IsSuccess = true;
                 response.Message = ReplyMessage.MESSAGE_DELETE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> ImportExcelExoneracion(ImportRequest request)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            using var stream = new MemoryStream();
+            await request.excel!.CopyToAsync(stream);
+            stream.Position = 0;
+
+            var data = _importExcel.ImportFromExcel<TbExoneracion>(stream);
+
+            response.Data = await _unitOfWork.Exoneracion.RegisterRangeAsync(data);
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
             else
             {
