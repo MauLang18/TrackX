@@ -11,6 +11,7 @@ pipeline {
         WORKSPACE_TMP_DIR = '/tmp/jenkins'
     }
 
+
     stages {
         stage('Check Dev Container Running') {
             steps {
