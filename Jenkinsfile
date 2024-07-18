@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'maulang18/trackX.api:latest'
+        DOCKER_IMAGE = 'maulang18/trackx.api:latest'
         CONTAINER_NAME_DEV = 'TrackXCFDev'
         PORT_DEV = '10108'
         PORT_CONTAINER = '8080'
@@ -10,6 +10,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         WORKSPACE_TMP_DIR = '/tmp/jenkins'
     }
+
 
     stages {
         stage('Check Dev Container Running') {
@@ -31,7 +32,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "docker build -t ${DOCKER_IMAGE} ."
+                    sh "docker build -f TrackX.Api/Dockerfile -t ${DOCKER_IMAGE} ."
                 }
             }
         }
