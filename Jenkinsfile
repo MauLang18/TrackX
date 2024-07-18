@@ -1,42 +1,69 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'maulang18/trackx.api:latest'
+        CONTAINER_NAME_DEV = 'TrackXCFDev'
+        PORT_DEV = '10108'
+        PORT_CONTAINER = '8080'
+        COMPOSE_NAME = '/home/administrador/docker-compose-castrofallas.yml'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
+        WORKSPACE_TMP_DIR = '/tmp/jenkins'
+    }
+
     stages {
-        stage('Docker Build') {
+        stage('Check Dev Container Running') {
             steps {
                 script {
-                    bat "docker build -f TrackX.Api/Dockerfile -t maulang18/trackx.api:latest ."
+                    def devContainerRunning = sh(script: "docker ps -q -f name=${CONTAINER_NAME_DEV}", returnStdout: true).trim()
+                    if (devContainerRunning) {
+                        env.DEV_CONTAINER_RUNNING = "true"
+                    } else {
+                        env.DEV_CONTAINER_RUNNING = "false"
+                    }
                 }
             }
         }
+
+        stage('Docker Build') {
+            when {
+                expression { env.DEV_CONTAINER_RUNNING == 'false' }
+            }
+            steps {
+                script {
+                    sh "docker build -f TrackX.Api/Dockerfile -t ${DOCKER_IMAGE} ."
+                }
+            }
+        }
+
         stage('Docker Run (Development)') {
             when {
                 expression { env.GIT_BRANCH == 'origin/develop' }
             }
             steps {
                 script {
-                    // Detener y eliminar el contenedor TrackXDev si existe
-                    bat 'docker stop TrackXDev 2>NUL || exit 0'
-                    bat 'docker rm TrackXDev 2>NUL || exit 0'
-                    
-                    // Ejecutar el contenedor de desarrollo
-                    bat 'docker run -d -p 10108:8080 --name TrackXDev maulang18/trackx.api:latest'
+                    if (env.DEV_CONTAINER_RUNNING == 'true') {
+                        echo 'Development container is already running.'
+                    } else {
+                        sh "docker run -d -p ${PORT_DEV}:${PORT_CONTAINER} --name ${CONTAINER_NAME_DEV} ${DOCKER_IMAGE}"
+                    }
                 }
             }
         }
+
         stage('Docker Compose Up (Production)') {
             when {
                 expression { env.GIT_BRANCH == 'origin/master' }
             }
             steps {
                 script {
-                    // Detener y eliminar el contenedor TrackXDev si existe
-                    bat 'docker stop TrackXDev 2>NUL || exit 0'
-                    bat 'docker rm TrackXDev 2>NUL || exit 0'
-                    
-                    // Ejecutar docker-compose para producción
-                    dir('C:/Users/administrador/Desktop/Docker/CastroFallas') {
-                        bat 'docker-compose up -d'
+                    def devContainerRunning = sh(script: "docker ps -q -f name=${CONTAINER_NAME_DEV}", returnStdout: true).trim()
+                    if (devContainerRunning) {
+                        sh "docker stop ${CONTAINER_NAME_DEV} || true"
+                        sh "docker rm ${CONTAINER_NAME_DEV} || true"
+                    }
+                    dir('/home/administrador') {
+                        sh "docker-compose -f ${COMPOSE_NAME} up -d"
                     }
                 }
             }
@@ -46,14 +73,18 @@ pipeline {
     post {
         always {
             script {
-                // Limpieza después de cada ejecución
-                bat 'docker system prune -af'
+                echo 'Cleaning up unused Docker images...'
+                sh "docker image prune -f"
             }
         }
 
         success {
             script {
                 echo 'Pipeline succeeded!'
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
+                    sh "docker push ${DOCKER_IMAGE}"
+                }
             }
         }
 
