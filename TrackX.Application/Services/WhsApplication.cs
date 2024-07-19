@@ -385,7 +385,7 @@ public class WhsApplication : IWhsApplication
         return response;
     }
 
-    public async Task<BaseResponse<bool>> ImportExcelWhs(ImportRequest request)
+    public async Task<BaseResponse<bool>> ImportExcelWhs(ImportRequest request, string whs)
     {
         var response = new BaseResponse<bool>();
         try
@@ -395,6 +395,11 @@ public class WhsApplication : IWhsApplication
             stream.Position = 0;
 
             var data = _importExcel.ImportFromExcel<TbWhs>(stream);
+
+            foreach (var items in data)
+            {
+                items.POL = whs;
+            }
 
             response.Data = await _unitOfWork.Whs.RegisterRangeAsync(data);
             if (response.Data)

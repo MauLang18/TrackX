@@ -13,5 +13,5 @@ public interface IWhsApplication
     Task<BaseResponse<bool>> RegisterWhs(WhsRequestDto requestDto);
     Task<BaseResponse<bool>> EditWhs(int id, WhsRequestDto requestDto);
     Task<BaseResponse<bool>> RemoveWhs(int id);
-    Task<BaseResponse<bool>> ImportExcelWhs(ImportRequest request);
+    Task<BaseResponse<bool>> ImportExcelWhs(ImportRequest request, string whs);
 }
