@@ -11,6 +11,7 @@ pipeline {
         SONARQUBE_AUTH_TOKEN = 'Sonar-Token'
         SONARQUBE_HOST_URL = 'http://20.81.187.2:9000'
         SONARQUBE_PROJECT_KEY = 'sonar.projectKey=TrackX-CastroFallas'
+        PATH = "${PATH}:/home/administrador/.dotnet/tools"
     }
 
     stages {
@@ -41,6 +42,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    echo "PATH: ${env.PATH}"
                     withSonarQubeEnv('Sonar-Server') {
                         sh """
                         dotnet sonarscanner begin /k:${SONARQUBE_PROJECT_KEY} /d:sonar.host.url=${SONARQUBE_HOST_URL} /d:sonar.login=${env.SONARQUBE_AUTH_TOKEN}
