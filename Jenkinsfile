@@ -8,9 +8,6 @@ pipeline {
         PORT_CONTAINER = '8080'
         COMPOSE_NAME = '/home/administrador/docker-compose-castrofallas.yml'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
-        SONARQUBE_PROJECT_KEY = 'TrackX-CastroFallas'
-        SONARQUBE_URL = 'https://sonar.customcodecr.com'
-        WORKSPACE_TMP_DIR = '/tmp/jenkins'
     }
 
     stages {
@@ -34,24 +31,6 @@ pipeline {
             steps {
                 script {
                     sh "docker build -f TrackX.Api/Dockerfile -t ${DOCKER_IMAGE} ."
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            when {
-                expression { env.GIT_BRANCH == 'origin/develop' || env.GIT_BRANCH == 'origin/master' }
-            }
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'Sonar-Token', variable: 'SONAR_TOKEN')]) {
-                        sh '''
-                        sonar-scanner \
-                            -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                            -Dsonar.host.url=${SONARQUBE_URL} \
-                            -Dsonar.login=${SONAR_TOKEN}
-                        '''
-                    }
                 }
             }
         }
