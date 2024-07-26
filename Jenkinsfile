@@ -41,7 +41,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv('Sonar-Server') {
                         sh """
                         dotnet sonarscanner begin /k:${SONARQUBE_PROJECT_KEY} /d:sonar.host.url=${SONARQUBE_HOST_URL} /d:sonar.login=${env.SONARQUBE_AUTH_TOKEN}
                         dotnet build
