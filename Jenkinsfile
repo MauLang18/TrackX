@@ -46,7 +46,6 @@ pipeline {
                     withCredentials([string(credentialsId: 'Sonar-Token', variable: 'SONAR_TOKEN')]) {
                         sh "sonar-scanner \
                             -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                            -Dsonar.host.url=${SONAR_SERVER} \
                             -Dsonar.login=${SONAR_TOKEN}"
                     }
                 }
