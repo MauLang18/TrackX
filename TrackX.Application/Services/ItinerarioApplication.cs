@@ -84,8 +84,8 @@ public class ItinerarioApplication : IItinerarioApplication
 
             if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
             {
-                itinerarios = itinerarios.Where(x => x.FechaCreacionAuditoria >= Convert.ToDateTime(filters.StartDate)
-                    && x.FechaCreacionAuditoria <= Convert.ToDateTime(filters.EndDate)
+                itinerarios = itinerarios.Where(x => x.ETD >= Convert.ToDateTime(filters.StartDate)
+                    && x.ETD <= Convert.ToDateTime(filters.EndDate)
                     .AddDays(1));
             }
 
