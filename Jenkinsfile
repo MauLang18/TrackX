@@ -9,6 +9,7 @@ pipeline {
         COMPOSE_NAME = '/home/administrador/docker-compose-castrofallas.yml'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         SONARQUBE_PROJECT_KEY = 'TrackX-CastroFallas'
+        SONARQUBE_URL = 'https://sonar.customcodecr.com'
         WORKSPACE_TMP_DIR = '/tmp/jenkins'
     }
 
@@ -44,9 +45,12 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'Sonar-Token', variable: 'SONAR_TOKEN')]) {
-                        sh "sonar-scanner \
+                        sh '''
+                        sonar-scanner \
                             -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                            -Dsonar.login=${SONAR_TOKEN}"
+                            -Dsonar.host.url=${SONARQUBE_URL} \
+                            -Dsonar.login=${SONAR_TOKEN}
+                        '''
                     }
                 }
             }
