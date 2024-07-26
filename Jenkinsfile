@@ -10,7 +10,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         SONARQUBE_AUTH_TOKEN = 'Sonar-Token'
         SONARQUBE_HOST_URL = 'http://20.81.187.2:9000'
-        SONARQUBE_PROJECT_KEY = 'sonar.projectKey=TrackX-CastroFallas'
+        SONARQUBE_PROJECT_KEY = 'TrackX-CastroFallas'
         PATH = "${PATH}:/home/administrador/.dotnet/tools"
     }
 
