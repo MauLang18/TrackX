@@ -44,10 +44,12 @@ pipeline {
                 script {
                     echo "PATH: ${env.PATH}"
                     withSonarQubeEnv('Sonar-Server') {
-                    sh 'dotnet sonarscanner begin /k:TrackX-CastroFallas /d:sonar.host.url=$SONARQUBE_URL /d:sonar.login=$SONARQUBE_TOKEN /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml'
-                    sh 'dotnet build TrackX.sln'
-                    sh 'dotnet sonarscanner end /d:sonar.login=$SONARQUBE_TOKEN'
-                }
+                        sh '''
+                            dotnet sonarscanner begin /k:$SONARQUBE_PROJECT_KEY /d:sonar.host.url=$SONARQUBE_HOST_URL /d:sonar.login=$SONARQUBE_TOKEN /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+                            dotnet build TrackX.sln
+                            dotnet sonarscanner end /d:sonar.login=$SONARQUBE_TOKEN
+                        '''
+                    }
                 }
             }
         }
