@@ -45,9 +45,9 @@ pipeline {
                     echo "PATH: ${env.PATH}"
                     withSonarQubeEnv('Sonar-Server') {
                         sh """
-                        dotnet sonarscanner begin /k:${SONARQUBE_PROJECT_KEY} /d:sonar.host.url=${SONARQUBE_HOST_URL} /d:sonar.login=${env.SONARQUBE_AUTH_TOKEN}
+                        dotnet sonarscanner begin /k:${SONARQUBE_PROJECT_KEY} /d:sonar.host.url=${SONARQUBE_HOST_URL} /d:sonar.login=${SONARQUBE_AUTH_TOKEN} /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
                         dotnet build TrackX.sln
-                        dotnet sonarscanner end /d:sonar.login=${env.SONARQUBE_AUTH_TOKEN}
+                        dotnet sonarscanner end /d:sonar.login=${SONARQUBE_AUTH_TOKEN}
                         """
                     }
                 }
