@@ -8,7 +8,7 @@ pipeline {
         PORT_CONTAINER = '8080'
         COMPOSE_NAME = '/home/administrador/docker-compose-castrofallas.yml'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
-        SONARQUBE_AUTH_TOKEN = 'Sonar-Token'
+        SONARQUBE_TOKEN = credentials('Sonar-Token')
         SONARQUBE_HOST_URL = 'http://20.81.187.2:9000'
         SONARQUBE_PROJECT_KEY = 'TrackX-CastroFallas'
         PATH = "${PATH}:/home/administrador/.dotnet/tools"
@@ -44,12 +44,10 @@ pipeline {
                 script {
                     echo "PATH: ${env.PATH}"
                     withSonarQubeEnv('Sonar-Server') {
-                        sh """
-                        dotnet sonarscanner begin /k:${SONARQUBE_PROJECT_KEY} /d:sonar.host.url=${SONARQUBE_HOST_URL} /d:sonar.login=${SONARQUBE_AUTH_TOKEN} /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-                        dotnet build TrackX.sln
-                        dotnet sonarscanner end /d:sonar.login=${SONARQUBE_AUTH_TOKEN}
-                        """
-                    }
+                    sh 'dotnet sonarscanner begin /k:TrackX-CastroFallas /d:sonar.host.url=$SONARQUBE_URL /d:sonar.login=$SONARQUBE_TOKEN /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml'
+                    sh 'dotnet build TrackX.sln'
+                    sh 'dotnet sonarscanner end /d:sonar.login=$SONARQUBE_TOKEN'
+                }
                 }
             }
         }
