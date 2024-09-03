@@ -168,7 +168,8 @@ public class FinanceApplication : IFinanceApplication
             if (requestDto.EstadoCuenta is not null)
                 Finance.EstadoCuenta = await _fileStorage.SaveFile(AzureContainers.FINANCES, requestDto.EstadoCuenta);
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {
@@ -221,7 +222,8 @@ public class FinanceApplication : IFinanceApplication
             if (requestDto.EstadoCuenta is null)
                 Finance.EstadoCuenta = FinanceEdit.Data!.EstadoCuenta!;
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {

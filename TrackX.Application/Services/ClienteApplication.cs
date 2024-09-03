@@ -7,129 +7,131 @@ using TrackX.Domain.Entities;
 using TrackX.Utilities.Static;
 using WatchDog;
 
-namespace TrackX.Application.Services;
-
-public class ClienteApplication : IClienteApplication
+namespace TrackX.Application.Services
 {
-    [Obsolete]
-    public async Task<BaseResponse<DynamicsClientes>> CodeCliente(string name)
+    public class ClienteApplication : IClienteApplication
     {
-        var response = new BaseResponse<DynamicsClientes>();
-
-        try
+        [Obsolete]
+        public async Task<BaseResponse<DynamicsClientes>> CodeCliente(string name)
         {
-            string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
-            string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
-            string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
-            string crmUrl = "https://sibaja07.crm.dynamics.com/";
+            var response = new BaseResponse<DynamicsClientes>();
 
-            string accessToken = string.Empty;
-
-            ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
-            var authContext = new AuthenticationContext(authority);
-            var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
-            accessToken = result.AccessToken;
-
-            using (HttpClient httpClient = new HttpClient())
+            try
             {
-                httpClient.BaseAddress = new Uri(crmUrl);
-                httpClient.Timeout = TimeSpan.FromSeconds(300);
-                httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-                httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                string entityName = "accounts";
+                string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
+                string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
+                string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
+                string crmUrl = "https://sibaja07.crm.dynamics.com/";
 
-                HttpResponseMessage httpResponseMessaje = await httpClient.GetAsync($"api/data/v9.2/{entityName}?$select=name,accountid&$filter=contains(name,'{name}')");
-                httpResponseMessaje.EnsureSuccessStatusCode();
+                ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
+                var authContext = new AuthenticationContext(authority);
+                var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
+                string accessToken = result.AccessToken;
 
-                if (httpResponseMessaje.IsSuccessStatusCode)
+                using (HttpClient httpClient = new HttpClient())
                 {
-                    string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
+                    httpClient.BaseAddress = new Uri(crmUrl);
+                    httpClient.Timeout = TimeSpan.FromSeconds(300);
+                    httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+                    httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    string entityName = "accounts";
 
-                    DynamicsClientes dynamicsObject = JsonConvert.DeserializeObject<DynamicsClientes>(jsonResponse)!;
+                    HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(
+                        $"api/data/v9.2/{entityName}?$select=name,accountid&$filter=contains(name,'{name}')");
 
-                    response.IsSuccess = true;
-                    response.Data = dynamicsObject;
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                    httpResponseMessage.EnsureSuccessStatusCode();
+
+                    if (httpResponseMessage.IsSuccessStatusCode)
+                    {
+                        string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                        var dynamicsObject = JsonConvert.DeserializeObject<DynamicsClientes>(jsonResponse) ?? new DynamicsClientes();
+
+                        response.IsSuccess = true;
+                        response.Data = dynamicsObject;
+                        response.Message = ReplyMessage.MESSAGE_QUERY;
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    }
+
+                    return response;
                 }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                }
-
-                return response;
             }
-        }
-        catch (Exception ex)
-        {
-            response.IsSuccess = false;
-            response.Message = ex.Message;
-            WatchLogger.Log(ex.Message);
-        }
-
-        return response;
-    }
-
-    [Obsolete]
-    public async Task<BaseResponse<DynamicsClientes>> NombreCliente(string code)
-    {
-        var response = new BaseResponse<DynamicsClientes>();
-
-        try
-        {
-            string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
-            string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
-            string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
-            string crmUrl = "https://sibaja07.crm.dynamics.com/";
-
-            string accessToken = string.Empty;
-
-            ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
-            var authContext = new AuthenticationContext(authority);
-            var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
-            accessToken = result.AccessToken;
-
-            using (HttpClient httpClient = new HttpClient())
+            catch (Exception ex)
             {
-                httpClient.BaseAddress = new Uri(crmUrl);
-                httpClient.Timeout = TimeSpan.FromSeconds(300);
-                httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-                httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                string entityName = "accounts";
-
-                HttpResponseMessage httpResponseMessaje = await httpClient.GetAsync($"api/data/v9.2/{entityName}?$select=name&$filter=accountid eq {code}");
-                httpResponseMessaje.EnsureSuccessStatusCode();
-
-                if (httpResponseMessaje.IsSuccessStatusCode)
-                {
-                    string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
-
-                    DynamicsClientes dynamicsObject = JsonConvert.DeserializeObject<DynamicsClientes>(jsonResponse)!;
-
-                    response.IsSuccess = true;
-                    response.Data = dynamicsObject;
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                }
-
-                return response;
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+                WatchLogger.Log(ex.Message);
             }
-        }
-        catch (Exception ex)
-        {
-            response.IsSuccess = false;
-            response.Message = ex.Message;
-            WatchLogger.Log(ex.Message);
+
+            return response;
         }
 
-        return response;
+        [Obsolete]
+        public async Task<BaseResponse<DynamicsClientes>> NombreCliente(List<string> codes)
+        {
+            var response = new BaseResponse<DynamicsClientes>();
+
+            try
+            {
+                string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
+                string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
+                string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
+                string crmUrl = "https://sibaja07.crm.dynamics.com/";
+
+                ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
+                var authContext = new AuthenticationContext(authority);
+                var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
+                string accessToken = result.AccessToken;
+
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri(crmUrl);
+                    httpClient.Timeout = TimeSpan.FromSeconds(300);
+                    httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+                    httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    string entityName = "accounts";
+
+                    var filter = string.Join(" or ", codes.Select(code => $"accountid eq {code}"));
+                    var requestUri = $"api/data/v9.2/{entityName}?$select=name,accountid&$filter={filter}";
+
+                    HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(requestUri);
+                    httpResponseMessage.EnsureSuccessStatusCode();
+
+                    if (httpResponseMessage.IsSuccessStatusCode)
+                    {
+                        string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                        var dynamicsObject = JsonConvert.DeserializeObject<DynamicsClientes>(jsonResponse) ?? new DynamicsClientes();
+
+                        response.IsSuccess = true;
+                        response.Data = dynamicsObject;
+                        response.Message = ReplyMessage.MESSAGE_QUERY;
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    }
+
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+                WatchLogger.Log(ex.Message);
+            }
+
+            return response;
+        }
     }
 }

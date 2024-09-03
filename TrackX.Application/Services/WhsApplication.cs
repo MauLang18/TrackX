@@ -215,7 +215,8 @@ public class WhsApplication : IWhsApplication
             if (requestDto.Imagen5 is not null)
                 Whs.Imagen5 = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.Imagen5);
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {
@@ -310,7 +311,8 @@ public class WhsApplication : IWhsApplication
             if (requestDto.Imagen5 is null)
                 Whs.Imagen5 = WhsEdit.Data!.Imagen5!;
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {
