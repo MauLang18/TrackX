@@ -53,19 +53,23 @@ public class TransInternacionalApplication : ITransInternacionalApplication
                         url = "new_cliente";
                         break;
                     case 2:
-                        url = "new_contenedor";
+                        //contenedor
+                        url = $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,_customerid_value,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_etadestino,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_llevaexoneracion&$filter=(contains(new_contenedor,'{textFilter}') and (createdon gt 2023-12-31T00:00:00.000Z) and (new_preestado2 eq 100000000 or new_preestado2 eq 100000001 or new_preestado2 eq 100000002 or new_preestado2 eq 100000017 or new_preestado2 eq 100000003 or new_preestado2 eq 100000004 or new_preestado2 eq 100000005 or new_preestado2 eq 100000007 or new_preestado2 eq 100000018 or new_preestado2 eq 100000028 or new_preestado2 eq 100000024 or new_preestado2 eq 100000025 or new_preestado2 eq 100000026 or new_preestado2 eq 100000015 or new_preestado2 eq 100000027 or new_preestado2 eq 100000014))&$orderby=title desc";
                         break;
                     case 3:
-                        url = "new_bcf";
+                        //bcf
+                        url = $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,_customerid_value,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_etadestino,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_llevaexoneracion&$filter=(contains(new_bcf,'{textFilter}') and (createdon gt 2023-12-31T00:00:00.000Z) and (new_preestado2 eq 100000000 or new_preestado2 eq 100000001 or new_preestado2 eq 100000002 or new_preestado2 eq 100000017 or new_preestado2 eq 100000003 or new_preestado2 eq 100000004 or new_preestado2 eq 100000005 or new_preestado2 eq 100000007 or new_preestado2 eq 100000018 or new_preestado2 eq 100000028 or new_preestado2 eq 100000024 or new_preestado2 eq 100000025 or new_preestado2 eq 100000026 or new_preestado2 eq 100000015 or new_preestado2 eq 100000027 or new_preestado2 eq 100000014))&$orderby=title desc";
                         break;
                     case 4:
-                        url = "new_factura";
+                        //factura
+                        url = $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,_customerid_value,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_etadestino,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_llevaexoneracion&$filter=(contains(new_factura,'{textFilter}') and (createdon gt 2023-12-31T00:00:00.000Z) and (new_preestado2 eq 100000000 or new_preestado2 eq 100000001 or new_preestado2 eq 100000002 or new_preestado2 eq 100000017 or new_preestado2 eq 100000003 or new_preestado2 eq 100000004 or new_preestado2 eq 100000005 or new_preestado2 eq 100000007 or new_preestado2 eq 100000018 or new_preestado2 eq 100000028 or new_preestado2 eq 100000024 or new_preestado2 eq 100000025 or new_preestado2 eq 100000026 or new_preestado2 eq 100000015 or new_preestado2 eq 100000027 or new_preestado2 eq 100000014))&$orderby=title desc";
                         break;
                     case 5:
-                        url = "new_po";
+                        //po
+                        url = $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,_customerid_value,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_etadestino,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_llevaexoneracion&$filter=(contains(new_po,'{textFilter}') and (createdon gt 2023-12-31T00:00:00.000Z) and (new_preestado2 eq 100000000 or new_preestado2 eq 100000001 or new_preestado2 eq 100000002 or new_preestado2 eq 100000017 or new_preestado2 eq 100000003 or new_preestado2 eq 100000004 or new_preestado2 eq 100000005 or new_preestado2 eq 100000007 or new_preestado2 eq 100000018 or new_preestado2 eq 100000028 or new_preestado2 eq 100000024 or new_preestado2 eq 100000025 or new_preestado2 eq 100000026 or new_preestado2 eq 100000015 or new_preestado2 eq 100000027 or new_preestado2 eq 100000014))&$orderby=title desc";
                         break;
                     default:
-                        url = $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_eta,new_etd1,modifiedon,new_incoterm,new_origen,new_po,new_poe,new_pol,new_preestado2,new_seal,_new_shipper_value,new_statuscliente,new_tamaoequipo,new_new_facturacompaia,title,new_lugarcolocacion,new_redestino,new_diasdetransito,new_barcodesalida,new_viajedesalida,_customerid_value,new_ofertatarifaid,new_proyecciondeingreso&$filter=((new_preestado2 eq 100000000 or new_preestado2 eq 100000001 or new_preestado2 eq 100000002 or new_preestado2 eq 100000017 or new_preestado2 eq 100000003 or new_preestado2 eq 100000004 or new_preestado2 eq 100000005 or new_preestado2 eq 100000007 or new_preestado2 eq 100000018 or new_preestado2 eq 100000028 or new_preestado2 eq 100000024 or new_preestado2 eq 100000025 or new_preestado2 eq 100000026 or new_preestado2 eq 100000015 or new_preestado2 eq 100000027 or new_preestado2 eq 100000014))&$orderby=title desc";
+                        url = $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,_customerid_value,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_etadestino,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_llevaexoneracion&$filter=(createdon gt 2023-12-31 and new_servicio eq '100000001')";
                         break;
                 }
 
@@ -78,34 +82,34 @@ public class TransInternacionalApplication : ITransInternacionalApplication
                     string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
                     DynamicsTransInternacional dynamicsObject = JsonConvert.DeserializeObject<DynamicsTransInternacional>(jsonResponse)!;
 
-                    //var shipperValues = dynamicsObject.value!
-                    //    .Where(item => item._new_shipper_value != null)
-                    //    .Select(item => item._new_shipper_value)
-                    //    .Distinct()
-                    //    .ToList();
+                    var shipperValues = dynamicsObject.value!
+                        .Where(item => item._customerid_value != null)
+                        .Select(item => item._customerid_value)
+                        .Distinct()
+                        .ToList();
 
-                    //var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
+                    var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
 
-                    //var clienteMap = new Dictionary<string, string>();
-                    //foreach (var clientes in clientesResult.Data!.value!)
-                    //{
-                    //    if (!clienteMap.ContainsKey(clientes.name!))
-                    //    {
-                    //        clienteMap[clientes.name!] = clientes.name!;
-                    //    }
-                    //}
+                    var clienteMap = new Dictionary<string, string>();
+                    foreach (var clientes in clientesResult.Data!.value!)
+                    {
+                        if (!clienteMap.ContainsKey(clientes.name!))
+                        {
+                            clienteMap[clientes.name!] = clientes.name!;
+                        }
+                    }
 
-                    //foreach (var item in dynamicsObject.value!)
-                    //{
-                    //    if (item._new_shipper_value != null && clienteMap.ContainsKey(item._new_shipper_value))
-                    //    {
-                    //        item._new_shipper_value = clienteMap[item._new_shipper_value];
-                    //    }
-                    //    else
-                    //    {
-                    //        item._new_shipper_value = "";
-                    //    }
-                    //}
+                    foreach (var item in dynamicsObject.value!)
+                    {
+                        if (item._customerid_value != null && clienteMap.ContainsKey(item._customerid_value))
+                        {
+                            item._customerid_value = clienteMap[item._customerid_value];
+                        }
+                        else
+                        {
+                            item._customerid_value = "";
+                        }
+                    }
 
                     response.IsSuccess = true;
                     response.Data = dynamicsObject;

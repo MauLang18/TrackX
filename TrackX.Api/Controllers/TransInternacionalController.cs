@@ -17,13 +17,14 @@ public class TransInternacionalController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> ListTransInternacional()
+    public async Task<IActionResult> ListTransInternacional(int numFilter, string textFilter)
     {
-        var response = await _transInternacionalApplication.ListTransInternacional();
+        var response = await _transInternacionalApplication.ListTransInternacional(numFilter, textFilter);
 
         return Ok(response);
     }
 
+    [HttpPost("Agregar")]
     public async Task<IActionResult> RegisterComentario([FromBody] TransInternacionalRequestDto request)
     {
         var response = await _transInternacionalApplication.RegisterComentario(request);
