@@ -17,7 +17,7 @@ public class TransInternacionalController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> ListTransInternacional(int numFilter, string textFilter)
+    public async Task<IActionResult> ListTransInternacional(int numFilter = 0, string textFilter = null!)
     {
         var response = await _transInternacionalApplication.ListTransInternacional(numFilter, textFilter);
 
