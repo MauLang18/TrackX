@@ -1,4 +1,4 @@
-﻿using Microsoft.Identity.Client;
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
@@ -14,34 +14,32 @@ namespace TrackX.Application.Services;
 public class TransInternacionalApplication : ITransInternacionalApplication
 {
     private readonly IClienteApplication _clienteApplication;
-    private readonly string _clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
-    private readonly string _clientSecret = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
-    private readonly string _authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
-    private readonly string _crmUrl = "https://sibaja07.crm.dynamics.com/";
 
     public TransInternacionalApplication(IClienteApplication clienteApplication)
     {
         _clienteApplication = clienteApplication;
     }
 
+    [Obsolete]
     public async Task<BaseResponse<DynamicsTransInternacional>> ListTransInternacional(int numFilter, string textFilter)
     {
         var response = new BaseResponse<DynamicsTransInternacional>();
 
         try
         {
-            var app = ConfidentialClientApplicationBuilder
-                .Create(_clientId)
-                .WithClientSecret(_clientSecret)
-                .WithAuthority(new Uri(_authority))
-                .Build();
+            string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
+            string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
+            string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
+            string crmUrl = "https://sibaja07.crm.dynamics.com/";
 
-            var result = await app.AcquireTokenForClient(new[] { $"{_crmUrl}/.default" }).ExecuteAsync();
+            Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential credentials = new Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential(clientId, clientSecrets);
+            var authContext = new AuthenticationContext(authority);
+            var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
             string accessToken = result.AccessToken;
 
             using (HttpClient httpClient = new HttpClient())
             {
-                httpClient.BaseAddress = new Uri(_crmUrl);
+                httpClient.BaseAddress = new Uri(crmUrl);
                 httpClient.Timeout = TimeSpan.FromSeconds(300);
                 httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
                 httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
@@ -109,18 +107,19 @@ public class TransInternacionalApplication : ITransInternacionalApplication
 
         try
         {
-            var app = ConfidentialClientApplicationBuilder
-                .Create(_clientId)
-                .WithClientSecret(_clientSecret)
-                .WithAuthority(new Uri(_authority))
-                .Build();
+            string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
+            string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
+            string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
+            string crmUrl = "https://sibaja07.crm.dynamics.com/";
 
-            var result = await app.AcquireTokenForClient(new[] { $"{_crmUrl}/.default" }).ExecuteAsync();
+            Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential credentials = new Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential(clientId, clientSecrets);
+            var authContext = new AuthenticationContext(authority);
+            var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
             string accessToken = result.AccessToken;
 
             using (HttpClient httpClient = new HttpClient())
             {
-                httpClient.BaseAddress = new Uri(_crmUrl);
+                httpClient.BaseAddress = new Uri(crmUrl);
                 httpClient.Timeout = TimeSpan.FromSeconds(300);
                 httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
                 httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
