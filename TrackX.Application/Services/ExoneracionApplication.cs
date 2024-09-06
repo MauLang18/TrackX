@@ -199,7 +199,8 @@ public class ExoneracionApplication : IExoneracionApplication
             if (requestDto.Autorizacion is not null)
                 Exoneracion.Autorizacion = await _fileStorage.SaveFile(AzureContainers.EXONERACIONES, requestDto.Autorizacion);
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {
@@ -259,7 +260,8 @@ public class ExoneracionApplication : IExoneracionApplication
             if (requestDto.Autorizacion is null)
                 Exoneracion.Autorizacion = ExoneracionEdit.Data!.Autorizacion!;
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {

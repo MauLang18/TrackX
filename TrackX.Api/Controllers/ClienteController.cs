@@ -22,12 +22,4 @@ public class ClienteController : ControllerBase
 
         return Ok(response);
     }
-
-    [HttpGet("Code")]
-    public async Task<IActionResult> ListClientesCode(string code)
-    {
-        var response = await _clienteApplication.NombreCliente(code);
-
-        return Ok(response);
-    }
 }

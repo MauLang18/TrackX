@@ -61,9 +61,10 @@ public class AuthApplication : IAuthApplication
 
                 if (shipperValue is not null)
                 {
-                    var nuevoValorCliente = _clienteApplication.NombreCliente(shipperValue);
+                    var shipperValuesList = new List<string> { shipperValue };
+                    var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
-                    foreach (var items in nuevoValorCliente.Result.Data!.value!)
+                    foreach (var items in nuevoValorCliente.Data!.value!)
                     {
                         user.NombreCliente = items.name!;
                     }

@@ -169,7 +169,8 @@ public class ControlInventarioApplication : IControlInventarioApplication
             if (requestDto.ControlInventario is not null)
                 ControlInventario.ControlInventario = await _fileStorage.SaveFile(AzureContainers.WHS, requestDto.ControlInventario);
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {
@@ -222,7 +223,8 @@ public class ControlInventarioApplication : IControlInventarioApplication
             if (requestDto.ControlInventario is null)
                 ControlInventario.ControlInventario = ControlInventarioEdit.Data!.ControlInventario!;
 
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(requestDto.Cliente!);
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
 
             foreach (var datos in nuevoValorCliente.Data!.value!)
             {
