@@ -73,7 +73,7 @@ namespace TrackX.Application.Services
         }
 
         [Obsolete]
-        public async Task<BaseResponse<DynamicsClientes>> NombreCliente(List<string> codes)
+        public async Task<BaseResponse<DynamicsClientes>> NombreCliente(List<string> code)
         {
             var response = new BaseResponse<DynamicsClientes>();
 
