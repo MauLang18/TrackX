@@ -24,7 +24,7 @@ public class TransInternacionalController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("Agregar")]
+    [HttpPatch("Agregar")]
     public async Task<IActionResult> RegisterComentario([FromBody] TransInternacionalRequestDto request)
     {
         var response = await _transInternacionalApplication.RegisterComentario(request);

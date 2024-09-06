@@ -2,5 +2,6 @@
 
 public class TransInternacionalRequestDto
 {
+    public string? TransInternacionalId { get; set; }
     public string? Comentario { get; set; }
 }

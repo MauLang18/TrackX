@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
+using System.Text;
 using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Dtos.TransInternacional.Request;
 using TrackX.Application.Interfaces;
@@ -106,9 +107,74 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        public Task<BaseResponse<bool>> RegisterComentario(TransInternacionalRequestDto request)
+        public async Task<BaseResponse<bool>> RegisterComentario(TransInternacionalRequestDto request)
         {
-            throw new NotImplementedException();
+            var response = new BaseResponse<bool>();
+
+            try
+            {
+                string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
+                string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
+                string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
+                string crmUrl = "https://sibaja07.crm.dynamics.com/";
+
+                ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
+                var authContext = new AuthenticationContext(authority);
+                var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
+                string accessToken = result.AccessToken;
+
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri(crmUrl);
+                    httpClient.Timeout = TimeSpan.FromSeconds(300);
+                    httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+                    httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                    // Crear el objeto para actualizar
+                    var comentarioRecord = new
+                    {
+                        new_descripcion1 = request.Comentario // Actualizar la descripción del comentario
+                    };
+
+                    string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    // Endpoint para el PATCH: actualizar un incidente específico (usando un ID de ejemplo)
+                    string url = $"api/data/v9.2/incidents({request.TransInternacionalId})"; // ID del incidente
+
+                    var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+                    {
+                        Content = content
+                    };
+
+                    HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(requestMessage);
+                    httpResponseMessage.EnsureSuccessStatusCode();
+
+                    if (httpResponseMessage.IsSuccessStatusCode)
+                    {
+                        response.IsSuccess = true;
+                        response.Data = true;
+                        response.Message = "Comentario actualizado exitosamente.";
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Data = false;
+                        response.Message = "Error al actualizar el comentario.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Data = false;
+                response.Message = ex.Message;
+                WatchLogger.Log(ex.Message);
+            }
+
+            return response;
         }
 
         private string BuildUrl(string entityName, int numFilter, string textFilter)
@@ -123,7 +189,7 @@ namespace TrackX.Application.Services
                 _ => $"Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001'])"
             };
 
-            return $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title&$filter={filter} and Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01') and (new_preestado2 ne 100000012 or new_preestado2 ne 100000010 or new_preestado2 ne 100000022 or new_preestado2 ne 100000021 or new_preestado2 ne 100000019 or new_preestado2 ne 100000023) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
+            return $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,new_descripcion1&$filter={filter} and Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01') and (new_preestado2 ne 100000012 or new_preestado2 ne 100000010 or new_preestado2 ne 100000022 or new_preestado2 ne 100000021 or new_preestado2 ne 100000019 or new_preestado2 ne 100000023) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
         }
     }
 }
