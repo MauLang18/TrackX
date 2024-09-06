@@ -53,7 +53,7 @@ pipeline {
 
         stage('Construcción de Docker') {
             when {
-                expression { currentBuild.result == 'SUCCESS' }
+                expression { currentBuild.result == 'success' }
             }
             steps {
                 script {
