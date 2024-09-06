@@ -99,7 +99,7 @@ namespace TrackX.Application.Services
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     string entityName = "accounts";
 
-                    var filter = string.Join(" or ", codes.Select(code => $"accountid eq {code}"));
+                    var filter = string.Join(" or ", code.Select(code => $"accountid eq {code}"));
                     var requestUri = $"api/data/v9.2/{entityName}?$select=name,accountid&$filter={filter}";
 
                     HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(requestUri);
