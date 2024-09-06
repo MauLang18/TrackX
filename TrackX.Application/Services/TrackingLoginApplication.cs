@@ -9,6 +9,8 @@ using TrackX.Domain.Entities;
 using TrackX.Utilities.Static;
 using WatchDog;
 
+namespace TrackX.Application.Services;
+
 public class TrackingLoginApplication : ITrackingLoginApplication
 {
     private readonly IClienteApplication _clienteApplication;
