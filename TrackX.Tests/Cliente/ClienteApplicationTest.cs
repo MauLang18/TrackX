@@ -46,7 +46,8 @@ public class ClienteApplicationTest
         var expected = true;
 
         //Act
-        var result = await context!.NombreCliente(code);
+        var shipperValuesList = new List<string> { code };
+        var result = await context!.NombreCliente(shipperValuesList);
         var current = result.IsSuccess;
 
         //Assert
