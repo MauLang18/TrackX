@@ -24,7 +24,6 @@ public class TransInternacionalApplication : ITransInternacionalApplication
         _clienteApplication = clienteApplication;
     }
 
-    [Obsolete("This method is obsolete and will be removed in future versions.")]
     public async Task<BaseResponse<DynamicsTransInternacional>> ListTransInternacional(int numFilter, string textFilter)
     {
         var response = new BaseResponse<DynamicsTransInternacional>();
