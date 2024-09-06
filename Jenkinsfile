@@ -52,9 +52,6 @@ pipeline {
         }
 
         stage('Construcción de Docker') {
-            when {
-                expression { currentBuild.result == 'success' }
-            }
             steps {
                 script {
                     sh "docker build -f TrackX.Api/Dockerfile -t ${DOCKER_IMAGE} ."
