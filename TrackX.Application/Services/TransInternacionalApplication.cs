@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+﻿using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
@@ -14,32 +14,35 @@ namespace TrackX.Application.Services
     public class TransInternacionalApplication : ITransInternacionalApplication
     {
         private readonly IClienteApplication _clienteApplication;
+        private readonly string _clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
+        private readonly string _clientSecret = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
+        private readonly string _authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
+        private readonly string _crmUrl = "https://sibaja07.crm.dynamics.com/";
 
         public TransInternacionalApplication(IClienteApplication clienteApplication)
         {
             _clienteApplication = clienteApplication;
         }
 
-        [Obsolete]
+        [Obsolete("This method is obsolete and will be removed in future versions.")]
         public async Task<BaseResponse<DynamicsTransInternacional>> ListTransInternacional(int numFilter, string textFilter)
         {
             var response = new BaseResponse<DynamicsTransInternacional>();
 
             try
             {
-                string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
-                string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
-                string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
-                string crmUrl = "https://sibaja07.crm.dynamics.com/";
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(_clientId)
+                    .WithClientSecret(_clientSecret)
+                    .WithAuthority(new Uri(_authority))
+                    .Build();
 
-                ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
-                var authContext = new AuthenticationContext(authority);
-                var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
+                var result = await app.AcquireTokenForClient(new[] { $"{_crmUrl}/.default" }).ExecuteAsync();
                 string accessToken = result.AccessToken;
 
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri(crmUrl);
+                    httpClient.BaseAddress = new Uri(_crmUrl);
                     httpClient.Timeout = TimeSpan.FromSeconds(300);
                     httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
                     httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
@@ -65,20 +68,14 @@ namespace TrackX.Application.Services
 
                         var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
 
-                        var clienteMap = new Dictionary<string, string>();
-                        foreach (var clientes in clientesResult.Data!.value!)
-                        {
-                            if (!clienteMap.ContainsKey(clientes.name!))
-                            {
-                                clienteMap[clientes.accountid!] = clientes.name!;
-                            }
-                        }
+                        var clienteMap = clientesResult.Data!.value!
+                            .ToDictionary(clientes => clientes.accountid!, clientes => clientes.name!);
 
                         foreach (var item in apiResponse.Value!)
                         {
-                            if (item._customerid_value != null && clienteMap.ContainsKey(item._customerid_value))
+                            if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
                             {
-                                item._customerid_value = clienteMap[item._customerid_value];
+                                item._customerid_value = clienteName;
                             }
                             else
                             {
@@ -113,36 +110,33 @@ namespace TrackX.Application.Services
 
             try
             {
-                string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
-                string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
-                string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
-                string crmUrl = "https://sibaja07.crm.dynamics.com/";
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(_clientId)
+                    .WithClientSecret(_clientSecret)
+                    .WithAuthority(new Uri(_authority))
+                    .Build();
 
-                ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
-                var authContext = new AuthenticationContext(authority);
-                var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
+                var result = await app.AcquireTokenForClient(new[] { $"{_crmUrl}/.default" }).ExecuteAsync();
                 string accessToken = result.AccessToken;
 
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri(crmUrl);
+                    httpClient.BaseAddress = new Uri(_crmUrl);
                     httpClient.Timeout = TimeSpan.FromSeconds(300);
                     httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
                     httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                    // Crear el objeto para actualizar
                     var comentarioRecord = new
                     {
-                        new_descripcion1 = request.Comentario // Actualizar la descripción del comentario
+                        new_descripcion1 = request.Comentario
                     };
 
                     string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                    // Endpoint para el PATCH: actualizar un incidente específico (usando un ID de ejemplo)
-                    string url = $"api/data/v9.2/incidents({request.TransInternacionalId})"; // ID del incidente
+                    string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
 
                     var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
                     {
@@ -177,7 +171,7 @@ namespace TrackX.Application.Services
             return response;
         }
 
-        private string BuildUrl(string entityName, int numFilter, string textFilter)
+        private static string BuildUrl(string entityName, int numFilter, string textFilter)
         {
             string filter = numFilter switch
             {
