@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Interfaces;
+using TrackX.Application.Services;
 using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers;
@@ -65,6 +66,14 @@ public class UsuarioController : ControllerBase
     public async Task<IActionResult> EditUsuario(int id, [FromForm] UsuarioRequestDto requestDto)
     {
         var response = await _usuarioApplication.EditUsuario(id, requestDto);
+
+        return Ok(response);
+    }
+
+    [HttpPut("State/{id:int}")]
+    public async Task<IActionResult> ChangeStateUsuario(int id)
+    {
+        var response = await _usuarioApplication.ChangeStateUsuario(id);
 
         return Ok(response);
     }

@@ -318,4 +318,51 @@ public class UsuarioApplication : IUsuarioApplication
 
         return response;
     }
+
+    public async Task<BaseResponse<bool>> ChangeStateUsuario(int id)
+    {
+        var response = new BaseResponse<bool>();
+
+        try
+        {
+            var usuarioEdit = await UsuarioById(id);
+
+            if (usuarioEdit.Data is null)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
+            }
+
+            var usuario = _mapper.Map<TbUsuario>(usuarioEdit.Data);
+            usuario.Id = id;
+
+            usuario.Estado =
+                usuarioEdit.Data.Estado ==
+                (int)StateTypes.Inactivo
+                ? (int)StateTypes.Activo
+                : (int)StateTypes.Inactivo;
+
+            response.Data = await _unitOfWork.Usuario.EditAsync(usuario);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_UPDATE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
 }
