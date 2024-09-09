@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TrackX.Application.Commons.Bases.Request;
+using TrackX.Application.Dtos.Mail.Request;
 using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Interfaces;
-using TrackX.Application.Services;
 using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers;
@@ -15,11 +15,13 @@ public class UsuarioController : ControllerBase
 {
     private readonly IUsuarioApplication _usuarioApplication;
     private readonly IGenerateExcelApplication _generateExcelApplication;
+    private readonly ISendEmailApplication _sendEmailApplication;
 
-    public UsuarioController(IUsuarioApplication usuarioApplication, IGenerateExcelApplication generateExcelApplication)
+    public UsuarioController(IUsuarioApplication usuarioApplication, IGenerateExcelApplication generateExcelApplication, ISendEmailApplication sendEmailApplication)
     {
         _usuarioApplication = usuarioApplication;
         _generateExcelApplication = generateExcelApplication;
+        _sendEmailApplication = sendEmailApplication;
     }
 
     [HttpGet]
@@ -53,7 +55,6 @@ public class UsuarioController : ControllerBase
         return Ok(response);
     }
 
-    [AllowAnonymous]
     [HttpPost("Register")]
     public async Task<IActionResult> RegisterUsuario([FromForm] UsuarioRequestDto requestDto)
     {
@@ -61,6 +62,54 @@ public class UsuarioController : ControllerBase
 
         return Ok(response);
     }
+
+    [AllowAnonymous]
+    [HttpPost("Register/Web")]
+    public async Task<IActionResult> RegisterWebUsuario([FromForm] UsuarioRequestDto requestDto)
+    {
+        var response = await _usuarioApplication.RegisterUsuarioWeb(requestDto);
+
+        if (response == null || response!.Data!.Id <= 0)
+        {
+            return BadRequest("Error al registrar el usuario.");
+        }
+
+        var activationLink = $"https://api.logisticacastrofallas.com/api/Usuario/State/{response!.Data!.Id}";
+
+        var requestMail = new MailRequestDto
+        {
+            Para = "rsibaja@castrofallas.com",
+            Asunto = $"Activación de cuenta - {requestDto.Nombre} {requestDto.Apellido} - {requestDto.NombreEmpresa}",
+            Contenido = $@"
+            Se acaba de registrar el usuario {requestDto.Correo}
+
+            Para activar su cuenta se puede utilizar el siguiente enlace:
+            <a href='{activationLink}'>Activar cuenta</a>
+
+            Información del usuario registrado:
+            Nombre: {requestDto.Nombre}
+            Apellido: {requestDto.Apellido}
+            Contraseña: {requestDto.Pass}
+            Correo: {requestDto.Correo}
+            Tipo: {requestDto.Tipo}
+            Cliente: {requestDto.Cliente}
+            Rol: {requestDto.IdRol}
+            Nombre de la empresa: {requestDto.NombreEmpresa}
+            Teléfono: {requestDto.Telefono}
+            Dirección: {requestDto.Direccion}
+            País: {requestDto.Pais}
+            Páginas: {requestDto.Paginas}
+            Estado: {requestDto.Estado}
+            
+            Nota: Si no puedes hacer clic en el enlace, copia y pega la URL en tu navegador para activar tu cuenta.
+        "
+        };
+
+        _sendEmailApplication.SendEmail(requestMail);
+
+        return Ok(response);
+    }
+
 
     [HttpPut("Edit/{id:int}")]
     public async Task<IActionResult> EditUsuario(int id, [FromForm] UsuarioRequestDto requestDto)
@@ -70,7 +119,8 @@ public class UsuarioController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("State/{id:int}")]
+    [AllowAnonymous]
+    [HttpGet("State/{id:int}")]
     public async Task<IActionResult> ChangeStateUsuario(int id)
     {
         var response = await _usuarioApplication.ChangeStateUsuario(id);

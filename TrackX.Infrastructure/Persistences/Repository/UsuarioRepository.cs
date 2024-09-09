@@ -22,4 +22,24 @@ public class UsuarioRepository : GenericRepository<TbUsuario>, IUsuarioRepositor
 
         return user!;
     }
+
+    public async Task<TbUsuario> RegisterUser(TbUsuario entity)
+    {
+        entity.UsuarioCreacionAuditoria = 1;
+        entity.FechaCreacionAuditoria = DateTime.Now;
+
+        await _context.AddAsync(entity);
+
+        var recordsAffected = await _context.SaveChangesAsync();
+
+        if (recordsAffected > 0)
+        {
+            return new TbUsuario
+            {
+                Id = entity.Id,
+            };
+        }
+
+        return null!;
+    }
 }

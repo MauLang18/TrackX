@@ -365,4 +365,39 @@ public class UsuarioApplication : IUsuarioApplication
 
         return response;
     }
+
+    public async Task<BaseResponse<TbUsuario>> RegisterUsuarioWeb(UsuarioRequestDto requestDto)
+    {
+        var response = new BaseResponse<TbUsuario>();
+
+        try
+        {
+            var account = _mapper.Map<TbUsuario>(requestDto);
+            account.Pass = BC.HashPassword(account.Pass);
+
+            if (requestDto.Imagen is not null)
+                account.Imagen = await _fileStorage.SaveFile(AzureContainers.USUARIOS, requestDto.Imagen);
+
+            response.Data = await _unitOfWork.Usuario.RegisterUser(account);
+
+            if (response.Data is not null)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
 }
