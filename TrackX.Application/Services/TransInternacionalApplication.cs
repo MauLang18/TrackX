@@ -31,6 +31,7 @@ namespace TrackX.Application.Services
         public async Task<BaseResponse<DynamicsTransInternacional>> ListTransInternacional(int numFilter, string textFilter)
         {
             var response = new BaseResponse<DynamicsTransInternacional>();
+            var cliente = "";
 
             try
             {
@@ -56,6 +57,18 @@ namespace TrackX.Application.Services
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
                 string entityName = "incidents";
+
+                if (numFilter == 1 && !string.IsNullOrEmpty(textFilter))
+                {
+                    var nuevoValorCliente = await _clienteApplication.CodeCliente(textFilter);
+
+                    foreach (var item in nuevoValorCliente.Data!.value!)
+                    {
+                        cliente = item.name;
+                        textFilter = item.accountid!;
+                    }
+                }
+
                 string url = BuildUrl(entityName, numFilter, textFilter);
 
                 HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url);
@@ -66,26 +79,36 @@ namespace TrackX.Application.Services
                     string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
                     DynamicsTransInternacional apiResponse = JsonConvert.DeserializeObject<DynamicsTransInternacional>(jsonResponse)!;
 
-                    var shipperValues = apiResponse.Value!
+                    if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
+                    {
+                        var shipperValues = apiResponse.Value!
                         .Where(item => item._customerid_value != null)
                         .Select(item => item._customerid_value)
                         .Distinct()
                         .ToList();
 
-                    var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
+                        var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
 
-                    var clienteMap = clientesResult.Data!.value!
-                        .ToDictionary(clientes => clientes.accountid!, clientes => clientes.name!);
+                        var clienteMap = clientesResult.Data!.value!
+                            .ToDictionary(clientes => clientes.accountid!, clientes => clientes.name!);
 
-                    foreach (var item in apiResponse.Value!)
-                    {
-                        if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
+                        foreach (var item in apiResponse.Value!)
                         {
-                            item._customerid_value = clienteName;
+                            if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
+                            {
+                                item._customerid_value = clienteName;
+                            }
+                            else
+                            {
+                                item._customerid_value = "";
+                            }
                         }
-                        else
+                    }
+                    else
+                    {
+                        foreach (var item in apiResponse.Value!)
                         {
-                            item._customerid_value = "";
+                            item._customerid_value = cliente;
                         }
                     }
 
@@ -138,7 +161,7 @@ namespace TrackX.Application.Services
 
                 var comentarioRecord = new
                 {
-                    new_descripcion1 = request.Comentario
+                    new_observacionesgenerales = request.Comentario
                 };
 
                 string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
@@ -180,6 +203,12 @@ namespace TrackX.Application.Services
 
         private static string BuildUrl(string entityName, int numFilter, string textFilter)
         {
+            // Verifica si textFilter es nulo o vacío, en cuyo caso se usará el filtro por defecto
+            if (string.IsNullOrEmpty(textFilter))
+            {
+                numFilter = 0;
+            }
+
             string filter = numFilter switch
             {
                 1 => $"_customerid_value eq '{textFilter}' and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001'])",
@@ -190,7 +219,7 @@ namespace TrackX.Application.Services
                 _ => $"Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001'])"
             };
 
-            return $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,new_descripcion1&$filter={filter} and Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01') and (new_preestado2 ne 100000012 or new_preestado2 ne 100000010 or new_preestado2 ne 100000022 or new_preestado2 ne 100000021 or new_preestado2 ne 100000019 or new_preestado2 ne 100000023) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
+            return $"api/data/v9.2/{entityName}?$select=new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,new_observacionesgenerales&$filter={filter} and Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01') and (new_preestado2 ne 100000012 or new_preestado2 ne 100000010 or new_preestado2 ne 100000022 or new_preestado2 ne 100000021 or new_preestado2 ne 100000019 or new_preestado2 ne 100000023) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
         }
     }
 }

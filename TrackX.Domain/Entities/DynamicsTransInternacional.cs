@@ -39,6 +39,6 @@ namespace TrackX.Domain.Entities
         public int? new_preestado2 { get; set; }
         public int? new_tamaoequipo { get; set; }
         public string? title { get; set; }
-        public string? new_descripcion1 { get; set; }
+        public string? new_observacionesgenerales { get; set; }
     }
 }
