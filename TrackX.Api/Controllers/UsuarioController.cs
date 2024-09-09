@@ -81,35 +81,71 @@ public class UsuarioController : ControllerBase
             Para = "rsibaja@castrofallas.com",
             Asunto = $"Activación de cuenta - {requestDto.Nombre} {requestDto.Apellido} - {requestDto.NombreEmpresa}",
             Contenido = $@"
-            Se acaba de registrar el usuario {requestDto.Correo}
-
-            Para activar su cuenta se puede utilizar el siguiente enlace:
-            <a href='{activationLink}'>Activar cuenta</a>
-
-            Información del usuario registrado:
-            Nombre: {requestDto.Nombre}
-            Apellido: {requestDto.Apellido}
-            Contraseña: {requestDto.Pass}
-            Correo: {requestDto.Correo}
-            Tipo: {requestDto.Tipo}
-            Cliente: {requestDto.Cliente}
-            Rol: {requestDto.IdRol}
-            Nombre de la empresa: {requestDto.NombreEmpresa}
-            Teléfono: {requestDto.Telefono}
-            Dirección: {requestDto.Direccion}
-            País: {requestDto.Pais}
-            Páginas: {requestDto.Paginas}
-            Estado: {requestDto.Estado}
-            
-            Nota: Si no puedes hacer clic en el enlace, copia y pega la URL en tu navegador para activar tu cuenta.
-        "
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    color: #333;
+                    line-height: 1.6;
+                }}
+                .container {{
+                    width: 80%;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #f4f4f4;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }}
+                h1 {{
+                    color: #0056b3;
+                }}
+                p {{
+                    margin: 10px 0;
+                }}
+                a {{
+                    color: #007bff;
+                    text-decoration: none;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    font-size: 0.9em;
+                    color: #888;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h1>Activación de Cuenta</h1>
+                <p>Se acaba de registrar el usuario <strong>{requestDto.Correo}</strong></p>
+                <p>Para activar su cuenta, por favor utilice el siguiente enlace:</p>
+                <p><a href='{activationLink}'>Activar cuenta</a></p>
+                <h2>Información del Usuario Registrado:</h2>
+                <p><strong>Nombre:</strong> {requestDto.Nombre}</p>
+                <p><strong>Apellido:</strong> {requestDto.Apellido}</p>
+                <p><strong>Contraseña:</strong> {requestDto.Pass}</p>
+                <p><strong>Correo:</strong> {requestDto.Correo}</p>
+                <p><strong>Tipo:</strong> {requestDto.Tipo}</p>
+                <p><strong>Cliente:</strong> {requestDto.Cliente}</p>
+                <p><strong>Rol:</strong> {requestDto.IdRol}</p>
+                <p><strong>Nombre de la Empresa:</strong> {requestDto.NombreEmpresa}</p>
+                <p><strong>Teléfono:</strong> {requestDto.Telefono}</p>
+                <p><strong>Dirección:</strong> {requestDto.Direccion}</p>
+                <p><strong>País:</strong> {requestDto.Pais}</p>
+                <p><strong>Páginas:</strong> {requestDto.Paginas}</p>
+                <p><strong>Estado:</strong> {requestDto.Estado}</p>
+                <div class='footer'>
+                    <p>Nota: Si no puedes hacer clic en el enlace, copia y pega la URL en tu navegador para activar tu cuenta.</p>
+                </div>
+            </div>
+        </body>
+        </html>"
         };
 
         _sendEmailApplication.SendEmail(requestMail);
 
         return Ok(response);
     }
-
 
     [HttpPut("Edit/{id:int}")]
     public async Task<IActionResult> EditUsuario(int id, [FromForm] UsuarioRequestDto requestDto)
@@ -124,6 +160,75 @@ public class UsuarioController : ControllerBase
     public async Task<IActionResult> ChangeStateUsuario(int id)
     {
         var response = await _usuarioApplication.ChangeStateUsuario(id);
+        var data = await _usuarioApplication.UsuarioById(id);
+
+        if (data == null || data.Data!.Id <= 0)
+        {
+            return NotFound("Usuario no encontrado.");
+        }
+
+        // Crear el contenido del correo
+        var requestMail = new MailRequestDto
+        {
+            Para = data.Data!.Correo,
+            Asunto = "Tu cuenta ha sido activada",
+            Contenido = $@"
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    color: #333;
+                    line-height: 1.6;
+                }}
+                .container {{
+                    width: 80%;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #f4f4f4;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }}
+                h1 {{
+                    color: #28a745;
+                }}
+                p {{
+                    margin: 10px 0;
+                }}
+                a {{
+                    color: #007bff;
+                    text-decoration: none;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    font-size: 0.9em;
+                    color: #888;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h1>Cuenta Activada Exitosamente</h1>
+                <p>Hola <strong>{data.Data!.Nombre} {data.Data!.Apellido}</strong>,</p>
+                <p>Tu cuenta ha sido activada exitosamente. Ahora puedes iniciar sesión y utilizar todos los servicios disponibles.</p>
+                <h2>Detalles de tu Cuenta:</h2>
+                <p><strong>Nombre:</strong> {data.Data!.Nombre}</p>
+                <p><strong>Apellido:</strong> {data.Data!.Apellido}</p>
+                <p><strong>Correo:</strong> {data.Data!.Correo}</p>
+                <p><strong>Teléfono:</strong> {data.Data!.Telefono}</p>
+                <p><strong>Dirección:</strong> {data.Data!.Direccion}</p>
+                <p><strong>País:</strong> {data.Data!.Pais}</p>
+                <p><strong>Nombre de la Empresa:</strong> {data.Data!.NombreEmpresa}</p>
+                <div class='footer'>
+                    <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+                </div>
+            </div>
+        </body>
+        </html>"
+        };
+
+        // Enviar el correo
+        _sendEmailApplication.SendEmail(requestMail);
 
         return Ok(response);
     }
