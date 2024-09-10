@@ -1,6 +1,5 @@
 ﻿using ClosedXML.Excel;
 using Newtonsoft.Json;
-using TrackX.Domain.Entities;
 using TrackX.Utilities.Static;
 
 namespace TrackX.Infrastructure.FileExcel;
@@ -9,7 +8,7 @@ public class GenerateExcel : IGenerateExcel
 {
     private readonly string jsonFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Static", "JSON");
 
-    public MemoryStream GenerateToExcel(List<Value2> data, List<TableColumns> columns)
+    public MemoryStream GenerateToExcel<T>(List<T> data, List<TableColumns> columns)
     {
         var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Listado");
@@ -70,192 +69,17 @@ public class GenerateExcel : IGenerateExcel
         return stream;
     }
 
-    private string GetPropertyValue(Value2 item, TableColumns column)
+    private string GetPropertyValue(object item, TableColumns column)
     {
         string propertyName = column.PropertyName!;
+        string jsonFileName = GetJsonFileName(propertyName);
 
-        if (propertyName == "new_origen")
+        if (!string.IsNullOrEmpty(jsonFileName))
         {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "origen.json");
+            string jsonFilePath = Path.Combine(jsonFolderPath, jsonFileName);
             if (File.Exists(jsonFilePath))
             {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_destino")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "destino.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_cantequipo")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "cantidadEquipo.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_tamaoequipo")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "tamanoEquipo.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_incoterm")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "incoterm.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_poe")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "poe.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_pol")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "pol.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_preestado2")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "status.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
-                string jsonContent = File.ReadAllText(jsonFilePath);
-                Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
-                {
-                    return jsonValues[valor!];
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (propertyName == "new_transporte")
-        {
-            string jsonFilePath = Path.Combine(jsonFolderPath, "transporte.json");
-            if (File.Exists(jsonFilePath))
-            {
-                var valor = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
+                var valor = item.GetType().GetProperty(propertyName)?.GetValue(item)?.ToString();
                 string jsonContent = File.ReadAllText(jsonFilePath);
                 Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
                 if (jsonValues.ContainsKey(valor!))
@@ -273,7 +97,25 @@ public class GenerateExcel : IGenerateExcel
             }
         }
 
-        var propertyValue = typeof(Value2).GetProperty(propertyName!)?.GetValue(item)?.ToString();
+        var propertyValue = item.GetType().GetProperty(propertyName)?.GetValue(item)?.ToString();
         return propertyValue ?? "";
+    }
+
+    private string GetJsonFileName(string propertyName)
+    {
+        return propertyName switch
+        {
+            "new_origen" => "origen.json",
+            "new_destino" => "destino.json",
+            "new_cantequipo" => "cantidadEquipo.json",
+            "new_tamaoequipo" => "tamanoEquipo.json",
+            "new_incoterm" => "incoterm.json",
+            "new_poe" => "poe.json",
+            "new_pol" => "pol.json",
+            "new_preestado2" => "status.json",
+            "new_transporte" => "transporte.json",
+            "new_ejecutivocomercial" => "ejecutivo.json",
+            _ => ""
+        };
     }
 }

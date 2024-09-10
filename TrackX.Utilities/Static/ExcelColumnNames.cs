@@ -335,4 +335,43 @@ public class ExcelColumnNames
         return columnsProperties;
     }
     #endregion
+
+    #region ColumnsTransporteInternacional
+    public static List<(string ColumnName, string PropertyName)> GetColumnsTrasporteInternacional()
+    {
+        var columnsProperties = new List<(string ColumnName, string PropertyName)>
+        {
+            ("IDTRA", "title"),
+            ("ESTADO", "new_preestado2"),
+            ("CLIENTE", "_customerid_value"),
+            ("CLIENTE", "new_ejecutivocomercial"),
+            ("# CONTENEDOR", "new_contenedor"),
+            ("# FACTURA", "new_factura"),
+            ("COMMODITY", "new_commodity"),
+            ("BCF", "new_bcf"),
+            ("PO", "new_po"),
+            ("POL", "new_pol"),
+            ("POE", "new_poe"),
+            ("ETA", "new_eta"),
+            ("CONFIRMACION DE ZARPE", "new_confirmacinzarpe"),
+            ("CANTIDAD DE EQUIPO", "new_cantequipo"),
+            ("TAMAÑO DE EQUPO", "new_tamaoequipo"),
+            ("CANTIDAD DE BULTOS", "new_contidadbultos"),
+            ("PESO", "new_peso"),
+            ("CERTIFICADO ORIGEN", "new_certificadoorigen"),
+            ("CERTIFICADO REEXPORTACIÓN", "new_certificadoreexportacion"),
+            ("EXONERACIÓN", "new_exoneracion"),
+            ("ENTREGA BL ORIGINAL", "new_entregablo"),
+            ("ENTREGA CARTA DE TRAZABILIDAD", "new_entregacargatrazabilidad"),
+            ("FECHA BL IMPRESO", "new_fechablimpreso"),
+            ("FECHA BL DIGITADO TICA", "new_fechabldigitadotica"),
+            ("ENTREGA DE TRADUCCIÓN", "new_fechatraduccion"),
+            ("LIBERACIÓN DOCUMENTAL", "new_fechaliberaciondocumental"),
+            ("LIBERACIÓN FINANCIERA", "new_fechaliberacionfinanciera"),
+            ("COMENTARIO", "new_observacionesgenerales"),
+        };
+
+        return columnsProperties;
+    }
+    #endregion
 }

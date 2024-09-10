@@ -13,6 +13,9 @@
     <None Update="Static\JSON\destino.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Static\JSON\ejecutivo.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Static\JSON\incoterm.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
