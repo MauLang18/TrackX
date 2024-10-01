@@ -79,24 +79,35 @@ public class GenerateExcel : IGenerateExcel
             string jsonFilePath = Path.Combine(jsonFolderPath, jsonFileName);
             if (File.Exists(jsonFilePath))
             {
+                // Obtener el valor de la propiedad del item
                 var valor = item.GetType().GetProperty(propertyName)?.GetValue(item)?.ToString();
+
+                // Si 'valor' es nulo, devolver una cadena vacía
+                if (string.IsNullOrEmpty(valor))
+                {
+                    return "";
+                }
+
                 string jsonContent = File.ReadAllText(jsonFilePath);
                 Dictionary<string, string> jsonValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent)!;
-                if (jsonValues.ContainsKey(valor!))
+
+                // Verificar si el valor existe en el diccionario
+                if (jsonValues.ContainsKey(valor))
                 {
-                    return jsonValues[valor!];
+                    return jsonValues[valor];
                 }
                 else
                 {
-                    return "";
+                    return ""; // O algún valor predeterminado si es necesario
                 }
             }
             else
             {
-                return "";
+                return ""; // Manejar el caso en que el archivo JSON no exista
             }
         }
 
+        // Si no hay archivo JSON asociado, devolver el valor de la propiedad directamente
         var propertyValue = item.GetType().GetProperty(propertyName)?.GetValue(item)?.ToString();
         return propertyValue ?? "";
     }
