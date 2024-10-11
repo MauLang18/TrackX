@@ -77,24 +77,30 @@ public class TrackingLoginApplication : ITrackingLoginApplication
                             .Distinct()
                             .ToList();
 
-                        var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
+                        Dictionary<string, string> clienteNames = new Dictionary<string, string>();
 
-                        var clienteNames = clientesResult.Data!.value!
-                            .Select(clientes => clientes.name!)
-                            .Distinct()
-                            .ToDictionary(name => name, name => name);
+                        if (shipperValues.Any()) // Si hay valores de shipper
+                        {
+                            var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
+
+                            clienteNames = clientesResult.Data!.value!
+                                .Select(clientes => clientes.name!)
+                                .Distinct()
+                                .ToDictionary(name => name, name => name);
+                        }
 
                         foreach (var item in dynamicsObject.value!)
                         {
                             if (item._new_shipper_value != null)
                             {
+                                // Si existe un cliente con ese shipper, lo reemplaza, si no, lo deja en blanco
                                 item._new_shipper_value = clienteNames.TryGetValue(item._new_shipper_value, out var clienteName)
                                     ? clienteName
                                     : "";
                             }
                             else
                             {
-                                item._new_shipper_value = "";
+                                item._new_shipper_value = ""; // Si no hay shipper, dejarlo en blanco
                             }
                         }
 
@@ -185,24 +191,30 @@ public class TrackingLoginApplication : ITrackingLoginApplication
                             .Distinct()
                             .ToList();
 
-                        var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
+                        Dictionary<string, string> clienteNames = new Dictionary<string, string>();
 
-                        var clienteNames = clientesResult.Data!.value!
-                            .Select(clientes => clientes.name!)
-                            .Distinct()
-                            .ToDictionary(name => name, name => name);
+                        if (shipperValues.Any()) // Si hay valores de shipper
+                        {
+                            var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
+
+                            clienteNames = clientesResult.Data!.value!
+                                .Select(clientes => clientes.name!)
+                                .Distinct()
+                                .ToDictionary(name => name, name => name);
+                        }
 
                         foreach (var item in dynamicsObject.value!)
                         {
                             if (item._new_shipper_value != null)
                             {
+                                // Si existe un cliente con ese shipper, lo reemplaza, si no, lo deja en blanco
                                 item._new_shipper_value = clienteNames.TryGetValue(item._new_shipper_value, out var clienteName)
                                     ? clienteName
                                     : "";
                             }
                             else
                             {
-                                item._new_shipper_value = "";
+                                item._new_shipper_value = ""; // Si no hay shipper, dejarlo en blanco
                             }
                         }
 
