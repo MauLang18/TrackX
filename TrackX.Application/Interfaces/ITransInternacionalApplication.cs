@@ -6,6 +6,6 @@ namespace TrackX.Application.Interfaces;
 
 public interface ITransInternacionalApplication
 {
-    Task<BaseResponse<DynamicsTransInternacional>> ListTransInternacional(int numFilter, string textFilter);
+    Task<BaseResponse<Dynamics<DynamicsTransInternacional>>> ListTransInternacional(int numFilter, string textFilter);
     Task<BaseResponse<bool>> RegisterComentario(TransInternacionalRequestDto request);
 }

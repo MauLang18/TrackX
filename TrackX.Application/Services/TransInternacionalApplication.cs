@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
+﻿using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
@@ -7,6 +6,7 @@ using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Dtos.TransInternacional.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
+using TrackX.Infrastructure.Secret;
 using TrackX.Utilities.Static;
 using WatchDog;
 
@@ -15,30 +15,38 @@ namespace TrackX.Application.Services
     public class TransInternacionalApplication : ITransInternacionalApplication
     {
         private readonly IClienteApplication _clienteApplication;
-        private readonly IConfiguration _configuration;
+        private readonly ISecretService _secretService;
         private readonly HttpClient _httpClient;
 
         public TransInternacionalApplication(
             IClienteApplication clienteApplication,
-            IConfiguration configuration,
+            ISecretService secretService,
             HttpClient httpClient)
         {
             _clienteApplication = clienteApplication;
-            _configuration = configuration;
+            _secretService = secretService;
             _httpClient = httpClient;
         }
 
-        public async Task<BaseResponse<DynamicsTransInternacional>> ListTransInternacional(int numFilter, string textFilter)
+        private async Task<AuthenticationConfig?> GetConfigAsync()
         {
-            var response = new BaseResponse<DynamicsTransInternacional>();
+            var secretJson = await _secretService.GetSecret("TrackX/data/Authentication");
+            var SecretResponse = JsonConvert.DeserializeObject<SecretResponse<AuthenticationConfig>>(secretJson);
+            return SecretResponse?.Data?.Data;
+        }
+
+        public async Task<BaseResponse<Dynamics<DynamicsTransInternacional>>> ListTransInternacional(int numFilter, string textFilter)
+        {
+            var response = new BaseResponse<Dynamics<DynamicsTransInternacional>>();
             var cliente = "";
+            var Config = await GetConfigAsync();
 
             try
             {
-                var clientId = _configuration["Authentication:ClientId"];
-                var clientSecret = _configuration["Authentication:ClientSecret"];
-                var authority = _configuration["Authentication:Authority"];
-                var crmUrl = _configuration["Authentication:CrmUrl"];
+                string clientId = Config!.ClientId!;
+                string clientSecret = Config!.ClientSecret!;
+                string authority = Config!.Authority!;
+                string crmUrl = Config!.CrmUrl!;
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(clientId)
@@ -77,11 +85,11 @@ namespace TrackX.Application.Services
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
                     string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
-                    DynamicsTransInternacional apiResponse = JsonConvert.DeserializeObject<DynamicsTransInternacional>(jsonResponse)!;
+                    Dynamics<DynamicsTransInternacional> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsTransInternacional>>(jsonResponse)!;
 
                     if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
                     {
-                        var shipperValues = apiResponse.Value!
+                        var shipperValues = apiResponse.value!
                         .Where(item => item._customerid_value != null)
                         .Select(item => item._customerid_value)
                         .Distinct()
@@ -92,7 +100,7 @@ namespace TrackX.Application.Services
                         var clienteMap = clientesResult.Data!.value!
                             .ToDictionary(clientes => clientes.accountid!, clientes => clientes.name!);
 
-                        foreach (var item in apiResponse.Value!)
+                        foreach (var item in apiResponse.value!)
                         {
                             if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
                             {
@@ -106,7 +114,7 @@ namespace TrackX.Application.Services
                     }
                     else
                     {
-                        foreach (var item in apiResponse.Value!)
+                        foreach (var item in apiResponse.value!)
                         {
                             item._customerid_value = cliente;
                         }
@@ -136,12 +144,14 @@ namespace TrackX.Application.Services
         {
             var response = new BaseResponse<bool>();
 
+            var Config = await GetConfigAsync();
+
             try
             {
-                var clientId = _configuration["Authentication:ClientId"];
-                var clientSecret = _configuration["Authentication:ClientSecret"];
-                var authority = _configuration["Authentication:Authority"];
-                var crmUrl = _configuration["Authentication:CrmUrl"];
+                string clientId = Config!.ClientId!;
+                string clientSecret = Config!.ClientSecret!;
+                string authority = Config!.Authority!;
+                string crmUrl = Config!.CrmUrl!;
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(clientId)
@@ -203,13 +213,11 @@ namespace TrackX.Application.Services
 
         private static string BuildUrl(string entityName, int numFilter, string textFilter)
         {
-            // Verifica si textFilter es nulo o vacío, en cuyo caso se usará el filtro por defecto
             if (string.IsNullOrEmpty(textFilter))
             {
                 numFilter = 0;
             }
 
-            // Filtro por defecto y grupos de condiciones correctamente agrupados
             string preestadoFilter = "(new_preestado2 ne 100000023 and new_preestado2 ne 100000012 and new_preestado2 ne 100000010 and new_preestado2 ne 100000022 and new_preestado2 ne 100000021 and new_preestado2 ne 100000019)";
 
             string filter = numFilter switch

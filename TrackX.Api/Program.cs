@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using TrackX.Api.Extensions;
 using TrackX.Application.Extensions;
 using TrackX.Infrastructure.Extensions;
+using TrackX.Infrastructure.Secret;
 using TrackX.Utilities.AppSettings;
 using WatchDog;
 
@@ -14,6 +15,8 @@ var Configuration = builder.Configuration;
 // Add services to the container.
 var Cors = "Cors";
 
+
+builder.Services.AddSingleton<ISecretService, VaultSecretService>();
 builder.Services.AddInjectionInfrastructure(Configuration);
 builder.Services.AddInjectionApplication(Configuration);
 builder.Services.AddAuthentication(Configuration);

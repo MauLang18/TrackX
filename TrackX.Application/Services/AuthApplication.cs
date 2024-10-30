@@ -1,7 +1,7 @@
 ﻿using Google.Apis.Auth;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,6 +10,7 @@ using TrackX.Application.Dtos.Usuario.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
 using TrackX.Infrastructure.Persistences.Interfaces;
+using TrackX.Infrastructure.Secret;
 using TrackX.Utilities.AppSettings;
 using TrackX.Utilities.Static;
 using WatchDog;
@@ -20,16 +21,16 @@ namespace TrackX.Application.Services;
 public class AuthApplication : IAuthApplication
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IConfiguration _configuration;
-    private readonly AppSettings _appSettings;
+    private readonly ISecretService _secretService;
     private readonly IClienteApplication _clienteApplication;
+    private readonly AppSettings _appSettings;
 
-    public AuthApplication(IUnitOfWork unitOfWork, IConfiguration configuration, IOptions<AppSettings> appSettings, IClienteApplication clienteApplication)
+    public AuthApplication(IUnitOfWork unitOfWork, ISecretService secretService, IClienteApplication clienteApplication, IOptions<AppSettings> appSettings)
     {
         _unitOfWork = unitOfWork;
-        _configuration = configuration;
-        _appSettings = appSettings.Value;
+        _secretService = secretService;
         _clienteApplication = clienteApplication;
+        _appSettings = appSettings.Value;
     }
 
     public async Task<BaseResponse<string>> Login(TokenRequestDto requestDto, string authType)
@@ -38,6 +39,14 @@ public class AuthApplication : IAuthApplication
 
         try
         {
+            var Config = await GetConfigAsync();
+            if (Config == null)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_TOKEN_ERROR;
+                return response;
+            }
+
             var user = await _unitOfWork.Usuario.UserByEmail(requestDto.Correo!);
 
             if (user is null)
@@ -74,7 +83,7 @@ public class AuthApplication : IAuthApplication
                     user.NombreCliente = "";
                 }
 
-                response.Data = GenerateToken(user);
+                response.Data = await GenerateToken(user);
                 response.Message = ReplyMessage.MESSAGE_TOKEN;
                 return response;
             }
@@ -121,7 +130,7 @@ public class AuthApplication : IAuthApplication
             }
 
             response.IsSuccess = true;
-            response.Data = GenerateToken(user);
+            response.Data = await GenerateToken(user);
             response.Message = ReplyMessage.MESSAGE_TOKEN;
         }
         catch (Exception ex)
@@ -134,10 +143,18 @@ public class AuthApplication : IAuthApplication
         return response;
     }
 
-    private string GenerateToken(TbUsuario usuario)
+    private async Task<JwtConfig?> GetConfigAsync()
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!));
+        var secretJson = await _secretService.GetSecret("TrackX/data/Jwt");
+        var SecretResponse = JsonConvert.DeserializeObject<SecretResponse<JwtConfig>>(secretJson);
+        return SecretResponse?.Data?.Data;
+    }
 
+    private async Task<string> GenerateToken(TbUsuario usuario)
+    {
+        var Config = await GetConfigAsync();
+
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Config!.Secret!));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
@@ -159,10 +176,10 @@ public class AuthApplication : IAuthApplication
         };
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Issuer"],
+            issuer: Config.Issuer,
+            audience: Config.Issuer,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(int.Parse(_configuration["Jwt:Expires"]!)),
+            expires: DateTime.UtcNow.AddHours(int.Parse(Config.Expires!)),
             notBefore: DateTime.UtcNow,
             signingCredentials: credentials);
 

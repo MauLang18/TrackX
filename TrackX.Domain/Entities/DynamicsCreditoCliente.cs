@@ -4,13 +4,6 @@ namespace TrackX.Domain.Entities;
 
 public class DynamicsCreditoCliente
 {
-    [JsonProperty("@odata.context")]
-    public string? odatacontext { get; set; }
-    public List<Value5>? value { get; set; }
-}
-
-public class Value5
-{
     [JsonProperty("@odata.etag")]
     public object? odataetag { get; set; }
     public object? _transactioncurrencyid_value { get; set; }

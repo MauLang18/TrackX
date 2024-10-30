@@ -2,29 +2,40 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.Text;
+using TrackX.Domain.Entities;
+using TrackX.Infrastructure.Secret;
 
-namespace TrackX.Api.Extensions;
-
-public static class AuthenticationExtensions
+namespace TrackX.Api.Extensions
 {
-    public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static class AuthenticationExtensions
     {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration["Jwt:Issuer"],
-                    ValidAudience = configuration["Jwt:Issuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!))
-                };
-            });
+        public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            var serviceProvider = services.BuildServiceProvider();
+            var secretService = serviceProvider.GetRequiredService<ISecretService>();
 
-        return services;
+            var secretJson = secretService.GetSecret("TrackX/data/Jwt").GetAwaiter().GetResult();
+            var SecretResponse = JsonConvert.DeserializeObject<SecretResponse<JwtConfig>>(secretJson);
+            var Config = SecretResponse?.Data?.Data;
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Config!.Issuer,
+                        ValidAudience = Config.Issuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Config.Secret!))
+                    };
+                });
+
+            return services;
+        }
     }
 }

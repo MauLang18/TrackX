@@ -4,13 +4,6 @@ namespace TrackX.Domain.Entities;
 
 public class DynamicsTrackingNoLogin
 {
-    [JsonProperty("@odata.context")]
-    public string? odatacontext { get; set; }
-    public List<Value>? value { get; set; }
-}
-
-public class Value
-{
     [JsonProperty("@odata.etag")]
     public string? odataetag { get; set; }
     public object? new_etadestino { get; set; }

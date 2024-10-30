@@ -4,71 +4,89 @@ using System.Net.Http.Headers;
 using TrackX.Application.Commons.Bases.Response;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
+using TrackX.Infrastructure.Secret;
 using TrackX.Utilities.Static;
 using WatchDog;
 
-namespace TrackX.Application.Services;
-
-public class CreditoClienteApplication : ICreditoClienteApplication
+namespace TrackX.Application.Services
 {
-    [Obsolete]
-    public async Task<BaseResponse<DynamicsCreditoCliente>> CreditoCliente(string code)
+    public class CreditoClienteApplication : ICreditoClienteApplication
     {
-        var response = new BaseResponse<DynamicsCreditoCliente>();
+        private readonly ISecretService _secretService;
 
-        try
+        public CreditoClienteApplication(ISecretService secretService)
         {
-            string clientId = "04f616d1-fb10-4c4f-ba02-45d2562fa9a8";
-            string clientSecrets = "1cn8Q~reOm4kQQ5fuaMUbR_X.cmtbQwyxv22IaVH";
-            string authority = "https://login.microsoftonline.com/48f7ad87-a406-4c72-98f5-d1c996e7e6f2";
-            string crmUrl = "https://sibaja07.crm.dynamics.com/";
+            _secretService = secretService;
+        }
 
-            string accessToken = string.Empty;
+        private async Task<AuthenticationConfig?> GetConfigAsync()
+        {
+            var secretJson = await _secretService.GetSecret("TrackX/data/Authentication");
+            var SecretResponse = JsonConvert.DeserializeObject<SecretResponse<AuthenticationConfig>>(secretJson);
+            return SecretResponse?.Data?.Data;
+        }
 
-            ClientCredential credentials = new ClientCredential(clientId, clientSecrets);
-            var authContext = new AuthenticationContext(authority);
-            var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
-            accessToken = result.AccessToken;
+        [Obsolete]
+        public async Task<BaseResponse<Dynamics<DynamicsCreditoCliente>>> CreditoCliente(string code)
+        {
+            var response = new BaseResponse<Dynamics<DynamicsCreditoCliente>>();
 
-            using (HttpClient httpClient = new HttpClient())
+            var Config = await GetConfigAsync();
+
+            try
             {
-                httpClient.BaseAddress = new Uri(crmUrl);
-                httpClient.Timeout = TimeSpan.FromSeconds(300);
-                httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-                httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                string entityName = "accounts";
+                string clientId = Config!.ClientId!;
+                string clientSecret = Config!.ClientSecret!;
+                string authority = Config!.Authority!;
+                string crmUrl = Config!.CrmUrl!;
 
-                HttpResponseMessage httpResponseMessaje = await httpClient.GetAsync($"api/data/v9.2/{entityName}?$select=_transactioncurrencyid_value,new_financiamiento,paymenttermscode,new_3,new_creditonoincluye,new_diasdecredito,new_fechadeiniciodecredito,new_fechaderenovaciondecredito,new_intersmoratoriomensual,creditlimit,new_tipodeproveedor&$filter=accountid eq {code}");
-                httpResponseMessaje.EnsureSuccessStatusCode();
+                var credentials = new ClientCredential(clientId, clientSecret);
+                var authContext = new AuthenticationContext(authority);
+                var result = await authContext.AcquireTokenAsync(crmUrl, credentials);
+                string accessToken = result.AccessToken;
 
-                if (httpResponseMessaje.IsSuccessStatusCode)
+                using (HttpClient httpClient = new HttpClient())
                 {
-                    string jsonResponse = await httpResponseMessaje.Content.ReadAsStringAsync();
+                    httpClient.BaseAddress = new Uri(crmUrl);
+                    httpClient.Timeout = TimeSpan.FromSeconds(300);
+                    httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+                    httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                    DynamicsCreditoCliente dynamicsObject = JsonConvert.DeserializeObject<DynamicsCreditoCliente>(jsonResponse)!;
+                    // Construye el URI de la solicitud
+                    string entityName = "accounts";
+                    string requestUri = $"api/data/v9.2/{entityName}?$select=_transactioncurrencyid_value,new_financiamiento,paymenttermscode,new_3,new_creditonoincluye,new_diasdecredito,new_fechadeiniciodecredito,new_fechaderenovaciondecredito,new_intersmoratoriomensual,creditlimit,new_tipodeproveedor&$filter=accountid eq {code}";
 
-                    response.IsSuccess = true;
-                    response.Data = dynamicsObject;
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                    HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(requestUri);
+                    httpResponseMessage.EnsureSuccessStatusCode();
+
+                    if (httpResponseMessage.IsSuccessStatusCode)
+                    {
+                        string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+                        Dynamics<DynamicsCreditoCliente> dynamicsObject = JsonConvert.DeserializeObject<Dynamics<DynamicsCreditoCliente>>(jsonResponse)!;
+
+                        response.IsSuccess = true;
+                        response.Data = dynamicsObject;
+                        response.Message = ReplyMessage.MESSAGE_QUERY;
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    }
+
+                    return response;
                 }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                }
-
-                return response;
             }
-        }
-        catch (Exception ex)
-        {
-            response.IsSuccess = false;
-            response.Message = ex.Message;
-            WatchLogger.Log(ex.Message);
-        }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+                WatchLogger.Log(ex.Message);
+            }
 
-        return response;
+            return response;
+        }
     }
 }

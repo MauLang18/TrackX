@@ -1,15 +1,6 @@
-﻿using Newtonsoft.Json;
-
-namespace TrackX.Domain.Entities
+﻿namespace TrackX.Domain.Entities
 {
     public class DynamicsTransInternacional
-    {
-        [JsonProperty("@odata.context")]
-        public string? OdataContext { get; set; }
-        public List<Incident>? Value { get; set; }
-    }
-
-    public class Incident
     {
         public string? incidentid { get; set; }
         public string? new_contenedor { get; set; }

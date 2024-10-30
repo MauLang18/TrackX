@@ -5,5 +5,5 @@ namespace TrackX.Application.Interfaces;
 
 public interface ICreditoClienteApplication
 {
-    Task<BaseResponse<DynamicsCreditoCliente>> CreditoCliente(string code);
+    Task<BaseResponse<Dynamics<DynamicsCreditoCliente>>> CreditoCliente(string code);
 }

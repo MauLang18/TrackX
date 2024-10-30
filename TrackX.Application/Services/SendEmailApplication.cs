@@ -1,42 +1,50 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
+using Newtonsoft.Json;
 using TrackX.Application.Dtos.Mail.Request;
 using TrackX.Application.Interfaces;
+using TrackX.Domain.Entities;
+using TrackX.Infrastructure.Secret;
 
-namespace TrackX.Application.Services;
-
-public class SendEmailApplication : ISendEmailApplication
+namespace TrackX.Application.Services
 {
-    private readonly IConfiguration _configuration;
-
-    public SendEmailApplication(IConfiguration configuration)
+    public class SendEmailApplication : ISendEmailApplication
     {
-        _configuration = configuration;
-    }
+        private readonly ISecretService _secretService;
 
-    public void SendEmail(MailRequestDto request)
-    {
-        var email = new MimeMessage();
-        email.From.Add(MailboxAddress.Parse(_configuration.GetSection("Email:UserName").Value));
-        email.To.Add(MailboxAddress.Parse(request.Para));
-        email.Subject = request.Asunto;
-        email.Body = new TextPart(TextFormat.Html)
+        public SendEmailApplication(ISecretService secretService)
         {
-            Text = request.Contenido
-        };
+            _secretService = secretService;
+        }
 
-        using var smtp = new SmtpClient();
-        smtp.Connect(_configuration.GetSection("Email:Host").Value,
-            Convert.ToInt32(_configuration.GetSection("Email:Port").Value),
-            SecureSocketOptions.StartTls);
+        public void SendEmail(MailRequestDto request)
+        {
+            var secretJson = _secretService.GetSecret("TrackX/data/Email").Result;
 
-        smtp.Authenticate(_configuration.GetSection("Email:UserName").Value,
-            _configuration.GetSection("Email:PassWord").Value);
+            var secretData = JsonConvert.DeserializeObject<SecretResponse<EmailConfig>>(secretJson);
 
-        smtp.Send(email);
-        smtp.Disconnect(true);
+            var emailConfig = secretData?.Data?.Data;
+
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(emailConfig!.UserName));
+            email.To.Add(MailboxAddress.Parse(request.Para));
+            email.Subject = request.Asunto;
+            email.Body = new TextPart(TextFormat.Html)
+            {
+                Text = request.Contenido
+            };
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(emailConfig.Host,
+                int.Parse(emailConfig.Port!),
+                SecureSocketOptions.StartTls);
+
+            smtp.Authenticate(emailConfig.UserName, emailConfig.Password);
+
+            smtp.Send(email);
+            smtp.Disconnect(true);
+        }
     }
 }

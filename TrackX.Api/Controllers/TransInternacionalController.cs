@@ -41,7 +41,7 @@ public class TransInternacionalController : ControllerBase
         var response = await _transInternacionalApplication.ListTransInternacional(numFilter, textFilter);
 
         var columnNames = ExcelColumnNames.GetColumnsTrasporteInternacional();
-        var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!.Value!, columnNames);
+        var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!.value!, columnNames);
 
         return File(fileBytes, ContentType.ContentTypeExcel);
     }

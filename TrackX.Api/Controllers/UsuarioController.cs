@@ -227,7 +227,6 @@ public class UsuarioController : ControllerBase
         </html>"
         };
 
-        // Enviar el correo
         _sendEmailApplication.SendEmail(requestMail);
 
         return Ok(response);

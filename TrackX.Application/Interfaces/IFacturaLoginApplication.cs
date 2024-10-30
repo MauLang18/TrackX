@@ -5,5 +5,5 @@ namespace TrackX.Application.Interfaces;
 
 public interface IFacturaLoginApplication
 {
-    Task<BaseResponse<DynamicsFacturas>> TrackingByFactura(string factura, string cliente);
+    Task<BaseResponse<Dynamics<DynamicsFacturas>>> TrackingByFactura(string factura, string cliente);
 }

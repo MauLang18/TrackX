@@ -4,13 +4,6 @@ namespace TrackX.Domain.Entities;
 
 public class DynamicsFacturas
 {
-    [JsonProperty("@odata.context")]
-    public string? odatacontext { get; set; }
-    public List<Value6>? value { get; set; }
-}
-
-public class Value6
-{
     [JsonProperty("@odata.etag")]
     public string? odataetag { get; set; }
     public string? title { get; set; }
