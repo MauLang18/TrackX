@@ -21,6 +21,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<TbPod> Pod { get; }
     IGenericRepository<TbControlInventarioWhs> ControlInventario { get; }
     IGenericRepository<TbMultimedia> Multimedia { get; }
+    IBcfRepository Bcf { get; }
 
     void SaveChanges();
     Task SaveChangesAsync();

@@ -47,6 +47,7 @@ public static class InjectionExtensions
         services.AddScoped<IFacturaLoginApplication, FacturaLoginApplication>();
         services.AddScoped<IMultimediaApplication, MultimediaApplication>();
         services.AddScoped<ITransInternacionalApplication, TransInternacionalApplication>();
+        services.AddScoped<IBcfApplication, BcfApplication>();
 
         services.AddScoped<ISendEmailApplication, SendEmailApplication>();
 

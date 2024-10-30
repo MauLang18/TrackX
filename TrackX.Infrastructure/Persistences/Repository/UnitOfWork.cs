@@ -23,6 +23,7 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<TbPod> _pod = null!;
     private IGenericRepository<TbControlInventarioWhs> _controlInventario = null!;
     private IGenericRepository<TbMultimedia> _multimedia = null!;
+    private IBcfRepository _bcf = null!;
 
     public UnitOfWork(DbCfContext context, IConfiguration configuration)
     {
@@ -58,6 +59,8 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<TbControlInventarioWhs> ControlInventario => _controlInventario ?? new GenericRepository<TbControlInventarioWhs>(_context);
 
     public IGenericRepository<TbMultimedia> Multimedia => _multimedia ?? new GenericRepository<TbMultimedia>(_context);
+
+    IBcfRepository IUnitOfWork.Bcf => _bcf ?? new BcfRepository(_context);
 
     public void Dispose()
     {

@@ -374,4 +374,20 @@ public class ExcelColumnNames
         return columnsProperties;
     }
     #endregion
+
+    #region ColumnsBcf
+    public static List<(string ColumnName, string PropertyName)> GetColumnsBcf()
+    {
+        var columnsProperties = new List<(string ColumnName, string PropertyName)>
+        {
+            ("IDTRA", "Idtra"),
+            ("BCF", "Bcf"),
+            ("CLIENTE", "NombreCliente"),
+            ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+            ("ESTADO", "EstadoControlInventario"),
+        };
+
+        return columnsProperties;
+    }
+    #endregion
 }
