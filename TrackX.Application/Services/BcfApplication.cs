@@ -168,18 +168,18 @@ public class BcfApplication : IBcfApplication
 
                 response.IsSuccess = true;
                 response.Data = true;
-                response.Message = "BCF registrado y comentario actualizado en Dynamics exitosamente.";
+                response.Message = ReplyMessage.MESSAGE_SAVE;
             }
             else
             {
                 response.IsSuccess = false;
-                response.Message = "Error al actualizar el comentario en Dynamics.";
+                response.Message = ReplyMessage.MESSAGE_FAILED;
             }
         }
         catch (Exception ex)
         {
             response.IsSuccess = false;
-            response.Message = ex.Message;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
             WatchLogger.Log(ex.Message);
         }
 

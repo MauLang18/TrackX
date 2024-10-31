@@ -384,7 +384,6 @@ public class ExcelColumnNames
             ("BCF", "Bcf"),
             ("CLIENTE", "NombreCliente"),
             ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
-            ("ESTADO", "EstadoControlInventario"),
         };
 
         return columnsProperties;
