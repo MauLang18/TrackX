@@ -92,6 +92,35 @@ public class BcfApplication : IBcfApplication
         return response;
     }
 
+    public async Task<BaseResponse<BcfByIdResponseDto>> BcfById(int id)
+    {
+        var response = new BaseResponse<BcfByIdResponseDto>();
+        try
+        {
+            var Bcf = await _unitOfWork.Bcf.GetByIdAsync(id);
+
+            if (Bcf is not null)
+            {
+                response.IsSuccess = true;
+                response.Data = _mapper.Map<BcfByIdResponseDto>(Bcf);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
     [Obsolete]
     public async Task<BaseResponse<bool>> RegisterBcf(BcfRequestDto request)
     {
@@ -155,12 +184,15 @@ public class BcfApplication : IBcfApplication
                 var Bcf = _mapper.Map<TbBcf>(request);
                 Bcf.BCF = newBcfCode;
 
-                var shipperValuesList = new List<string> { request.Cliente! };
-                var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
-
-                foreach (var datos in nuevoValorCliente.Data!.value!)
+                if (request.Cliente is not null)
                 {
-                    Bcf.NombreCliente = datos.name;
+                    var shipperValuesList = new List<string> { request.Cliente! };
+                    var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
+
+                    foreach (var datos in nuevoValorCliente.Data!.value!)
+                    {
+                        Bcf.NombreCliente = datos.name;
+                    }
                 }
 
                 await _unitOfWork.Bcf.RegisterAsync(Bcf);
@@ -169,6 +201,54 @@ public class BcfApplication : IBcfApplication
                 response.IsSuccess = true;
                 response.Data = true;
                 response.Message = ReplyMessage.MESSAGE_SAVE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ReplyMessage.MESSAGE_EXCEPTION;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> EditBcf(int id, BcfRequestDto requestDto)
+    {
+        var response = new BaseResponse<bool>();
+        try
+        {
+            var BcfEdit = await BcfById(id);
+
+            if (BcfEdit.Data is null)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
+            }
+
+            var Bcf = _mapper.Map<TbBcf>(requestDto);
+            Bcf.Id = id;
+
+            var shipperValuesList = new List<string> { requestDto.Cliente! };
+            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
+
+            foreach (var datos in nuevoValorCliente.Data!.value!)
+            {
+                Bcf.NombreCliente = datos.name;
+            }
+
+            response.Data = await _unitOfWork.Bcf.EditAsync(Bcf);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_UPDATE;
             }
             else
             {
