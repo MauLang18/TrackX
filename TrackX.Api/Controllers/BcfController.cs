@@ -35,10 +35,25 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> BcfById(int id)
+        {
+            var response = await _bcfApplication.BcfById(id);
+            return Ok(response);
+        }
+
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterBcf([FromBody] BcfRequestDto request)
         {
             var response = await _bcfApplication.RegisterBcf(request);
+
+            return Ok(response);
+        }
+
+        [HttpPut("Edit")]
+        public async Task<IActionResult> EditBcf(int id, [FromBody] BcfRequestDto request)
+        {
+            var response = await _bcfApplication.EditBcf(id, request);
 
             return Ok(response);
         }

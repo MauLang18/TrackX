@@ -184,7 +184,7 @@ public class BcfApplication : IBcfApplication
                 var Bcf = _mapper.Map<TbBcf>(request);
                 Bcf.BCF = newBcfCode;
 
-                if (request.Cliente is not null)
+                if (request.Cliente is not null || !string.IsNullOrEmpty(request.Cliente))
                 {
                     var shipperValuesList = new List<string> { request.Cliente! };
                     var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
@@ -218,7 +218,7 @@ public class BcfApplication : IBcfApplication
         return response;
     }
 
-    public async Task<BaseResponse<bool>> EditBcf(int id, BcfRequestDto requestDto)
+    public async Task<BaseResponse<bool>> EditBcf(int id, BcfRequestDto request)
     {
         var response = new BaseResponse<bool>();
         try
@@ -232,15 +232,18 @@ public class BcfApplication : IBcfApplication
                 return response;
             }
 
-            var Bcf = _mapper.Map<TbBcf>(requestDto);
+            var Bcf = _mapper.Map<TbBcf>(request);
             Bcf.Id = id;
 
-            var shipperValuesList = new List<string> { requestDto.Cliente! };
-            var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
-
-            foreach (var datos in nuevoValorCliente.Data!.value!)
+            if (request.Cliente is not null || !string.IsNullOrEmpty(request.Cliente))
             {
-                Bcf.NombreCliente = datos.name;
+                var shipperValuesList = new List<string> { request.Cliente! };
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Bcf.NombreCliente = datos.name;
+                }
             }
 
             response.Data = await _unitOfWork.Bcf.EditAsync(Bcf);
