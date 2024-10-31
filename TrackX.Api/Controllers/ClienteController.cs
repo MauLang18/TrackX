@@ -22,4 +22,20 @@ public class ClienteController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpGet("Idtra")]
+    public async Task<IActionResult> ListClientesIdtra(string idtra)
+    {
+        var response = await _clienteApplication.ClienteIdtra(idtra);
+
+        return Ok(response);
+    }
+
+    [HttpGet("Code")]
+    public async Task<IActionResult> ListClientesCode(string code)
+    {
+        var response = await _clienteApplication.NameCliente(code);
+
+        return Ok(response);
+    }
 }
