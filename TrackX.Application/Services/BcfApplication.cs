@@ -184,7 +184,7 @@ public class BcfApplication : IBcfApplication
                 var Bcf = _mapper.Map<TbBcf>(request);
                 Bcf.BCF = newBcfCode;
 
-                if (request.Cliente is not null || !string.IsNullOrEmpty(request.Cliente))
+                if (!string.IsNullOrEmpty(request.Cliente))
                 {
                     var shipperValuesList = new List<string> { request.Cliente! };
                     var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
