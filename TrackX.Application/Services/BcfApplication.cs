@@ -152,10 +152,18 @@ public class BcfApplication : IBcfApplication
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                var bcfEntity = _mapper.Map<TbBcf>(request);
-                bcfEntity.BCF = newBcfCode;
+                var Bcf = _mapper.Map<TbBcf>(request);
+                Bcf.BCF = newBcfCode;
 
-                await _unitOfWork.Bcf.RegisterAsync(bcfEntity);
+                var shipperValuesList = new List<string> { request.Cliente! };
+                var nuevoValorCliente = await _clienteApplication.NombreCliente(shipperValuesList);
+
+                foreach (var datos in nuevoValorCliente.Data!.value!)
+                {
+                    Bcf.NombreCliente = datos.name;
+                }
+
+                await _unitOfWork.Bcf.RegisterAsync(Bcf);
                 await _unitOfWork.SaveChangesAsync();
 
                 response.IsSuccess = true;
