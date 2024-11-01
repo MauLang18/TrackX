@@ -16,8 +16,7 @@ public class BcfRepository : GenericRepository<TbBcf>, IBcfRepository
     public async Task<string?> GetLastBcfAsync()
     {
         return await _context.TbBcfs
-            .Where(b => b.FechaCreacionAuditoria != null)
-            .OrderByDescending(b => b.FechaCreacionAuditoria)
+            .OrderByDescending(b => b.BCF)
             .Select(b => b.BCF)
             .FirstOrDefaultAsync();
     }
