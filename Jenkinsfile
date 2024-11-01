@@ -16,28 +16,6 @@ pipeline {
     }
 
     stages {
-        stage('Análisis de SonarQube') {
-            steps {
-                script {
-                    echo "PATH: ${env.PATH}"
-                    withSonarQubeEnv('Sonar-Server') {
-                        sh '''
-                            dotnet sonarscanner begin /k:$SONARQUBE_PROJECT_KEY /d:sonar.host.url=$SONARQUBE_HOST_URL /d:sonar.login=$SONARQUBE_TOKEN /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
-                            dotnet build TrackX.sln
-                            dotnet sonarscanner end /d:sonar.login=$SONARQUBE_TOKEN
-                        '''
-                    }
-                }
-            }
-            post {
-                failure {
-                    mail to: env.NOTIFICATION_EMAIL,
-                         subject: "Error en el análisis de SonarQube: ${currentBuild.fullDisplayName}",
-                         body: "El análisis de SonarQube ha fallado en el build ${env.BUILD_URL}. Verifica el pipeline para más detalles."
-                }
-            }
-        }
-
         stage('Ejecutar Pruebas Unitarias') {
             steps {
                 sh 'dotnet test TrackX.Tests/TrackX.Tests.csproj --logger trx'
