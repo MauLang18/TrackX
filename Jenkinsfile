@@ -13,6 +13,7 @@ pipeline {
         SONARQUBE_PROJECT_KEY = 'TrackX-CastroFallas'
         PATH = "${PATH}:/home/administrador/.dotnet/tools"
         NOTIFICATION_EMAIL = 'maulangbonilla.18@gmail.com'
+        VAULT_TOKEN = credentials('VAULT_TOKEN')  // Variable de entorno para el token de Vault
     }
 
     stages {
@@ -32,7 +33,7 @@ pipeline {
         stage('Construcción de Docker') {
             steps {
                 script {
-                    sh "docker build -f TrackX.Api/Dockerfile -t ${DOCKER_IMAGE} ."
+                    sh "docker build --build-arg VAULT_TOKEN=${VAULT_TOKEN} -f TrackX.Api/Dockerfile -t ${DOCKER_IMAGE} ."
                 }
             }
         }

@@ -1,22 +1,28 @@
-﻿
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 
-namespace TrackX.Infrastructure.Secret;
-
-public class VaultSecretService : ISecretService
+namespace TrackX.Infrastructure.Secret
 {
-    public async Task<string> GetSecret(string secretPath)
+    public class VaultSecretService : ISecretService
     {
-        using (var httpClient = new HttpClient())
+        public async Task<string> GetSecret(string secretPath)
         {
-            httpClient.BaseAddress = new Uri("https://vault.customcodecr.com");
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "root");
+            var vaultToken = Environment.GetEnvironmentVariable("VAULT_TOKEN");
+            if (string.IsNullOrEmpty(vaultToken))
+            {
+                throw new InvalidOperationException("Vault token is not provided.");
+            }
 
-            var response = await httpClient.GetAsync($"/v1/{secretPath}");
-            response.EnsureSuccessStatusCode();
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri("https://vault.customcodecr.com");
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", vaultToken);
 
-            var json = await response.Content.ReadAsStringAsync();
-            return json;
+                var response = await httpClient.GetAsync($"/v1/{secretPath}");
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                return json;
+            }
         }
     }
 }

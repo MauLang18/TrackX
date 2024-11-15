@@ -1,5 +1,4 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
+# Base image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 RUN apt-get update && apt-get install -y tzdata
 RUN mkdir -p /app/wwwroot && \
@@ -8,6 +7,7 @@ WORKDIR /app
 EXPOSE 8080
 ENV TZ=America/Costa_Rica
 
+# Build image
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -17,17 +17,23 @@ COPY ["TrackX.Domain/TrackX.Domain.csproj", "TrackX.Domain/"]
 COPY ["TrackX.Infrastructure/TrackX.Infrastructure.csproj", "TrackX.Infrastructure/"]
 COPY ["TrackX.Utilities/TrackX.Utilities.csproj", "TrackX.Utilities/"]
 RUN dotnet restore "./TrackX.Api/TrackX.Api.csproj"
-COPY . .
+COPY . . 
 WORKDIR "/src/TrackX.Api"
 RUN dotnet build "./TrackX.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+# Publish image
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TrackX.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Final image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 RUN chmod 755 /app
 EXPOSE 8080
+
+# Set the Vault token from environment variable
+ARG VAULT_TOKEN
+ENV VAULT_TOKEN=$VAULT_TOKEN
+
 ENTRYPOINT ["dotnet", "TrackX.Api.dll"]
