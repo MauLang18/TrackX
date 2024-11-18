@@ -389,4 +389,19 @@ public class ExcelColumnNames
         return columnsProperties;
     }
     #endregion
+
+    #region ColumnsCotizaciones
+    public static List<(string ColumnName, string PropertyName)> GetColumnsCotizacion()
+    {
+        var columnsProperties = new List<(string ColumnName, string PropertyName)>
+        {
+            ("QUO", "Quo"),
+            ("Cotizacion", "Cotizacion"),
+            ("CLIENTE", "NombreCliente"),
+            ("FECHA DE REGISTRO", "FechaCreacionAuditoria"),
+        };
+
+        return columnsProperties;
+    }
+    #endregion
 }

@@ -22,6 +22,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<TbControlInventarioWhs> ControlInventario { get; }
     IGenericRepository<TbMultimedia> Multimedia { get; }
     IBcfRepository Bcf { get; }
+    IGenericRepository<TbCotizacion> Cotizacion { get; }
 
     void SaveChanges();
     Task SaveChangesAsync();

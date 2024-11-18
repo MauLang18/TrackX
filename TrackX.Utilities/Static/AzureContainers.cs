@@ -12,4 +12,5 @@ public class AzureContainers
     public const string ORIGEN = "origen";
     public const string DESTINO = "destino";
     public const string MULTIMEDIA = "multimedia";
+    public const string COTIZACION = "cotizaciones";
 }
