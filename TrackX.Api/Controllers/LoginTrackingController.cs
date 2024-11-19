@@ -46,4 +46,12 @@ public class LoginTrackingController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpGet("BOOKING")]
+    public async Task<IActionResult> BOOKING(string booking, string cliente)
+    {
+        var response = await _loginTrackingApplication.TrackingByBooking(booking, cliente);
+
+        return Ok(response);
+    }
 }
