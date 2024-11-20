@@ -17,6 +17,7 @@
         public DateTime? new_entregacartatrazabilidad { get; set; }
         public DateTime? new_entregatraduccion { get; set; }
         public DateTime? new_eta { get; set; }
+        public DateTime? new_etd1 { get; set; }
         public DateTime? new_fechabldigittica { get; set; }
         public DateTime? new_fechablimpreso { get; set; }
         public DateTime? new_liberacionmovimientoinventario { get; set; }
