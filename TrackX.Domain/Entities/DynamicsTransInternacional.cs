@@ -32,5 +32,15 @@
         public int? new_tamaoequipo { get; set; }
         public string? title { get; set; }
         public string? new_observacionesgenerales { get; set; }
+        public object? new_facturacomercial { get; set; }
+        public object? new_listadeempaque { get; set; }
+        public object? new_draftbl { get; set; }
+        public object? new_bloriginal { get; set; }
+        public object? new_cartatrazabilidad { get; set; }
+        public object? new_cartadesglosecargos { get; set; }
+        public object? new_exoneracion { get; set; }
+        public object? new_certificadoorigen { get; set; }
+        public object? new_certificadoreexportacion { get; set; }
+        public object? new_permisos { get; set; }
     }
 }

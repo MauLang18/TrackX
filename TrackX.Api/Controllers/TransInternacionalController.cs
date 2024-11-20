@@ -35,6 +35,14 @@ public class TransInternacionalController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPatch("Upload")]
+    public async Task<IActionResult> UpdateDocuments([FromForm] TransInternacionalDocumentRequestDto request)
+    {
+        var response = await _transInternacionalApplication.UpdateDocuments(request);
+
+        return Ok(response);
+    }
+
     [HttpGet("Download")]
     public async Task<IActionResult> DownloadActivo(int numFilter = 0, string textFilter = null!)
     {

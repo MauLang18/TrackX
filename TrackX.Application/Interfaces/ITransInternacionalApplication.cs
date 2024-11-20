@@ -8,4 +8,5 @@ public interface ITransInternacionalApplication
 {
     Task<BaseResponse<Dynamics<DynamicsTransInternacional>>> ListTransInternacional(int numFilter, string textFilter);
     Task<BaseResponse<bool>> RegisterComentario(TransInternacionalRequestDto request);
+    Task<BaseResponse<bool>> UpdateDocuments(TransInternacionalDocumentRequestDto request);
 }

@@ -10,229 +10,305 @@ using TrackX.Infrastructure.Secret;
 using TrackX.Utilities.Static;
 using WatchDog;
 
-namespace TrackX.Application.Services
+namespace TrackX.Application.Services;
+
+public class TransInternacionalApplication : ITransInternacionalApplication
 {
-    public class TransInternacionalApplication : ITransInternacionalApplication
+    private readonly IClienteApplication _clienteApplication;
+    private readonly ISecretService _secretService;
+    private readonly HttpClient _httpClient;
+    private readonly IFileStorageLocalApplication _fileStorage;
+
+    public TransInternacionalApplication(
+        IClienteApplication clienteApplication,
+        ISecretService secretService,
+        HttpClient httpClient,
+        IFileStorageLocalApplication fileStorage)
     {
-        private readonly IClienteApplication _clienteApplication;
-        private readonly ISecretService _secretService;
-        private readonly HttpClient _httpClient;
+        _clienteApplication = clienteApplication;
+        _secretService = secretService;
+        _httpClient = httpClient;
+        _fileStorage = fileStorage;
+    }
 
-        public TransInternacionalApplication(
-            IClienteApplication clienteApplication,
-            ISecretService secretService,
-            HttpClient httpClient)
+    private async Task<AuthenticationConfig?> GetConfigAsync()
+    {
+        var secretJson = await _secretService.GetSecret("TrackX/data/Authentication");
+        var SecretResponse = JsonConvert.DeserializeObject<SecretResponse<AuthenticationConfig>>(secretJson);
+        return SecretResponse?.Data?.Data;
+    }
+
+    public async Task<BaseResponse<Dynamics<DynamicsTransInternacional>>> ListTransInternacional(int numFilter, string textFilter)
+    {
+        var response = new BaseResponse<Dynamics<DynamicsTransInternacional>>();
+        var cliente = "";
+        var Config = await GetConfigAsync();
+
+        try
         {
-            _clienteApplication = clienteApplication;
-            _secretService = secretService;
-            _httpClient = httpClient;
-        }
+            string clientId = Config!.ClientId!;
+            string clientSecret = Config!.ClientSecret!;
+            string authority = Config!.Authority!;
+            string crmUrl = Config!.CrmUrl!;
 
-        private async Task<AuthenticationConfig?> GetConfigAsync()
-        {
-            var secretJson = await _secretService.GetSecret("TrackX/data/Authentication");
-            var SecretResponse = JsonConvert.DeserializeObject<SecretResponse<AuthenticationConfig>>(secretJson);
-            return SecretResponse?.Data?.Data;
-        }
+            var app = ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .WithClientSecret(clientSecret)
+                .WithAuthority(new Uri(authority!))
+                .Build();
 
-        public async Task<BaseResponse<Dynamics<DynamicsTransInternacional>>> ListTransInternacional(int numFilter, string textFilter)
-        {
-            var response = new BaseResponse<Dynamics<DynamicsTransInternacional>>();
-            var cliente = "";
-            var Config = await GetConfigAsync();
+            var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
+            string accessToken = result.AccessToken;
 
-            try
+            _httpClient.BaseAddress = new Uri(crmUrl!);
+            _httpClient.Timeout = TimeSpan.FromSeconds(300);
+            _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+            _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            string entityName = "incidents";
+
+            if (numFilter == 1 && !string.IsNullOrEmpty(textFilter))
             {
-                string clientId = Config!.ClientId!;
-                string clientSecret = Config!.ClientSecret!;
-                string authority = Config!.Authority!;
-                string crmUrl = Config!.CrmUrl!;
+                var nuevoValorCliente = await _clienteApplication.CodeCliente(textFilter);
 
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(clientId)
-                    .WithClientSecret(clientSecret)
-                    .WithAuthority(new Uri(authority!))
-                    .Build();
-
-                var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
-                string accessToken = result.AccessToken;
-
-                _httpClient.BaseAddress = new Uri(crmUrl!);
-                _httpClient.Timeout = TimeSpan.FromSeconds(300);
-                _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-                _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                string entityName = "incidents";
-
-                if (numFilter == 1 && !string.IsNullOrEmpty(textFilter))
+                foreach (var item in nuevoValorCliente.Data!.value!)
                 {
-                    var nuevoValorCliente = await _clienteApplication.CodeCliente(textFilter);
-
-                    foreach (var item in nuevoValorCliente.Data!.value!)
-                    {
-                        cliente = item.name;
-                        textFilter = item.accountid!;
-                    }
+                    cliente = item.name;
+                    textFilter = item.accountid!;
                 }
+            }
 
-                string url = BuildUrl(entityName, numFilter, textFilter);
+            string url = BuildUrl(entityName, numFilter, textFilter);
 
-                HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url);
-                httpResponseMessage.EnsureSuccessStatusCode();
+            HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url);
+            httpResponseMessage.EnsureSuccessStatusCode();
 
-                if (httpResponseMessage.IsSuccessStatusCode)
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+                Dynamics<DynamicsTransInternacional> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsTransInternacional>>(jsonResponse)!;
+
+                if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
                 {
-                    string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
-                    Dynamics<DynamicsTransInternacional> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsTransInternacional>>(jsonResponse)!;
+                    var shipperValues = apiResponse.value!
+                    .Where(item => item._customerid_value != null)
+                    .Select(item => item._customerid_value)
+                    .Distinct()
+                    .ToList();
 
-                    if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
+                    var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
+
+                    var clienteMap = clientesResult.Data!.value!
+                        .ToDictionary(clientes => clientes.accountid!, clientes => clientes.name!);
+
+                    foreach (var item in apiResponse.value!)
                     {
-                        var shipperValues = apiResponse.value!
-                        .Where(item => item._customerid_value != null)
-                        .Select(item => item._customerid_value)
-                        .Distinct()
-                        .ToList();
-
-                        var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
-
-                        var clienteMap = clientesResult.Data!.value!
-                            .ToDictionary(clientes => clientes.accountid!, clientes => clientes.name!);
-
-                        foreach (var item in apiResponse.value!)
+                        if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
                         {
-                            if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
-                            {
-                                item._customerid_value = clienteName;
-                            }
-                            else
-                            {
-                                item._customerid_value = "";
-                            }
+                            item._customerid_value = clienteName;
+                        }
+                        else
+                        {
+                            item._customerid_value = "";
                         }
                     }
-                    else
-                    {
-                        foreach (var item in apiResponse.value!)
-                        {
-                            item._customerid_value = cliente;
-                        }
-                    }
-
-                    response.IsSuccess = true;
-                    response.Data = apiResponse;
-                    response.Message = ReplyMessage.MESSAGE_QUERY;
                 }
                 else
                 {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    foreach (var item in apiResponse.value!)
+                    {
+                        item._customerid_value = cliente;
+                    }
                 }
+
+                response.IsSuccess = true;
+                response.Data = apiResponse;
+                response.Message = ReplyMessage.MESSAGE_QUERY;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = ex.Message;
-                WatchLogger.Log(ex.Message);
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
             }
-
-            return response;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Message = ex.Message;
+            WatchLogger.Log(ex.Message);
         }
 
-        public async Task<BaseResponse<bool>> RegisterComentario(TransInternacionalRequestDto request)
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> RegisterComentario(TransInternacionalRequestDto request)
+    {
+        var response = new BaseResponse<bool>();
+
+        var Config = await GetConfigAsync();
+
+        try
         {
-            var response = new BaseResponse<bool>();
+            string clientId = Config!.ClientId!;
+            string clientSecret = Config!.ClientSecret!;
+            string authority = Config!.Authority!;
+            string crmUrl = Config!.CrmUrl!;
 
-            var Config = await GetConfigAsync();
+            var app = ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .WithClientSecret(clientSecret)
+                .WithAuthority(new Uri(authority!))
+                .Build();
 
-            try
+            var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
+            string accessToken = result.AccessToken;
+
+            _httpClient.BaseAddress = new Uri(crmUrl!);
+            _httpClient.Timeout = TimeSpan.FromSeconds(300);
+            _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+            _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var comentarioRecord = new
             {
-                string clientId = Config!.ClientId!;
-                string clientSecret = Config!.ClientSecret!;
-                string authority = Config!.Authority!;
-                string crmUrl = Config!.CrmUrl!;
+                new_observacionesgenerales = request.Comentario
+            };
 
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(clientId)
-                    .WithClientSecret(clientSecret)
-                    .WithAuthority(new Uri(authority!))
-                    .Build();
+            string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
-                string accessToken = result.AccessToken;
+            string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
 
-                _httpClient.BaseAddress = new Uri(crmUrl!);
-                _httpClient.Timeout = TimeSpan.FromSeconds(300);
-                _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-                _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+            {
+                Content = content
+            };
 
-                var comentarioRecord = new
-                {
-                    new_observacionesgenerales = request.Comentario
-                };
+            HttpResponseMessage httpResponseMessage = await _httpClient.SendAsync(requestMessage);
+            httpResponseMessage.EnsureSuccessStatusCode();
 
-                string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-                string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
-
-                var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
-                {
-                    Content = content
-                };
-
-                HttpResponseMessage httpResponseMessage = await _httpClient.SendAsync(requestMessage);
-                httpResponseMessage.EnsureSuccessStatusCode();
-
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    response.IsSuccess = true;
-                    response.Data = true;
-                    response.Message = "Comentario actualizado exitosamente.";
-                }
-                else
-                {
-                    response.IsSuccess = false;
-                    response.Data = false;
-                    response.Message = "Error al actualizar el comentario.";
-                }
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                response.IsSuccess = true;
+                response.Data = true;
+                response.Message = "Comentario actualizado exitosamente.";
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
                 response.Data = false;
-                response.Message = ex.Message;
-                WatchLogger.Log(ex.Message);
+                response.Message = "Error al actualizar el comentario.";
             }
-
-            return response;
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Data = false;
+            response.Message = ex.Message;
+            WatchLogger.Log(ex.Message);
         }
 
-        private static string BuildUrl(string entityName, int numFilter, string textFilter)
+        return response;
+    }
+
+    private static string BuildUrl(string entityName, int numFilter, string textFilter)
+    {
+        if (string.IsNullOrEmpty(textFilter))
         {
-            if (string.IsNullOrEmpty(textFilter))
-            {
-                numFilter = 0;
-            }
+            numFilter = 0;
+        }
 
-            string preestadoFilter = "(new_preestado2 ne 100000011 and new_preestado2 ne 100000009 and new_preestado2 ne 100000010 and new_preestado2 ne 100000019 and new_preestado2 ne 100000023 and new_preestado2 ne 100000022 and new_preestado2 ne 100000010 and new_preestado2 ne 100000021 and new_preestado2 ne 100000012 and new_preestado2 ne 100000011)";
+        string preestadoFilter = "(new_preestado2 ne 100000011 and new_preestado2 ne 100000009 and new_preestado2 ne 100000010 and new_preestado2 ne 100000019 and new_preestado2 ne 100000023 and new_preestado2 ne 100000022 and new_preestado2 ne 100000010 and new_preestado2 ne 100000021 and new_preestado2 ne 100000012 and new_preestado2 ne 100000011)";
 
-            string filter = numFilter switch
+        string filter = numFilter switch
+        {
+            1 => $"_customerid_value eq '{textFilter}' and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
+            2 => $"contains(new_contenedor,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
+            3 => $"contains(new_bcf,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
+            4 => $"contains(new_factura,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
+            5 => $"contains(new_po,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
+            6 => $"contains(title,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
+            _ => $"{preestadoFilter} and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001'])"
+        };
+
+        return $"api/data/v9.2/{entityName}?$select=new_etd1,new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,new_observacionesgenerales&$filter=({filter}) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01')) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
+    }
+
+    public async Task<BaseResponse<bool>> UpdateDocuments(TransInternacionalDocumentRequestDto request)
+    {
+        var response = new BaseResponse<bool>();
+
+        var Config = await GetConfigAsync();
+
+        try
+        {
+            string clientId = Config!.ClientId!;
+            string clientSecret = Config!.ClientSecret!;
+            string authority = Config!.Authority!;
+            string crmUrl = Config!.CrmUrl!;
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .WithClientSecret(clientSecret)
+                .WithAuthority(new Uri(authority!))
+                .Build();
+
+            var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
+            string accessToken = result.AccessToken;
+
+            _httpClient.BaseAddress = new Uri(crmUrl!);
+            _httpClient.Timeout = TimeSpan.FromSeconds(300);
+            _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+            _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var documento = await _fileStorage.SaveFile(AzureContainers.DOCUMENTOS, request.File!);
+
+            var field = request.FieldName;
+
+            var comentarioRecord = new
             {
-                1 => $"_customerid_value eq '{textFilter}' and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
-                2 => $"contains(new_contenedor,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
-                3 => $"contains(new_bcf,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
-                4 => $"contains(new_factura,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
-                5 => $"contains(new_po,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
-                6 => $"contains(title,'{textFilter}') and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']) and {preestadoFilter}",
-                _ => $"{preestadoFilter} and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001'])"
+                field = documento
             };
 
-            return $"api/data/v9.2/{entityName}?$select=new_etd1,new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,new_observacionesgenerales&$filter=({filter}) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01')) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
+            string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
+
+            var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+            {
+                Content = content
+            };
+
+            HttpResponseMessage httpResponseMessage = await _httpClient.SendAsync(requestMessage);
+            httpResponseMessage.EnsureSuccessStatusCode();
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                response.IsSuccess = true;
+                response.Data = true;
+                response.Message = "Comentario actualizado exitosamente.";
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Data = false;
+                response.Message = "Error al actualizar el comentario.";
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Data = false;
+            response.Message = ex.Message;
+            WatchLogger.Log(ex.Message);
         }
 
+        return response;
     }
 }
