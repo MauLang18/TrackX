@@ -1,5 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using TrackX.Application.Commons.Bases.Response;
@@ -234,7 +235,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             _ => $"{preestadoFilter} and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001'])"
         };
 
-        return $"api/data/v9.2/{entityName}?$select=new_etd1,new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,new_observacionesgenerales&$filter=({filter}) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01')) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
+        return $"api/data/v9.2/{entityName}?$select=new_facturacomercial,new_listadeempaque,new_draftbl,new_bloriginal,new_cartatrazabilidad,new_cartadesglosecargos,new_exoneracion,new_certificadoorigen,new_certificadoreexportacion,new_permisos,new_etd1,new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_cantequipo,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_llevaexoneracion,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,title,new_observacionesgenerales&$filter=({filter}) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01')) and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000)&$orderby=new_eta asc";
     }
 
     public async Task<BaseResponse<bool>> UpdateDocuments(TransInternacionalDocumentRequestDto request)
@@ -270,9 +271,9 @@ public class TransInternacionalApplication : ITransInternacionalApplication
 
             var field = request.FieldName;
 
-            var comentarioRecord = new
+            var comentarioRecord = new JObject
             {
-                field = documento
+                [field!] = documento
             };
 
             string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
