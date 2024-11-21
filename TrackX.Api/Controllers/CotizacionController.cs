@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using TrackX.Application.Commons.Bases.Request;
 using TrackX.Application.Dtos.Cotizacion.Request;
 using TrackX.Application.Interfaces;
-using TrackX.Utilities.Static;
 
 namespace TrackX.Api.Controllers
 {
@@ -21,21 +19,14 @@ namespace TrackX.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ListCotizacion([FromQuery] BaseFiltersRequest filters)
+        public async Task<IActionResult> ListCotizacion(int numFilter = 0, string textFilter = null!)
         {
-            var response = await _cotizacionApplication.ListCotizacion(filters);
-
-            if ((bool)filters.Download!)
-            {
-                var columnNames = ExcelColumnNames.GetColumnsCotizacion();
-                var fileBytes = _generateExcelApplication.GenerateToExcelGeneric(response.Data!, columnNames);
-                return File(fileBytes, ContentType.ContentTypeExcel);
-            }
+            var response = await _cotizacionApplication.ListCotizacion(numFilter, textFilter);
 
             return Ok(response);
         }
 
-        [HttpPost("Register")]
+        [HttpPatch("Agregar")]
         public async Task<IActionResult> RegisterCotizacion([FromForm] CotizacionRequestDto request)
         {
             var response = await _cotizacionApplication.RegisterCotizacion(request);

@@ -25,4 +25,5 @@ public class DynamicsTrackingNoLogin
     public int? new_preestado2 { get; set; }
     public DateTime? modifiedon { get; set; }
     public string? incidentid { get; set; }
+    public string? quoteid { get; set; }
 }
