@@ -42,5 +42,12 @@
         public object? new_certificadoorigen { get; set; }
         public object? new_certificadoreexportacion { get; set; }
         public object? new_permisos { get; set; }
+        public object? new_documentodenacionalizacion { get; set; }
+        public object? new_borradordeimpuestos { get; set; }
+        public object? new_nombrepedimentador { get; set; }
+        public object? new_numerorecibo { get; set; }
+        public object? new_tipoaforo { get; set; }
+        public object? new_duaanticipados { get; set; }
+        public object? new_duanacional {  get; set; }
     }
 }
