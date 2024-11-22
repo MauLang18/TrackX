@@ -95,6 +95,7 @@ public class CotizacionApplication : ICotizacionApplication
 
         try
         {
+            // Configuración de autenticación
             string clientId = Config!.ClientId!;
             string clientSecret = Config!.ClientSecret!;
             string authority = Config!.Authority!;
@@ -109,77 +110,112 @@ public class CotizacionApplication : ICotizacionApplication
             var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
             string accessToken = result.AccessToken;
 
-            _httpClient.BaseAddress = new Uri(crmUrl!);
-            _httpClient.Timeout = TimeSpan.FromSeconds(300);
-            _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-            _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            string entityName = "quotes";
-
-            if (numFilter == 1 && !string.IsNullOrEmpty(textFilter))
+            using (var httpClient = new HttpClient())
             {
-                var nuevoValorCliente = await _clienteApplication.CodeCliente(textFilter);
+                httpClient.BaseAddress = new Uri(crmUrl!);
+                httpClient.Timeout = TimeSpan.FromSeconds(300);
+                httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+                httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                foreach (var item in nuevoValorCliente.Data!.value!)
+                string entityName = "quotes";
+
+                // Aplicar filtro por cliente si es necesario
+                if (numFilter == 1 && !string.IsNullOrEmpty(textFilter))
                 {
-                    cliente = item.name;
-                    textFilter = item.accountid!;
-                }
-            }
+                    var nuevoValorCliente = await _clienteApplication.CodeCliente(textFilter);
 
-            string url = BuildUrl(entityName, numFilter, textFilter);
-
-            HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url);
-            httpResponseMessage.EnsureSuccessStatusCode();
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
-                Dynamics<DynamicsCotizacion> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsCotizacion>>(jsonResponse)!;
-
-                if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
-                {
-                    var shipperValues = apiResponse.value!
-                    .Where(item => item._customerid_value != null)
-                    .Select(item => item._customerid_value)
-                    .Distinct()
-                    .ToList();
-
-                    var clientesResult = await _clienteApplication.NombreCliente(shipperValues!);
-
-                    var clienteMap = clientesResult.Data!.value!
-                        .ToDictionary(clientes => clientes.accountid!, clientes => clientes.name!);
-
-                    foreach (var item in apiResponse.value!)
+                    if (nuevoValorCliente.Data?.value != null)
                     {
-                        if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
+                        foreach (var item in nuevoValorCliente.Data.value)
                         {
-                            item._customerid_value = clienteName;
+                            cliente = item.name ?? "";
+                            textFilter = item.accountid ?? "";
+                        }
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = "No se encontraron datos de cliente.";
+                        return response;
+                    }
+                }
+
+                // Construcción de la URL con filtros
+                string url = BuildUrl(entityName, numFilter, textFilter);
+
+                // Enviar solicitud GET
+                HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(url);
+                httpResponseMessage.EnsureSuccessStatusCode();
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    // Leer y deserializar la respuesta de la API
+                    string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+                    Dynamics<DynamicsCotizacion> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsCotizacion>>(jsonResponse)!;
+
+                    if (apiResponse?.value == null || !apiResponse.value.Any())
+                    {
+                        response.IsSuccess = false;
+                        response.Message = "No se encontraron cotizaciones.";
+                        return response;
+                    }
+
+                    // Obtener clientes para el mapeo
+                    if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
+                    {
+                        var shipperValues = apiResponse.value!
+                            .Where(item => item._customerid_value != null)
+                            .Select(item => item._customerid_value!)
+                            .Distinct()
+                            .ToList();
+
+                        var clientesResult = await _clienteApplication.NombreCliente(shipperValues);
+
+                        if (clientesResult.Data?.value != null)
+                        {
+                            var clienteMap = clientesResult.Data.value
+                                .ToDictionary(clientes => clientes.accountid ?? "", clientes => clientes.name ?? "");
+
+                            foreach (var item in apiResponse.value)
+                            {
+                                if (item._customerid_value != null && clienteMap.TryGetValue(item._customerid_value, out var clienteName))
+                                {
+                                    item._customerid_value = clienteName;
+                                }
+                                else
+                                {
+                                    item._customerid_value = "";
+                                }
+                            }
                         }
                         else
                         {
-                            item._customerid_value = "";
+                            response.IsSuccess = false;
+                            response.Message = "No se encontraron datos de clientes para mapear.";
+                            return response;
                         }
                     }
+                    else
+                    {
+                        // Asignar nombre del cliente para el caso de filtro directo
+                        foreach (var item in apiResponse.value!)
+                        {
+                            item._customerid_value = cliente;
+                        }
+                    }
+
+                    // Respuesta exitosa
+                    response.IsSuccess = true;
+                    response.Data = apiResponse;
+                    response.Message = ReplyMessage.MESSAGE_QUERY;
                 }
                 else
                 {
-                    foreach (var item in apiResponse.value!)
-                    {
-                        item._customerid_value = cliente;
-                    }
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                 }
-
-                response.IsSuccess = true;
-                response.Data = apiResponse;
-                response.Message = ReplyMessage.MESSAGE_QUERY;
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
             }
         }
         catch (Exception ex)
