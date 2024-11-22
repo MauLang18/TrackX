@@ -241,6 +241,7 @@ public class CotizacionApplication : ICotizacionApplication
         {
             1 => $"(_customerid_value eq '{textFilter}') and {permisosFilter}",
             2 => $"(quotenumber eq '{textFilter}') and {permisosFilter}",
+            3 => $"(_customerid_value eq '{textFilter}') and {permisosFilter}",
             _ => $"{permisosFilter}"
         };
 
