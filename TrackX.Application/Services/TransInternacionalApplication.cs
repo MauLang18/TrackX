@@ -173,9 +173,11 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            var comentarioRecord = new
+            var field = request.FieldName;
+
+            var comentarioRecord = new JObject
             {
-                new_observacionesgenerales = request.Comentario
+                [field!] = request.Comentario
             };
 
             string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
