@@ -67,7 +67,7 @@ public class CotizacionApplication : ICotizacionApplication
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             string entityName = "quotes";
-            string requestUri = $"api/data/v9.2/{entityName}?$select=quoteid,quotenumber&$filter=quotenumber eq {Quo}";
+            string requestUri = $"api/data/v9.2/{entityName}?$select=quoteid,quotenumber&$filter=quotenumber eq '{Quo}'";
 
             HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(requestUri);
             httpResponseMessage.EnsureSuccessStatusCode();
@@ -192,8 +192,6 @@ public class CotizacionApplication : ICotizacionApplication
         return response;
     }
 
-
-
     private static string BuildUrl(string entityName, int numFilter, string textFilter)
     {
         if (string.IsNullOrEmpty(textFilter))
@@ -205,12 +203,12 @@ public class CotizacionApplication : ICotizacionApplication
 
         string filter = numFilter switch
         {
-            1 => $"_customerid_value eq '{textFilter}' and {permisosFilter}",
-            2 => $"quotenumber eq '{textFilter}'", // and {permisosFilter}
+            1 => $"(_customerid_value eq '{textFilter}') and {permisosFilter}",
+            2 => $"(quotenumber eq '{textFilter}') and {permisosFilter}",
             _ => $"{permisosFilter}"
         };
 
-        return $"api/data/v9.2/{entityName}?$select=quoteid,_customerid_value,quotenumber,new_servicioalcliente,new_clienteweb,new_almacenfiscal,new_consolidadoradecarga,new_enlacecotizacion&filter={filter}";
+        return $"api/data/v9.2/{entityName}?$select=createdon,quoteid,_customerid_value,quotenumber,new_servicioalcliente,new_clienteweb,new_almacenfiscal,new_consolidadoradecarga,new_enlacecotizacion&$filter={filter}";
     }
 
     [Obsolete]
@@ -222,6 +220,7 @@ public class CotizacionApplication : ICotizacionApplication
 
         try
         {
+            // Obtiene el Quote ID
             string? quoteId = await GetQuoteIdByQuoAsync(request.Quo!);
             if (quoteId == null)
             {
@@ -230,6 +229,7 @@ public class CotizacionApplication : ICotizacionApplication
                 return response;
             }
 
+            // Configuración de autenticación
             string clientId = Config!.ClientId!;
             string clientSecret = Config!.ClientSecret!;
             string authority = Config!.Authority!;
@@ -244,44 +244,45 @@ public class CotizacionApplication : ICotizacionApplication
             var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
             string accessToken = result.AccessToken;
 
-            _httpClient.BaseAddress = new Uri(crmUrl!);
-            _httpClient.Timeout = TimeSpan.FromSeconds(300);
-            _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-            _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var documento = await _fileStorage.SaveFile(AzureContainers.DOCUMENTOS, request.Cotizacion!);
-
-            var comentarioRecord = new
+            // Crear un nuevo HttpClient para evitar errores de reutilización
+            using (var httpClient = new HttpClient())
             {
-                new_enlacecotizacion = documento
-            };
+                httpClient.BaseAddress = new Uri(crmUrl!);
+                httpClient.Timeout = TimeSpan.FromSeconds(300);
+                httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+                httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                // Subir archivo y generar contenido
+                var documento = await _fileStorage.SaveFile(AzureContainers.DOCUMENTOS, request.Cotizacion!);
+                var comentarioRecord = new { new_enlacecotizacion = documento };
 
-            string url = $"api/data/v9.2/quotes({quoteId})";
+                string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
-            {
-                Content = content
-            };
+                // Construir y enviar solicitud PATCH
+                string url = $"api/data/v9.2/quotes({quoteId})";
+                var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+                {
+                    Content = content
+                };
 
-            HttpResponseMessage httpResponseMessage = await _httpClient.SendAsync(requestMessage);
-            httpResponseMessage.EnsureSuccessStatusCode();
+                HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(requestMessage);
+                httpResponseMessage.EnsureSuccessStatusCode();
 
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                response.IsSuccess = true;
-                response.Data = true;
-                response.Message = "Comentario actualizado exitosamente.";
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Data = false;
-                response.Message = "Error al actualizar el comentario.";
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    response.IsSuccess = true;
+                    response.Data = true;
+                    response.Message = "Comentario actualizado exitosamente.";
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Data = false;
+                    response.Message = "Error al actualizar el comentario.";
+                }
             }
         }
         catch (Exception ex)
