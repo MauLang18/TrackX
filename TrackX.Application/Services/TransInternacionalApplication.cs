@@ -224,7 +224,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             numFilter = 0;
         }
 
-        string preestadoFilter = "(new_preestado2 ne 100000011 and new_preestado2 ne 100000009 and new_preestado2 ne 100000010 and new_preestado2 ne 100000019 and new_preestado2 ne 100000023 and new_preestado2 ne 100000022 and new_preestado2 ne 100000010 and new_preestado2 ne 100000021 and new_preestado2 ne 100000012 and new_preestado2 ne 100000011)";
+        string preestadoFilter = "(new_preestado2 ne 100000012 and new_preestado2 ne 100000021)";
 
         string filter = numFilter switch
         {
