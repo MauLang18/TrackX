@@ -48,6 +48,8 @@
         public object? new_numerorecibo { get; set; }
         public object? new_tipoaforo { get; set; }
         public object? new_duaanticipados { get; set; }
-        public object? new_duanacional {  get; set; }
+        public object? new_duanacional { get; set; }
+        public object? new_traducciondefacturas { get; set; }
+        public object? new_borradordecertificadodeorigen { get; set; }
     }
 }
