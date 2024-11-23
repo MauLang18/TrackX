@@ -7,4 +7,5 @@ public interface ITrackingLoginApplication
 {
     Task<BaseResponse<Dynamics<DynamicsTrackingLogin>>> TrackingActivoByCliente(string cliente);
     Task<BaseResponse<Dynamics<DynamicsTrackingLogin>>> TrackingFinalizadoByCliente(string cliente);
+    Task<BaseResponse<Dynamics<DynamicsTrackingLogin>>> TrackingHistorialByCliente(string cliente);
 }

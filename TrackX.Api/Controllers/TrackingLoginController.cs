@@ -22,7 +22,6 @@ public class TrackingLoginController : ControllerBase
     }
 
     [HttpGet("Activo")]
-    [OutputCache(Duration = 3600, PolicyName = "activo")]
     public async Task<IActionResult> TrackingActivoByCliente(string cliente)
     {
         var response = await _trackingLoginApplication.TrackingActivoByCliente(cliente);
@@ -31,10 +30,17 @@ public class TrackingLoginController : ControllerBase
     }
 
     [HttpGet("Finalizado")]
-    [OutputCache(Duration = 3600, PolicyName = "finalizado")]
     public async Task<IActionResult> TrackingFinalizadoByCliente(string cliente)
     {
         var response = await _trackingLoginApplication.TrackingFinalizadoByCliente(cliente);
+
+        return Ok(response);
+    }
+
+    [HttpGet("Historial")]
+    public async Task<IActionResult> TrackingHistorialByCliente(string cliente)
+    {
+        var response = await _trackingLoginApplication.TrackingHistorialByCliente(cliente);
 
         return Ok(response);
     }
@@ -48,13 +54,5 @@ public class TrackingLoginController : ControllerBase
         var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!.value!, columnNames);
 
         return File(fileBytes, ContentType.ContentTypeExcel);
-    }
-
-    [HttpGet("Cache")]
-    public async Task<IActionResult> LimpiarCache()
-    {
-        await _outputCacheStore.EvictByTagAsync("activo", default);
-        await _outputCacheStore.EvictByTagAsync("finalizado", default);
-        return Ok();
     }
 }
