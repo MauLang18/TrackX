@@ -14,5 +14,6 @@ public class DynamicsCotizacion
     public object? new_clienteweb { get; set; }
     public object? new_enlacecotizacion { get; set; }
     public object? quoteid { get; set; }
+    public object? revisionnumber { get; set; }
     public DateTime? createdon { get; set; }
 }

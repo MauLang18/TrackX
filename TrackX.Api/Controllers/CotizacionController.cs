@@ -26,6 +26,14 @@ namespace TrackX.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("Cliente")]
+        public async Task<IActionResult> ListCotizacionClient(string textFilter = null!, string cliente = "")
+        {
+            var response = await _cotizacionApplication.ListCotizacionClient(cliente, textFilter);
+
+            return Ok(response);
+        }
+
         [HttpPatch("Agregar")]
         public async Task<IActionResult> RegisterCotizacion([FromForm] CotizacionRequestDto request)
         {

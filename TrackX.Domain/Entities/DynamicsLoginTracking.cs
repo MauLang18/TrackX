@@ -11,7 +11,7 @@ public class DynamicsLoginTracking
     public object? new_contenedor { get; set; }
     public string? new_factura { get; set; }
     public object? new_bcf { get; set; }
-    public object? new_booking { get; set; }
+    public object? new_bookingno { get; set; }
     public int? new_cantequipo { get; set; }
     public string? new_commodity { get; set; }
     public object? new_confirmacinzarpe { get; set; }
