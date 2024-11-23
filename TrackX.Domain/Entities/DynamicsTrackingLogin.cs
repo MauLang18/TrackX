@@ -39,6 +39,7 @@ public class DynamicsTrackingLogin
     public object? new_ofertatarifaid { get; set; }
     public object? new_proyecciondeingreso { get; set; }
     public object? new_cbm1 { get; set; }
+    public object? new_cantidadteus { get; set; }
     public DateTime? createdon { get; set; }
     public string? incidentid { get; set; }
 }

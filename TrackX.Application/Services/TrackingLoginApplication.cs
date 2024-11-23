@@ -301,7 +301,7 @@ namespace TrackX.Application.Services
                         string entityName = "incidents";
 
                         HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(
-                            $"api/data/v9.2/{entityName}?$select=createdon,new_cbm1,new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_eta,new_etd1,modifiedon,new_incoterm,new_origen,new_po,new_poe,new_pol,new_preestado2,new_seal,_new_shipper_value,new_statuscliente,new_tamaoequipo,new_new_facturacompaia,title,new_lugarcolocacion,new_redestino,new_diasdetransito,new_barcodesalida,new_viajedesalida,_customerid_value,new_ofertatarifaid,new_proyecciondeingreso&$filter=(_customerid_value eq {cliente})&$orderby=title desc");
+                            $"api/data/v9.2/{entityName}?$select=new_cantidadteus,createdon,new_cbm1,new_contenedor,new_factura,new_bcf,new_cantequipo,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_destino,new_eta,new_etd1,modifiedon,new_incoterm,new_origen,new_po,new_poe,new_pol,new_preestado2,new_seal,_new_shipper_value,new_statuscliente,new_tamaoequipo,new_new_facturacompaia,title,new_lugarcolocacion,new_redestino,new_diasdetransito,new_barcodesalida,new_viajedesalida,_customerid_value,new_ofertatarifaid,new_proyecciondeingreso&$filter=(_customerid_value eq {cliente})&$orderby=title desc");
 
                         httpResponseMessage.EnsureSuccessStatusCode();
 
