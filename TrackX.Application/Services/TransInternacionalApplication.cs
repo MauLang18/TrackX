@@ -91,6 +91,13 @@ public class TransInternacionalApplication : ITransInternacionalApplication
                 string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
                 Dynamics<DynamicsTransInternacional> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsTransInternacional>>(jsonResponse)!;
 
+                foreach (var item in apiResponse.value!)
+                {
+                    item.new_entregabloriginal = ConvertToBooleanOrDate(item.new_entregabloriginal);
+                    item.new_entregacartatrazabilidad = ConvertToBooleanOrDate(item.new_entregacartatrazabilidad);
+                    item.new_llevaexoneracion = ConvertToBooleanOrDate(item.new_llevaexoneracion);
+                }
+
                 if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
                 {
                     var shipperValues = apiResponse.value!
@@ -215,6 +222,24 @@ public class TransInternacionalApplication : ITransInternacionalApplication
         }
 
         return response;
+    }
+
+    private bool? ConvertToBooleanOrDate(object value)
+    {
+        if (value == null) return null;
+
+        if (value is bool)
+        {
+            return (bool)value;  // If the value is already a boolean, return it
+        }
+
+        // Check if it's a valid date string
+        if (DateTime.TryParse(value.ToString(), out DateTime date))
+        {
+            return true;  // Treat the date as true if it's valid
+        }
+
+        return false;  // Default to false if it's neither a boolean nor a valid date
     }
 
     private static string BuildUrl(string entityName, int numFilter, string textFilter)
