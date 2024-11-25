@@ -277,9 +277,16 @@ public class GeneratePdfService : IGeneratePdfService
     }
 
     // Métodos adicionales para manejar los tipos de datos específicos
-    private string CreateYesNo(bool? value)
+    private string CreateYesNo(object? value)
     {
-        return value.HasValue && value.Value ? "Sí" : "No";
+        if (value is bool booleanValue)
+        {
+            // If it's a boolean, return "Sí" for true and "No" for false
+            return booleanValue ? "Sí" : "No";
+        }
+
+        // If it's not a boolean, check if it has a value (non-null and non-empty string)
+        return value != null && !string.IsNullOrEmpty(value.ToString()) ? "Sí" : "No";
     }
 
     private string MapJsonField(string value, string jsonFileName)

@@ -91,13 +91,6 @@ public class TransInternacionalApplication : ITransInternacionalApplication
                 string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
                 Dynamics<DynamicsTransInternacional> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsTransInternacional>>(jsonResponse)!;
 
-                foreach (var item in apiResponse.value!)
-                {
-                    item.new_entregabloriginal = ConvertToBooleanOrDate(item.new_entregabloriginal);
-                    item.new_entregacartatrazabilidad = ConvertToBooleanOrDate(item.new_entregacartatrazabilidad);
-                    item.new_llevaexoneracion = ConvertToBooleanOrDate(item.new_llevaexoneracion);
-                }
-
                 if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
                 {
                     var shipperValues = apiResponse.value!

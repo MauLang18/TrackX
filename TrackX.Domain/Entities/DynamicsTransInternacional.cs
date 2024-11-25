@@ -13,8 +13,8 @@
         public DateTime? new_confirmacionzarpe { get; set; }
         public string? new_contidadbultos { get; set; }
         public int? new_ejecutivocomercial { get; set; }
-        public bool? new_entregabloriginal { get; set; }
-        public bool? new_entregacartatrazabilidad { get; set; }
+        public object? new_entregabloriginal { get; set; }
+        public object? new_entregacartatrazabilidad { get; set; }
         public DateTime? new_entregatraduccion { get; set; }
         public DateTime? new_eta { get; set; }
         public DateTime? new_etd1 { get; set; }
