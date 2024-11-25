@@ -188,7 +188,7 @@ public class GeneratePdfService : IGeneratePdfService
                             header.Cell().Background(Colors.Black).Padding(5).AlignCenter().Text("Liberación Financiera").Bold().FontColor(Colors.White);
                         });
 
-                        table.Cell().Border(1).Padding(5).Text(record.new_fechaliberacionfinanciera?.ToString() ?? "N/A");
+                        table.Cell().Border(1).Padding(5).Text(record.new_liberacionmovimientoinventario?.ToString() ?? "N/A");
                         table.Cell().Border(1).Padding(5).Text(record.new_fechaliberacionfinanciera?.ToString() ?? "N/A");
                     });
 
