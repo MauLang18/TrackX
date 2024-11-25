@@ -9,4 +9,5 @@ public interface ICotizacionApplication
     Task<BaseResponse<Dynamics<DynamicsCotizacion>>> ListCotizacionClient(string cliente, string textFilter);
     Task<BaseResponse<Dynamics<DynamicsCotizacion>>> ListCotizacion(int numFilter, string textFilter);
     Task<BaseResponse<bool>> RegisterCotizacion(CotizacionRequestDto requestDto);
+    Task<BaseResponse<bool>> RemoveCotizacion(string incidentid);
 }

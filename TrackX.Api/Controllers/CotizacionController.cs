@@ -41,5 +41,13 @@ namespace TrackX.Api.Controllers
 
             return Ok(response);
         }
+
+        [HttpPatch("Eliminar")]
+        public async Task<IActionResult> RemoveCotizacion([FromQuery] string quoteId)
+        {
+            var response = await _cotizacionApplication.RemoveCotizacion(quoteId);
+
+            return Ok(response);
+        }
     }
 }

@@ -87,6 +87,55 @@ public class CotizacionApplication : ICotizacionApplication
         return null;
     }
 
+    [Obsolete]
+    private async Task<string?> GetQuoteIdByQuoteIdAsync(string quoteid)
+    {
+        var Config = await GetConfigAsync();
+
+        try
+        {
+            string clientId = Config!.ClientId!;
+            string clientSecret = Config!.ClientSecret!;
+            string authority = Config!.Authority!;
+            string crmUrl = Config!.CrmUrl!;
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .WithClientSecret(clientSecret)
+                .WithAuthority(new Uri(authority!))
+                .Build();
+
+            var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
+            string accessToken = result.AccessToken;
+
+            _httpClient.BaseAddress = new Uri(crmUrl!);
+            _httpClient.Timeout = TimeSpan.FromSeconds(300);
+            _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+            _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            string entityName = "quotes";
+            string requestUri = $"api/data/v9.2/{entityName}?$select=new_enlacecotizacion,quoteid,quotenumber&$filter=quoteid eq '{quoteid}'";
+
+            HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(requestUri);
+            httpResponseMessage.EnsureSuccessStatusCode();
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+                var dynamicsObject = JsonConvert.DeserializeObject<Dynamics<DynamicsTrackingNoLogin>>(jsonResponse);
+
+                return dynamicsObject?.value?.FirstOrDefault()?.new_enlacecotizacion;
+            }
+        }
+        catch (Exception ex)
+        {
+            WatchLogger.Log($"Error en GetQuoIdByQuoAsync: {ex.Message}");
+        }
+        return null;
+    }
+
     public async Task<BaseResponse<Dynamics<DynamicsCotizacion>>> ListCotizacionClient(string cliente, string textFilter)
     {
         var response = new BaseResponse<Dynamics<DynamicsCotizacion>>();
@@ -451,5 +500,90 @@ public class CotizacionApplication : ICotizacionApplication
         }
 
         return response;
+    }
+
+    public async Task<BaseResponse<bool>> RemoveCotizacion(string incidentid)
+    {
+        var response = new BaseResponse<bool>();
+
+        var Config = await GetConfigAsync();
+
+        try
+        {
+            // Obtiene el Quote ID
+            string? enlace = await GetQuoteIdByQuoteIdAsync(incidentid);
+            if (enlace == null)
+            {
+                response.IsSuccess = false;
+                response.Message = "No se encontró el Enlace en Dynamics para el QUO proporcionado.";
+                return response;
+            }
+
+            // Configuración de autenticación
+            string clientId = Config!.ClientId!;
+            string clientSecret = Config!.ClientSecret!;
+            string authority = Config!.Authority!;
+            string crmUrl = Config!.CrmUrl!;
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .WithClientSecret(clientSecret)
+                .WithAuthority(new Uri(authority!))
+                .Build();
+
+            var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
+            string accessToken = result.AccessToken;
+
+            // Crear un nuevo HttpClient para evitar errores de reutilización
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri(crmUrl!);
+                httpClient.Timeout = TimeSpan.FromSeconds(300);
+                httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+                httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                await _fileStorage.RemoveFile(enlace, AzureContainers.WHS);
+                var comentarioRecord = new { new_enlacecotizacion = "" };
+
+                string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                // Construir y enviar solicitud PATCH
+                string url = $"api/data/v9.2/quotes({incidentid})";
+                var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+                {
+                    Content = content
+                };
+
+                HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(requestMessage);
+                httpResponseMessage.EnsureSuccessStatusCode();
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    response.IsSuccess = true;
+                    response.Data = true;
+                    response.Message = "Comentario actualizado exitosamente.";
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Data = false;
+                    response.Message = "Error al actualizar el comentario.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Data = false;
+            response.Message = ex.Message;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+
+
     }
 }

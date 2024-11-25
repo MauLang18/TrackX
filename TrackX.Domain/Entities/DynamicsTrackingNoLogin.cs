@@ -26,4 +26,5 @@ public class DynamicsTrackingNoLogin
     public DateTime? modifiedon { get; set; }
     public string? incidentid { get; set; }
     public string? quoteid { get; set; }
+    public string? new_enlacecotizacion { get; set; }
 }
