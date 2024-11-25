@@ -342,9 +342,11 @@ public class ExcelColumnNames
         var columnsProperties = new List<(string ColumnName, string PropertyName)>
         {
             ("IDTRA", "title"),
+            ("# RECIBO", "new_numerorecibo"),
+            ("NOMBRE PEDIMENTADOR", "new_nombrepedimentador"),
             ("ESTADO", "new_preestado2"),
             ("CLIENTE", "_customerid_value"),
-            ("CLIENTE", "new_ejecutivocomercial"),
+            ("EJECUTIVO", "new_ejecutivocomercial"),
             ("# CONTENEDOR", "new_contenedor"),
             ("# FACTURA", "new_factura"),
             ("COMMODITY", "new_commodity"),
@@ -358,6 +360,9 @@ public class ExcelColumnNames
             ("TAMAÑO DE EQUPO", "new_tamaoequipo"),
             ("CANTIDAD DE BULTOS", "new_contidadbultos"),
             ("PESO", "new_peso"),
+            ("TIPO AFORO", "new_tipoaforo"),
+            ("# DUA ANTICIPADO", "new_duaanticipados"),
+            ("# DUA NACIONAL", "new_duanacional"),
             ("CERTIFICADO ORIGEN", "new_certificadoorigen"),
             ("CERTIFICADO REEXPORTACIÓN", "new_certificadoreexportacion"),
             ("EXONERACIÓN", "new_exoneracion"),
@@ -369,6 +374,18 @@ public class ExcelColumnNames
             ("LIBERACIÓN DOCUMENTAL", "new_fechaliberaciondocumental"),
             ("LIBERACIÓN FINANCIERA", "new_fechaliberacionfinanciera"),
             ("COMENTARIO", "new_observacionesgenerales"),
+            ("FACTURA COMERCIAL", "new_facturacomercial"),
+            ("LISTA DE EMPAQUE", "new_listadeempaque"),
+            ("DRAFT BL", "new_draftbl"),
+            ("BL ORIGINAL", "new_bloriginal"),
+            ("CARTA TRAZABILIDAD", "new_cartatrazabilidad"),
+            ("CARTA DE DESGLOSE DE CARGOS", "new_cartadesglosecargos"),
+            ("EXONERACIONES", "new_exoneracion"),
+            ("CERTIFICADO DE ORIGEN", "new_certificadoorigen"),
+            ("CERTIDICADO DE RE-EXPORTACION", "new_certificadoreexportacion"),
+            ("PERMISOS", "new_permisos"),
+            ("BORRADOR DE IMPUESTOS", "new_borradordeimpuestos"),
+            ("DOCUMENTO DE NACIONALIZACION", "new_documentodenacionalizacion"),
         };
 
         return columnsProperties;

@@ -126,6 +126,7 @@ public class GenerateExcel : IGenerateExcel
             "new_preestado2" => "status.json",
             "new_transporte" => "transporte.json",
             "new_ejecutivocomercial" => "ejecutivo.json",
+            "new_tipoaforo" => "aforo.json",
             _ => ""
         };
     }

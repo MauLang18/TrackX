@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using TrackX.Domain.Entities;
 using TrackX.Infrastructure.FileExcel;
+using TrackX.Infrastructure.FilePdf;
 using TrackX.Infrastructure.FileStorage;
 using TrackX.Infrastructure.Persistences.Contexts;
 using TrackX.Infrastructure.Persistences.Interfaces;
@@ -29,11 +30,14 @@ public static class InjectionExtensions
             options => options.UseSqlServer(
                    Config!.Connection, b => b.MigrationsAssembly(assembly)), ServiceLifetime.Transient);
 
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
         services.AddTransient<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddTransient<IFileStorageLocal, FileStorageLocal>();
         services.AddTransient<IGenerateExcel, GenerateExcel>();
         services.AddTransient<IImportExcel, ImportExcel>();
+        services.AddTransient<IGeneratePdfService, GeneratePdfService>();
 
         services.AddStackExchangeRedisCache(options =>
         {

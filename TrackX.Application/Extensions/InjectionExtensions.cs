@@ -23,6 +23,7 @@ public static class InjectionExtensions
         services.AddTransient<IFileStorageLocalApplication, FileStorageLocalApplication>();
 
         services.AddScoped<IGenerateExcelApplication, GenerateExcelApplication>();
+        services.AddScoped<IGeneratePdfApplication, GeneratePdfApplication>();
 
         services.AddScoped<IUsuarioApplication, UsuarioApplication>();
         services.AddScoped<IAuthApplication, AuthApplication>();

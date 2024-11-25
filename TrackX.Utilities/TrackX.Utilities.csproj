@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="Static\JSON\aforo.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Static\JSON\cantidadEquipo.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
