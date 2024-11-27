@@ -51,5 +51,6 @@
         public object? new_duanacional { get; set; }
         public object? new_traducciondefacturas { get; set; }
         public object? new_borradordecertificadodeorigen { get; set; }
+        public object? new_fechastatus { get; set; }
     }
 }
