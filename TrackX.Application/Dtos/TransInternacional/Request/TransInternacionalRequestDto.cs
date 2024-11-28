@@ -15,3 +15,10 @@ public class TransInternacionalDocumentRequestDto
     public string? FieldName { get; set; }
     public IFormFile? File { get; set; }
 }
+
+public class TransInternacionalRemoveDocumentRequestDto
+{
+    public string? TransInternacionalId { get; set; }
+    public string? FieldName { get; set; }
+    public string? FileUrl { get; set; }
+}

@@ -64,6 +64,14 @@ public class TransInternacionalController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPatch("RemoveFile")]
+    public async Task<IActionResult> RemoveDocuments([FromForm] TransInternacionalRemoveDocumentRequestDto request)
+    {
+        var response = await _transInternacionalApplication.RemoveDocuments(request);
+
+        return Ok(response);
+    }
+
     [HttpGet("Download")]
     public async Task<IActionResult> DownloadActivo(int numFilter = 0, string textFilter = null!)
     {

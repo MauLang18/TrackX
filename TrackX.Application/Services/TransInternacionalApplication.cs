@@ -334,4 +334,79 @@ public class TransInternacionalApplication : ITransInternacionalApplication
 
         return response;
     }
+
+    public async Task<BaseResponse<bool>> RemoveDocuments(TransInternacionalRemoveDocumentRequestDto request)
+    {
+        var response = new BaseResponse<bool>();
+
+        var Config = await GetConfigAsync();
+
+        try
+        {
+            string clientId = Config!.ClientId!;
+            string clientSecret = Config!.ClientSecret!;
+            string authority = Config!.Authority!;
+            string crmUrl = Config!.CrmUrl!;
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .WithClientSecret(clientSecret)
+                .WithAuthority(new Uri(authority!))
+                .Build();
+
+            var result = await app.AcquireTokenForClient(new[] { $"{crmUrl}/.default" }).ExecuteAsync();
+            string accessToken = result.AccessToken;
+
+            _httpClient.BaseAddress = new Uri(crmUrl!);
+            _httpClient.Timeout = TimeSpan.FromSeconds(300);
+            _httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+            _httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            await _fileStorage.RemoveFile(request.FileUrl!,AzureContainers.DOCUMENTOS);
+
+            var field = request.FieldName;
+
+            var comentarioRecord = new JObject
+            {
+                [field!] = ""
+            };
+
+            string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
+
+            var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+            {
+                Content = content
+            };
+
+            HttpResponseMessage httpResponseMessage = await _httpClient.SendAsync(requestMessage);
+            httpResponseMessage.EnsureSuccessStatusCode();
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                response.IsSuccess = true;
+                response.Data = true;
+                response.Message = "Comentario actualizado exitosamente.";
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Data = false;
+                response.Message = "Error al actualizar el comentario.";
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.Data = false;
+            response.Message = ex.Message;
+            WatchLogger.Log(ex.Message);
+        }
+
+        return response;
+    }
 }
