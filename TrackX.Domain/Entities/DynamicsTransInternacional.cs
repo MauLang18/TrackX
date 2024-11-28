@@ -52,5 +52,6 @@
         public object? new_traducciondefacturas { get; set; }
         public object? new_borradordecertificadodeorigen { get; set; }
         public object? new_fechastatus { get; set; }
+        public object? new_confirmacinzarpe {  get; set; }
     }
 }
