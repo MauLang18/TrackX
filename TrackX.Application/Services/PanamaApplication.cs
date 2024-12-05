@@ -74,8 +74,12 @@ public class PanamaApplication : IPanamaApplication
             4 => $"(contains(new_factura,'{textFilter}')) and {typeFilters}",
             5 => $"(contains(new_po,'{textFilter}')) and {typeFilters}",
             6 => $"(contains(title,'{textFilter}')) and {typeFilters}",
-            7 => $"(contains(new_nombrepedimentador,'{textFilter}')) and {typeFilters}",
-            8 => $"(contains(new_numerorecibo,'{textFilter}')) and {typeFilters}",
+            7 => $"(contains(new_dmcentrada,'{textFilter}')) and {typeFilters}",
+            8 => $"(Microsoft.Dynamics.CRM.On(PropertyName='new_fechadmcentrada',PropertyValue='{textFilter}')) and {typeFilters}",
+            9 => $"(contains(new_dmcsalida,'{textFilter}')) and {typeFilters}",
+            10 => $"(Microsoft.Dynamics.CRM.On(PropertyName='new_fechadmcentrada',PropertyValue='{textFilter}')) and {typeFilters}",
+            11 => $"(contains(new_ti,'{textFilter}')) and {typeFilters}",
+            12 => $"(Microsoft.Dynamics.CRM.On(PropertyName='new_fechati',PropertyValue='{textFilter}')) and {typeFilters}",
             _ => $"{typeFilters}"
         };
 
