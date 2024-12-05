@@ -50,6 +50,7 @@ public static class InjectionExtensions
         services.AddScoped<ITransInternacionalApplication, TransInternacionalApplication>();
         services.AddScoped<IBcfApplication, BcfApplication>();
         services.AddScoped<ICotizacionApplication, CotizacionApplication>();
+        services.AddScoped<IPanamaApplication, PanamaApplication>();
 
         services.AddScoped<ISendEmailApplication, SendEmailApplication>();
 

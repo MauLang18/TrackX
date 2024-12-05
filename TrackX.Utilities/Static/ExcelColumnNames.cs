@@ -421,4 +421,96 @@ public class ExcelColumnNames
         return columnsProperties;
     }
     #endregion
+
+    #region ColumnsPanama
+    public static List<(string ColumnName, string PropertyName)> GetColumnsPanama()
+    {
+        var columnsProperties = new List<(string ColumnName, string PropertyName)>
+        {
+            ("IDTRA", "title"),
+            ("ESTADO", "new_preestado2"),
+            ("CLIENTE", "_customerid_value"),
+            ("CANTIDAD DE EQUIPO", "new_cantequipo"),
+            ("TAMAÑO DE EQUIPO", "new_tamaoequipo"),
+            ("# CONTENEDOR", "new_contenedor"),
+            ("CANTIDAD DE BULTOS", "new_contidadbultos"),
+            ("PESO", "new_peso"),
+            ("PO", "new_po"),
+            ("# FACTURA", "new_factura"),
+            ("COMMODITY", "new_commodity"),
+            ("BCF", "new_bcf"),
+            ("POL", "new_pol"),
+            ("POE", "new_poe"),
+            ("ETA", "new_eta"),
+            ("ULTIMO DIA LIBRE CONTENEDOR","new_ultimodialibrecontenedor"),
+            ("FECHA SALIDA PTY","new_fechasalidapty"),
+            ("FECHA LLEGADA CRC","new_fechallegadacrc"),
+            ("CERTIFICADO ORIGEN", "new_certificadoorigen"),
+            ("CERTIFICADO REEXPORTACIÓN", "new_certificadoreexportacion"),
+            ("PAGO NAVIERA REALIZADO","new_pagonavierarealizado"),
+            ("ENTREGA BL ORIGINAL", "new_entregablo"),
+            ("ENTREGA CARTA DE TRAZABILIDAD", "new_entregacargatrazabilidad"),
+            ("FECHA BL IMPRESO", "new_fechablimpreso"),
+            ("ENTREGA DE TRADUCCIÓN", "new_fechatraduccion"),
+            ("FECHA DMC ENTRADA", "new_fechadmcentrada"),
+            ("FECHA TI", "new_fechati"),
+            ("FECHA CARGA HUB PANAMA", "new_fechacargahubpanama"),
+            ("FECHA DMC SALIDA", "new_fechadmcsalida"),
+            ("FECHA REALIZAR CERT. REEXPORTACION","new_fecharealizarcertreexportacion"),
+            ("LIBERACIÓN DOCUMENTAL", "new_fechaliberaciondocumental"),
+            ("LIBERACIÓN FINANCIERA", "new_fechaliberacionfinanciera"),
+            ("FACTURA COMERCIAL", "new_facturacomercial"),
+            ("LISTA DE EMPAQUE", "new_listadeempaque"),
+            ("DRAFT BL", "new_draftbl"),
+            ("BL ORIGINAL", "new_bloriginal"),
+            ("CARTA TRAZABILIDAD", "new_cartatrazabilidad"),
+            ("CARTA DE DESGLOSE DE CARGOS", "new_cartadesglosecargos"),
+            ("EXONERACIONES", "new_exoneracion"),
+            ("BORRADOR CERTIFICADO ORIGEN", "new_borradordecertificadodeorigen"),
+            ("CERTIFICADO DE ORIGEN", "new_certificadoorigen"),
+            ("CERTIFICADO DE RE-EXPORTACION", "new_certificadoreexportacion"),
+            ("CARTA PORTE", "new_cartaporte"),
+            ("MANIFIESTO", "new_manifiestoenlace"),
+            ("DUCAT", "new_ducatenlace"),
+            ("BL NAVIERA / SWB", "new_blnavieraswb"),
+            ("CARTA LIBERACION NAVIERA", "new_cartaliberacionnaviera"),
+            ("# DMC ENTRADA", "new_dmcentrada"),
+            ("DMC ENTRADA", "new_dmcentradaenlace"),
+            ("# IT", "new_ti"),
+            ("TI", "new_tienlace"),
+            ("# DMC SALIDA", "new_dmcsalida"),
+            ("DMC SALIDA", "new_dmcsalidaenlace"),
+            ("FECHA STATUS CLIENTE", "new_fechastatus"),
+            ("STATUS CLIENTE", "new_statuscliente"),
+        };
+
+        return columnsProperties;
+    }
+    #endregion
+
+    #region ColumnsPanamaReporte
+    public static List<(string ColumnName, string PropertyName)> GetColumnsPanamaReporte()
+    {
+        var columnsProperties = new List<(string ColumnName, string PropertyName)>
+        {
+            ("IDTRA", "title"),
+            ("CLIENTE", "_customerid_value"),
+            ("POE", "new_poe"),
+            ("ETA", "new_eta"),
+            ("# CONTENEDOR", "new_contenedor"),
+            ("TAMAÑO DE EQUPO", "new_tamaoequipo"),
+            ("PESO", "new_peso"),
+            ("CANTIDAD DE BULTOS", "new_contidadbultos"),
+            ("STAUS CLIENTE", "new_statuscliente"),
+            ("FECHA STATUS CLIENTE","new_fechastatus"),
+            ("COMENTARIOS OVERNIGHT","new_comentariosovernight"),
+            ("ACTUALIZACION OVERNIGHT","new_actualizacionovernight"),
+            ("PO", "new_po"),
+            ("COMMODITY", "new_commodity"),
+            ("APLICA C.O.", "new_aplicacertificadodeorigen"),
+        };
+
+        return columnsProperties;
+    }
+    #endregion
 }

@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using TrackX.Application.Commons.Bases.Response;
-using TrackX.Application.Dtos.TransInternacional.Request;
+using TrackX.Application.Dtos.Panama.Request;
 using TrackX.Application.Interfaces;
 using TrackX.Domain.Entities;
 using TrackX.Infrastructure.Secret;
@@ -13,18 +13,14 @@ using WatchDog;
 
 namespace TrackX.Application.Services;
 
-public class TransInternacionalApplication : ITransInternacionalApplication
+public class PanamaApplication : IPanamaApplication
 {
     private readonly IClienteApplication _clienteApplication;
     private readonly ISecretService _secretService;
     private readonly HttpClient _httpClient;
     private readonly IFileStorageLocalApplication _fileStorage;
 
-    public TransInternacionalApplication(
-        IClienteApplication clienteApplication,
-        ISecretService secretService,
-        HttpClient httpClient,
-        IFileStorageLocalApplication fileStorage)
+    public PanamaApplication(IClienteApplication clienteApplication, ISecretService secretService, HttpClient httpClient, IFileStorageLocalApplication fileStorage)
     {
         _clienteApplication = clienteApplication;
         _secretService = secretService;
@@ -39,34 +35,56 @@ public class TransInternacionalApplication : ITransInternacionalApplication
         return SecretResponse?.Data?.Data;
     }
 
-    private static string BuildUrl(string entityName, int numFilter, string textFilter)
+    private static string BuildUrl(string entityName, int numFilter, string textFilter, int type)
     {
         if (string.IsNullOrEmpty(textFilter))
         {
             numFilter = 0;
         }
 
-        string preestadoFilter = "(new_preestado2 ne 100000012 and new_preestado2 ne 100000021)";
+        string typeFilters = type switch 
+        {
+            //Varios
+            1 => $"(new_preestado2 eq 100000002 or new_preestado2 eq 100000003 or new_preestado2 eq 100000018) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01'))",
+            //hub
+            2 => $"(new_preestado2 eq 100000026) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01'))",
+            //movimiento
+            3 => $"(new_preestado2 eq 100000024) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01'))",
+            //general
+            _ => $"(new_poe eq 100000054 or new_poe eq 100000051 or new_poe eq 100000015 or new_poe eq 100000074 or new_poe eq 100000009 or new_poe eq 100000038 or new_poe eq 100000041 or new_poe eq 100000052 or new_poe eq 100000010 or new_poe eq 100000011 or new_poe eq 100000042 or new_poe eq 100000057) and (new_preestado2 eq 100000000 or new_preestado2 eq 100000001 or new_preestado2 eq 100000015 or new_preestado2 eq 100000014 or new_preestado2 eq 100000017 or new_preestado2 eq 100000002 or new_preestado2 eq 100000003 or new_preestado2 eq 100000024 or new_preestado2 eq 100000025 or new_preestado2 eq 100000004 or new_preestado2 eq 100000026 or new_preestado2 eq 100000013 or new_preestado2 eq 100000018 or new_preestado2 eq 100000009) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01'))"
+        };
+
+        string typeData = type switch
+        {
+            //Varios
+            1 => $"new_contenedor,new_actualizacionovernight,new_aplicacertificadodeorigen,_customerid_value,new_comentariosovernight,new_commodity,new_contidadbultos,new_eta,new_fechastatus,new_peso,new_po,new_poe,new_statuscliente,new_tamaoequipo,title",
+            //hub
+            2 => $"new_contenedor,new_actualizacionovernight,new_aplicacertificadodeorigen,_customerid_value,new_comentariosovernight,new_commodity,new_contidadbultos,new_eta,new_fechastatus,new_peso,new_po,new_poe,new_statuscliente,new_tamaoequipo,title",
+            //movimiento
+            3 => $"new_contenedor,new_actualizacionovernight,new_aplicacertificadodeorigen,_customerid_value,new_comentariosovernight,new_commodity,new_contidadbultos,new_eta,new_fechastatus,new_peso,new_po,new_poe,new_statuscliente,new_tamaoequipo,title",
+            //general
+            _ => $"new_dmcsalidaenlace,new_dmcsalida,new_tienlace,new_ti,new_dmcentradaenlace,new_dmcentrada,new_cartaliberacionnaviera,new_blnavieraswb,new_ducatenlace,new_manifiestoenlace,new_cartaporte,new_fecharealizarcertreexportacion,new_fechadmcsalida,new_fechacargahubpanama,new_fechati,new_fechadmcentrada,new_pagonavierarealizado,new_fechallegadacrc,new_fechasalidapty,new_ultimodialibrecontenedor,new_decertificadodereexportacion,new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_bloriginal,new_borradordecertificadodeorigen,new_cantequipo,new_cartadesglosecargos,new_cartatrazabilidad,new_certificadoorigen,new_certificadoreexportacion,_customerid_value,new_commodity,new_contidadbultos,new_draftbl,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_exoneracion,new_facturacomercial,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_fechastatus,new_bcf,new_listadeempaque,new_peso,new_po,new_poe,new_pol,new_preestado2,new_statuscliente,new_tamaoequipo,new_traducciondefacturas,title"
+        };
 
         string filter = numFilter switch
         {
-            1 => $"_customerid_value eq '{textFilter}' and {preestadoFilter}",
-            2 => $"contains(new_contenedor,'{textFilter}') and {preestadoFilter}",
-            3 => $"contains(new_bcf,'{textFilter}') and {preestadoFilter}",
-            4 => $"contains(new_factura,'{textFilter}') and {preestadoFilter}",
-            5 => $"contains(new_po,'{textFilter}') and {preestadoFilter}",
-            6 => $"contains(title,'{textFilter}') and {preestadoFilter}",
-            7 => $"contains(new_nombrepedimentador,'{textFilter}') and {preestadoFilter}",
-            8 => $"contains(new_numerorecibo,'{textFilter}') and {preestadoFilter}",
-            _ => $"{preestadoFilter}"
+            1 => $"(_customerid_value eq '{textFilter}') and {typeFilters}",
+            2 => $"(contains(new_contenedor,'{textFilter}')) and {typeFilters}",
+            3 => $"(contains(new_bcf,'{textFilter}')) and {typeFilters}",
+            4 => $"(contains(new_factura,'{textFilter}')) and {typeFilters}",
+            5 => $"(contains(new_po,'{textFilter}')) and {typeFilters}",
+            6 => $"(contains(title,'{textFilter}')) and {typeFilters}",
+            7 => $"(contains(new_nombrepedimentador,'{textFilter}')) and {typeFilters}",
+            8 => $"(contains(new_numerorecibo,'{textFilter}')) and {typeFilters}",
+            _ => $"{typeFilters}"
         };
 
-        return $"api/data/v9.2/{entityName}?$select=new_fechastatus,new_borradordecertificadodeorigen,new_traducciondefacturas,new_tipoaforo,new_duaanticipados,new_duanacional,new_numerorecibo,new_nombrepedimentador,new_borradordeimpuestos,new_documentodenacionalizacion,new_certificadodeorigen,new_duaanticipados,new_duanacional,new_contenedor,new_factura,new_aplicacertificadodeorigen,new_aplicacertificadoreexportacion,new_bloriginal,new_cantequipo,new_cartadesglosecargos,new_cartatrazabilidad,new_certificadoreexportacion,_customerid_value,new_commodity,new_confirmacinzarpe,new_contidadbultos,new_draftbl,new_ejecutivocomercial,new_entregabloriginal,new_entregacartatrazabilidad,new_entregatraduccion,new_eta,new_etd1,new_exoneracion,new_facturacomercial,new_fechabldigittica,new_fechablimpreso,new_liberacionmovimientoinventario,new_fechaliberacionfinanciera,new_bcf,new_listadeempaque,new_llevaexoneracion,new_observacionesgenerales,new_permisos,new_peso,new_po,new_poe,new_pol,new_preestado2,new_tamaoequipo,new_tipoaforo,title&$filter=({filter}) and (Microsoft.Dynamics.CRM.OnOrAfter(PropertyName='createdon',PropertyValue='2024-01-01') and (new_destino eq 100000030 or new_destino eq 100000003 or new_destino eq 100000012 or new_destino eq 100000008 or new_destino eq 100000002 or new_destino eq 100000001 or new_destino eq 100000000) and new_tipoaforo eq null and Microsoft.Dynamics.CRM.ContainValues(PropertyName='new_servicio',PropertyValues=['100000001']))&$orderby=new_eta asc";
+        return $"api/data/v9.2/{entityName}?$select={typeData}&$filter=({filter})&$orderby=new_eta asc";
     }
 
-    public async Task<BaseResponse<Dynamics<DynamicsTransInternacional>>> ListTransInternacional(int numFilter, string textFilter)
+    public async Task<BaseResponse<Dynamics<DynamicsPanama>>> ListPanama(int numFilter, string textFilter, int type)
     {
-        var response = new BaseResponse<Dynamics<DynamicsTransInternacional>>();
+        var response = new BaseResponse<Dynamics<DynamicsPanama>>();
         var cliente = "";
         var Config = await GetConfigAsync();
 
@@ -106,7 +124,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
                 }
             }
 
-            string url = BuildUrl(entityName, numFilter, textFilter);
+            string url = BuildUrl(entityName, numFilter, textFilter, type);
 
             HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url);
             httpResponseMessage.EnsureSuccessStatusCode();
@@ -114,7 +132,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 string jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
-                Dynamics<DynamicsTransInternacional> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsTransInternacional>>(jsonResponse)!;
+                Dynamics<DynamicsPanama> apiResponse = JsonConvert.DeserializeObject<Dynamics<DynamicsPanama>>(jsonResponse)!;
 
                 if (numFilter != 1 || string.IsNullOrEmpty(textFilter))
                 {
@@ -169,7 +187,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
         return response;
     }
 
-    public async Task<BaseResponse<bool>> RegisterComentario(TransInternacionalRequestDto request)
+    public async Task<BaseResponse<bool>> RegisterComentario(PanamaRequestDto request)
     {
         var response = new BaseResponse<bool>();
 
@@ -208,7 +226,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
+            string url = $"api/data/v9.2/incidents({request.PanamaId})";
 
             var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
             {
@@ -242,7 +260,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
         return response;
     }
 
-    public async Task<BaseResponse<bool>> UpdateDocuments(TransInternacionalDocumentRequestDto request)
+    public async Task<BaseResponse<bool>> UpdateDocuments(PanamaDocumentRequestDto request)
     {
         var response = new BaseResponse<bool>();
 
@@ -283,7 +301,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
+            string url = $"api/data/v9.2/incidents({request.PanamaId})";
 
             var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
             {
@@ -317,7 +335,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
         return response;
     }
 
-    public async Task<BaseResponse<bool>> RemoveDocuments(TransInternacionalRemoveDocumentRequestDto request)
+    public async Task<BaseResponse<bool>> RemoveDocuments(PanamaRemoveDocumentRequestDto request)
     {
         var response = new BaseResponse<bool>();
 
@@ -346,7 +364,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            await _fileStorage.RemoveFile(request.FileUrl!,AzureContainers.DOCUMENTOS);
+            await _fileStorage.RemoveFile(request.FileUrl!, AzureContainers.DOCUMENTOS);
 
             var field = request.FieldName;
 
@@ -358,7 +376,7 @@ public class TransInternacionalApplication : ITransInternacionalApplication
             string jsonContent = JsonConvert.SerializeObject(comentarioRecord);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            string url = $"api/data/v9.2/incidents({request.TransInternacionalId})";
+            string url = $"api/data/v9.2/incidents({request.PanamaId})";
 
             var requestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url)
             {
