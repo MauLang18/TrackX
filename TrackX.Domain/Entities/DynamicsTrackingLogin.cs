@@ -7,6 +7,7 @@ public class DynamicsTrackingLogin
     [JsonProperty("@odata.etag")]
     public string? odataetag { get; set; }
     public string? new_contenedor { get; set; }
+    public string? new_contenedor2 { get; set; }
     public string? new_factura { get; set; }
     public string? new_bcf { get; set; }
     public int? new_cantequipo { get; set; }
