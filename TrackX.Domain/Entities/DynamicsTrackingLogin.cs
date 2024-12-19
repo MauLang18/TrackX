@@ -9,11 +9,14 @@ public class DynamicsTrackingLogin
     public string? new_contenedor { get; set; }
     public string? new_contenedor2 { get; set; }
     public string? new_factura { get; set; }
+    public string? new_factura2 { get; set; }
     public string? new_bcf { get; set; }
     public int? new_cantequipo { get; set; }
     public string? new_commodity { get; set; }
+    public string? new_commodity2 { get; set; }
     public DateTime? new_confirmacinzarpe { get; set; }
     public string? new_contidadbultos { get; set; }
+    public string? new_contidadbultos2 { get; set; }
     public int new_destino { get; set; }
     public DateTime? new_eta { get; set; }
     public DateTime? new_etd1 { get; set; }
@@ -21,10 +24,12 @@ public class DynamicsTrackingLogin
     public int? new_incoterm { get; set; }
     public int? new_origen { get; set; }
     public string? new_po { get; set; }
+    public string? new_po2 { get; set; }
     public int? new_poe { get; set; }
     public int? new_pol { get; set; }
     public int? new_preestado2 { get; set; }
     public string? new_seal { get; set; }
+    public string? new_seal2 { get; set; }
     public string? _new_shipper_value { get; set; }
     public string? new_statuscliente { get; set; }
     public int? new_tamaoequipo { get; set; }
